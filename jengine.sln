@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jengine", "Jengine\Jengine.csproj", "{F583EAAA-3DD7-4F36-9333-523F3EC7F8E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlasherExample", "SlasherExample\SlasherExample.csproj", "{55B5107A-01F9-4693-A0F0-E6B5040D30F6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F583EAAA-3DD7-4F36-9333-523F3EC7F8E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F583EAAA-3DD7-4F36-9333-523F3EC7F8E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F583EAAA-3DD7-4F36-9333-523F3EC7F8E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F583EAAA-3DD7-4F36-9333-523F3EC7F8E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55B5107A-01F9-4693-A0F0-E6B5040D30F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55B5107A-01F9-4693-A0F0-E6B5040D30F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55B5107A-01F9-4693-A0F0-E6B5040D30F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55B5107A-01F9-4693-A0F0-E6B5040D30F6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
