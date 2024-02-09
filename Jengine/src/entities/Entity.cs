@@ -21,7 +21,6 @@ public class Entity : ISerialisable, IReferencable {
     public         IEnumerable<Component> Components => components.Values;
     public virtual EntityDef              Def        => def;
     public virtual string                 Name       => Def?.name ?? "Unnamed Entity";
-    public         IntVec2                TilePos    => pos.Floor();
     public         RenderComponent        Renderer   => GetComponent<RenderComponent>();
     public         GraphicData            Graphics   => GetComponent<RenderComponent>().Graphics;
     public virtual bool                   Selectable => true;

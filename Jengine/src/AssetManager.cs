@@ -11,6 +11,7 @@ namespace JEngine;
 public class AssetManager {
     // Constants
     private const string DefPath = "assets/defs";
+    private const string TexturePath = "assets/textures";
     private readonly JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings {
         Converters = new List<JsonConverter> {
             new DefConverter(),
@@ -41,7 +42,7 @@ public class AssetManager {
     }
 
     private void LoadTextures() {
-        foreach (var path in FileUtility.GetFiles("assets/textures", "*.*", SearchOption.AllDirectories)) {
+        foreach (var path in FileUtility.GetFiles(TexturePath, "*.*", SearchOption.AllDirectories)) {
             if (!path.EndsWith(".png"))
                 continue;
 
@@ -53,7 +54,7 @@ public class AssetManager {
             }
         }
         
-        defaultTexture = GetTexture("assets/textures/placeholder.png");
+        defaultTexture = GetTexture(TexturePath + "/placeholder.png");
     }
 
     private static Queue<JObject> GetDataQueue() {
@@ -101,7 +102,11 @@ public class AssetManager {
                 continue;
             }
 
-            var id   = data["id"]!.Value<string>();
+            var id = data["id"]!.Value<string>();
+            if (id == null) {
+                Debug.Warn("Found def missing id, ignoring");
+                continue;
+            }
             
             if (!data.ContainsKey("abstract"))
                 data.Add("abstract", false);
@@ -115,7 +120,7 @@ public class AssetManager {
                         merged.Merge(data);
                         data = merged;
                     } else {
-                        if (!dataQueue.Any(data => data["id"]?.Value<string>() == inheritsId)) {
+                        if (dataQueue.All(d => d["id"]?.Value<string>() != inheritsId)) {
                             Debug.Error($"Failed to resolve inheritance for {id}, missing def: {inheritsId}");
                             continue;
                         }
@@ -138,8 +143,8 @@ public class AssetManager {
     private void DeserializeDefs(Queue<JObject> dataQueue) {
         while (dataQueue.Count > 0) {
             var data = dataQueue.Dequeue();
-            var id = data["id"]!.ToString();
-            if (data["abstract"]!.Value<bool>()) 
+            var id = data["id"].ToString();
+            if (data["abstract"].Value<bool>())
                 continue;
 
             // Check if already loaded
@@ -188,21 +193,23 @@ public class AssetManager {
 
             if (val is Def def)
                 provider.SetValue(obj, GetDef(def.id));
-
-            if (val.GetType().IsGenericType && val.GetType().GetGenericTypeDefinition() == typeof(List<>)) {
-                var list            = (IList)val;
-                var genericList     = Activator.CreateInstance(val.GetType()) as IList;
+            else if (val.GetType().IsGenericType && val.GetType().GetGenericTypeDefinition() == typeof(List<>)) {
+                var list        = (IList)val;
+                var genericList = Activator.CreateInstance(val.GetType()) as IList;
                 foreach (Def d in list) {
                     genericList.Add(GetDef(d.id));
                 }
 
                 provider.SetValue(obj, genericList);
-            }
+            } else
+                Debug.Error("Failed to resolve def reference, unsupported collection: " + val.GetType().Name);
+
+            // TODO: Resolve defs in other collections
         }
     }
 
     public Texture2D GetTexture(string path) {
-        var shortPath = path.Replace("assets/textures/", "");
+        var shortPath = path.Replace(TexturePath, "");
 
         if (!textureMap.ContainsKey(shortPath)) {
             Texture2D texture;

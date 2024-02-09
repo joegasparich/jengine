@@ -507,19 +507,4 @@ public class SaveManager {
         }
         currentSaveNode = parent;
     }
-
-    // public JObject SerialiseToNode<T>(T value) where T : ISerialisable, new() {
-    //     var node = new JObject();
-    //     Find.SaveManager.CurrentSaveNode = node;
-    //     Find.SaveManager.Mode            = SerialiseMode.Saving;
-    //     Find.SaveManager.ArchiveDeep("key", value);
-    //
-    //     return node;
-    // }
-    //
-    // public void DeserialiseFromNode<T>(T value, JObject node) where T : ISerialisable, new() {
-    //     Find.SaveManager.CurrentSaveNode = node;
-    //     Find.SaveManager.Mode            = SerialiseMode.Loading;
-    //     Find.SaveManager.ArchiveDeep("key", value);
-    // }
 }

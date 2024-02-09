@@ -29,7 +29,7 @@ internal class Blit {
 
 public class Renderer {
     // Resources
-    public static  readonly Shader OutlineShader      = Raylib.LoadShader(null, "assets/shaders/outline.fsh");
+    private static readonly Shader OutlineShader      = Raylib.LoadShader(null, "assets/shaders/outline.fsh");
     private static readonly Shader DiscardAlphaShader = Raylib.LoadShader(null, "assets/shaders/discard_alpha.fsh");
     private static readonly Shader PickShader         = Raylib.LoadShader(null, "assets/shaders/pick.fsh");
     private static readonly int    PickColourLoc      = Raylib.GetShaderLocation(PickShader, "pickColor");

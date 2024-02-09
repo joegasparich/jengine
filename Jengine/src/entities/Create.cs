@@ -71,10 +71,6 @@ public static class Create {
         try {
             var entity = Activator.CreateInstance(type) as Entity;
 
-            // foreach (var compData in def.components) {
-            //     entity.AddComponent(compData.CompClass, compData);
-            // }
-
             Find.Game.RegisterEntityNow(entity, id);
 
             return entity;

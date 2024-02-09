@@ -3,24 +3,6 @@ using Raylib_cs;
 
 namespace JEngine;
 
-public enum InputType {
-    CameraLeft,
-    CameraRight,
-    CameraUp,
-    CameraDown,
-    CameraZoomIn,
-    CameraZoomOut,
-    Undo, // TODO: combos
-    Pause,
-    NormalSpeed,
-    FastSpeed,
-    FasterSpeed,
-    IncreaseBrushSize,
-    DecreaseBrushSize,
-    RotateClockwise,
-    RotateCounterClockwise
-}
-
 public enum InputEventType {
     Key,
     MouseButton,
@@ -30,16 +12,16 @@ public enum InputEventType {
 
 public class InputEvent {
     public InputEventType type;
-    public KeyboardKey?   keyDown   = null;
-    public KeyboardKey?   keyUp     = null;
-    public MouseButton?   mouseDown = null;
-    public MouseButton?   mouseUp   = null;
-    public InputType?     inputDown = null;
-    public InputType?     inputUp   = null;
+    public KeyboardKey?   keyDown;
+    public KeyboardKey?   keyUp;
+    public MouseButton?   mouseDown;
+    public MouseButton?   mouseUp;
+    // public InputType?     inputDown;
+    // public InputType?     inputUp;
     public Vector2        mousePos;
     public Vector2        mouseWorldPos;
     public float          mouseScroll;
-    public bool           consumed = false;
+    public bool           consumed;
     
     public InputEvent(InputEventType type) {
         this.type = type;
@@ -57,17 +39,17 @@ public class InputManager {
     private static readonly int KeyMax          = (int)KeyboardKey.KeyboardMenu;
     
     // Collections
-    private Dictionary<KeyboardKey, InputType[]> inputs = new() {
-        // Default inputs
-        {KeyboardKey.W, new[] {InputType.CameraUp}},
-        {KeyboardKey.A, new[] {InputType.CameraLeft}},
-        {KeyboardKey.S, new[] {InputType.CameraDown}},
-        {KeyboardKey.D, new[] {InputType.CameraRight}},
-        {KeyboardKey.Up, new[] {InputType.CameraUp}},
-        {KeyboardKey.Left, new[] {InputType.CameraLeft}},
-        {KeyboardKey.Down, new[] {InputType.CameraDown}},
-        {KeyboardKey.Right, new[] {InputType.CameraRight}},
-    };
+    // private Dictionary<KeyboardKey, InputType[]> inputs = new() {
+    //     // Default inputs
+    //     {KeyboardKey.W, [InputType.CameraUp] },
+    //     {KeyboardKey.A, [InputType.CameraLeft] },
+    //     {KeyboardKey.S, [InputType.CameraDown] },
+    //     {KeyboardKey.D, [InputType.CameraRight] },
+    //     {KeyboardKey.Up, [InputType.CameraUp] },
+    //     {KeyboardKey.Left, [InputType.CameraLeft] },
+    //     {KeyboardKey.Down, [InputType.CameraDown] },
+    //     {KeyboardKey.Right, [InputType.CameraRight] },
+    // };
 
     // State
     private InputEvent currentEvent;
@@ -89,16 +71,16 @@ public class InputManager {
             FireInputEvent(evt);
             
             // Inputs
-            if (!inputs.ContainsKey(key)) continue;
-            
-            foreach (var input in inputs[key]) {
-                evt = new InputEvent(InputEventType.Input);
-                evt.inputDown       = Raylib.IsKeyPressed(key) ? input : null;
-                evt.inputUp         = Raylib.IsKeyReleased(key) ? input : null;
-                evt.mousePos        = Raylib.GetMousePosition();
-                evt.mouseWorldPos   = Find.Renderer.ScreenToWorldPos(evt.mousePos);
-                FireInputEvent(evt);
-            }
+            // if (!inputs.ContainsKey(key)) continue;
+            //
+            // foreach (var input in inputs[key]) {
+            //     evt = new InputEvent(InputEventType.Input);
+            //     evt.inputDown       = Raylib.IsKeyPressed(key) ? input : null;
+            //     evt.inputUp         = Raylib.IsKeyReleased(key) ? input : null;
+            //     evt.mousePos        = Raylib.GetMousePosition();
+            //     evt.mouseWorldPos   = Find.Renderer.ScreenToWorldPos(evt.mousePos);
+            //     FireInputEvent(evt);
+            // }
         }
         
         // Mouse events
@@ -133,12 +115,13 @@ public class InputManager {
         // Messenger::fire(EventType::InputEvent);
     }
 
-    public void RegisterInput(InputType input, KeyboardKey key) {
-        if (!inputs.ContainsKey(key))
-            inputs[key] = Array.Empty<InputType>();
-
-        inputs[key] = inputs[key].Append(input).ToArray();
-    }
+    // TODO: Change from InputType enum to something else
+    // public void RegisterInput(InputType input, KeyboardKey key) {
+    //     if (!inputs.ContainsKey(key))
+    //         inputs[key] = Array.Empty<InputType>();
+    //
+    //     inputs[key] = inputs[key].Append(input).ToArray();
+    // }
 
     public bool IsKeyHeld(KeyboardKey key) {
         return Raylib.IsKeyDown(key);
@@ -148,15 +131,15 @@ public class InputManager {
         return Raylib.IsMouseButtonDown(button);
     }
     
-    public bool IsInputHeld(InputType input) {
-        // Prob replace with reverse dictionary
-        foreach (var (key, ins) in inputs) {
-            if (ins.Contains(input))
-                return Raylib.IsKeyDown(key);
-        }
-
-        return false;
-    }
+    // public bool IsInputHeld(InputType input) {
+    //     // Prob replace with reverse dictionary
+    //     foreach (var (key, ins) in inputs) {
+    //         if (ins.Contains(input))
+    //             return Raylib.IsKeyDown(key);
+    //     }
+    //
+    //     return false;
+    // }
     
     public Vector2 GetMousePos() {
         return Raylib.GetMousePosition();
