@@ -37,20 +37,17 @@ public static class Debug {
             throw new Exception(message);
     }
     
-    public static void DrawLine(Vector2 start, Vector2 end, Color colour, bool worldScale) {
-        var scale = worldScale ? Game.WorldScale : 1;
-        Draw.DrawLineV3D(start * scale, end * scale, colour, (int)Depth.Debug);
+    public static void DrawLine(Vector2 start, Vector2 end, Color colour) {
+        Draw.DrawLineV3D(start, end, colour, (int)Depth.Debug);
     }
     
-    public static void DrawRect(Vector2 start, Vector2 dimensions, Color colour, bool worldScale) {
-        var scale = worldScale ? Game.WorldScale : 1;
-        Draw.DrawRectangleV3D(start * scale, dimensions * scale, colour, (int)Depth.Debug);
+    public static void DrawRect(Vector2 start, Vector2 dimensions, Color colour) {
+        Draw.DrawRectangleV3D(start, dimensions, colour, (int)Depth.Debug);
     }
 
-    public static void DrawPolygon(List<Vector2> points, Color colour, bool worldScale) {
-        var scale      = worldScale ? Game.WorldScale : 1;
+    public static void DrawPolygon(List<Vector2> points, Color colour) {
         var pointsCopy = new List<Vector2>(points) {points.Average()};
         pointsCopy.Append(points[1]);
-        Draw.DrawTriangleFan3D(pointsCopy.Select(point => point * scale).ToArray(), colour, (int)Depth.Debug);
+        Draw.DrawTriangleFan3D(pointsCopy.Select(point => point).ToArray(), colour, (int)Depth.Debug);
     }
 }

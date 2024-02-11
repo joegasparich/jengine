@@ -1,3 +1,4 @@
+using System.Numerics;
 using Newtonsoft.Json;
 using Raylib_cs;
 using Newtonsoft.Json.Linq;
@@ -8,7 +9,7 @@ using JEngine.scenes;
 namespace JEngine;
 
 public class GameSettings {
-    public int screenWidth = 1280;
+    public int screenWidth  = 1280;
     public int screenHeight = 720;
 }
 
@@ -19,7 +20,6 @@ public class Game {
     private const int    DefaultScreenWidth  = 1280;
     private const int    DefaultScreenHeight = 720;
     private const string SettingsFilePath    = "settings.json";
-    public const  int    WorldScale          = 16;
     public const  int    LargerThanWorld     = 10000;
 
     public GameSettings settings;
@@ -61,9 +61,7 @@ public class Game {
 
     public Game() {
         Find.Game = this;
-    }
 
-    protected virtual void Init() {
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
         Raylib.InitWindow(DefaultScreenWidth, DefaultScreenHeight, "JEngine");
         Raylib.SetExitKey(KeyboardKey.Null);
@@ -79,6 +77,10 @@ public class Game {
         entities = new();
         entitiesToAdd = new();
         entitiesToRemove = new();
+    }
+
+    protected virtual void Init() {
+        renderer.Init();
 
         LoadSettings();
 

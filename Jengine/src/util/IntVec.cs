@@ -3,42 +3,42 @@ using System.Numerics;
 namespace JEngine.util;
 
 public struct IntVec2 : IEquatable<IntVec2> {
-    public int x;
-    public int y;
+    public int X;
+    public int Y;
 
     public static IntVec2 Zero => new(0, 0);
     public static IntVec2 One  => new(1, 1);
 
     public IntVec2() {
-        x = 0;
-        y = 0;
+        X = 0;
+        Y = 0;
     }
     public IntVec2(int n) {
-        x = n;
-        y = n;
+        X = n;
+        Y = n;
     }
     public IntVec2(int x, int y) {
-        this.x = x;
-        this.y = y;
+        X = x;
+        Y = y;
     }
 
     public static IntVec2 operator +(IntVec2 a, IntVec2 b) {
-        return new IntVec2(a.x + b.x, a.y + b.y);
+        return new IntVec2(a.X + b.X, a.Y + b.Y);
     }
     public static IntVec2 operator -(IntVec2 a, IntVec2 b) {
-        return new IntVec2(a.x - b.x, a.y - b.y);
+        return new IntVec2(a.X - b.X, a.Y - b.Y);
     }
     public static IntVec2 operator *(IntVec2 a, IntVec2 b) {
-        return new IntVec2(a.x * b.x, a.y * b.y);
+        return new IntVec2(a.X * b.X, a.Y * b.Y);
     }
     public static IntVec2 operator *(IntVec2 a, int b) {
-        return new IntVec2(a.x * b, a.y * b);
+        return new IntVec2(a.X * b, a.Y * b);
     }
     public static IntVec2 operator /(IntVec2 a, int b) {
-        return new IntVec2(a.x / b, a.y / b);
+        return new IntVec2(a.X / b, a.Y / b);
     }
     public static Vector2 operator /(IntVec2 a, float b) {
-        return new Vector2(a.x / b, a.y / b);
+        return new Vector2(a.X / b, a.Y / b);
     }
     public static bool operator ==(IntVec2 a, IntVec2 b) {
         return a.Equals(b);
@@ -47,20 +47,20 @@ public struct IntVec2 : IEquatable<IntVec2> {
         return !a.Equals(b);
     }
 
-    public static implicit operator Vector2(IntVec2 v) => new(v.x, v.y);
-    public Vector2 ToVector2() => new(x, y);
+    public static implicit operator Vector2(IntVec2 v) => new(v.X, v.Y);
+    public Vector2 ToVector2() => new(X, Y);
 
     public bool Equals(IntVec2 other) {
-        return x == other.x && y == other.y;
+        return X == other.X && Y == other.Y;
     }
     
     public void Deconstruct(out int x, out int y) {
-        x = this.x;
-        y = this.y;
+        x = X;
+        y = Y;
     }
 
     public string ToString() {
-        return $"{x}, {y}";
+        return $"{X}, {Y}";
     }
     public static IntVec2 FromString(string s) {
         if (s.NullOrEmpty()) 

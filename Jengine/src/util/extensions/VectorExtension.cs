@@ -22,6 +22,9 @@ public static class VectorExtension {
     public static bool InDistOf(this Vector2 a, Vector2 b, float range) {
         return a.DistanceSquared(b) < range * range;
     }
+    public static float Magnitude(this Vector2 v) {
+        return MathF.Sqrt(v.X * v.X + v.Y * v.Y);
+    }
     public static Vector2 Normalised(this Vector2 v) {
         if (v.LengthSquared() == 0) 
             return Vector2.Zero;

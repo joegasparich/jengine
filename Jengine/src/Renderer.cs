@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Numerics;
 using JEngine.util;
 using Raylib_cs;
@@ -25,6 +24,7 @@ internal class Blit {
     public Color     tint;
     public Shader?   fragShader;
     public int?      pickId;
+    public bool      flipX;
 }
 
 public class Renderer {
@@ -35,24 +35,29 @@ public class Renderer {
     private static readonly int    PickColourLoc      = Raylib.GetShaderLocation(PickShader, "pickColor");
     
     // Collections
-    private ConcurrentQueue<Blit> blits = new();
+    private List<Blit> blits = new();
     
     // State
-    public  Camera          camera = new();
+    public  Camera          camera;
+    private RenderTexture2D screenBuffer;
     private RenderTexture2D pickBuffer;
     private Image           pickImage;
+    public  IntVec2         resolution = new(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
     
-    public Renderer() {
+    public void Init() {
         Debug.Log("Initialising Renderer");
         Raylib.SetTargetFPS(60);
         Raylib.SetTraceLogLevel(TraceLogLevel.Warning);
 
-        pickBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
-        
+        camera = new();
+
+        screenBuffer = Raylib.LoadRenderTexture(resolution.X, resolution.Y);
+        pickBuffer = Raylib.LoadRenderTexture(resolution.X, resolution.Y);
+
         // Set outline colour
         var outlineColLoc = Raylib.GetShaderLocation(OutlineShader, "outlineCol");
         Raylib.SetShaderValue(OutlineShader, outlineColLoc, new Vector4(0.4f, 0.7f, 1f, 1f), ShaderUniformDataType.Vec4);
-        
+
         Rlgl.EnableDepthTest();
     }
 
@@ -60,37 +65,53 @@ public class Renderer {
 
     public void Render() {
         Raylib.BeginDrawing();
-        Raylib.ClearBackground(Color.Gray);
-        
-        Raylib.BeginMode3D(camera.Cam);
         {
-            Find.Game.Render();
-            
-            Raylib.BeginShaderMode(DiscardAlphaShader);
-            foreach (var blit in blits) {
-                DoBlit(blit);
+            Raylib.BeginTextureMode(screenBuffer);
+            {
+                Raylib.ClearBackground(Color.Gray);
+
+                Raylib.BeginMode3D(camera.Cam);
+                {
+                    Find.Game.Render();
+
+                    Raylib.BeginShaderMode(DiscardAlphaShader);
+                    foreach (var blit in blits) {
+                        DoBlit(blit);
+                    }
+
+                    Raylib.EndShaderMode();
+
+                    Find.Game.RenderLate();
+                }
+                Raylib.EndMode3D();
+
+                RenderPickIdsToBuffer();
+                Raylib.UnloadImage(pickImage);
+                pickImage = Raylib.LoadImageFromTexture(pickBuffer.Texture);
+                // if (DebugSettings.Get(DebugSetting.DrawPickBuffer))
+                //     RenderPickBuffer();
+
+                Find.Game.Render2D();
             }
-            Raylib.EndShaderMode();
-            
-            Find.Game.RenderLate();
+            Raylib.EndTextureMode();
+
+            Raylib.DrawTexturePro(
+                screenBuffer.Texture,
+                new Rectangle(0, 0, resolution.X, -resolution.Y),
+                new Rectangle(0, 0, Find.Game.ScreenWidth, Find.Game.ScreenHeight),
+                new Vector2(0, 0),
+                0,
+                Color.White
+            );
         }
-        Raylib.EndMode3D();
-        
-        RenderPickIdsToBuffer();
-        Raylib.UnloadImage(pickImage);
-        pickImage = Raylib.LoadImageFromTexture(pickBuffer.Texture);
-        // if (DebugSettings.Get(DebugSetting.DrawPickBuffer))
-        //     RenderPickBuffer();
-        
-        Find.Game.Render2D();
         Raylib.EndDrawing();
-        
+
         blits.Clear();
     }
 
     public void OnScreenResized() {
-        Raylib.UnloadRenderTexture(pickBuffer);
-        pickBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
+        // Raylib.UnloadRenderTexture(pickBuffer);
+        // pickBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
         
         camera.OnScreenResized();
     }
@@ -109,7 +130,8 @@ public class Renderer {
         float      rotation = 0,
         Color?     color  = null,
         Shader?    fragShader = null,
-        int?       pickId = null
+        int?       pickId = null,
+        bool       flipX = false
     ) {
         scale  ??= new Vector2(texture.Width, texture.Height);
         origin ??= new Vector2(0, 0);
@@ -119,16 +141,18 @@ public class Renderer {
         // Cull offscreen blits
         if (!IsPosOnScreen(pos, MathF.Max(scale.Value.X, scale.Value.Y))) 
             return;
-        
+
+        var flip = flipX ? -1 : 1;
+
         var src = new Rectangle(
             source.Value.X      * texture.Width,
             source.Value.Y      * texture.Height,
-            source.Value.Width  * texture.Width,
+            source.Value.Width  * texture.Width * flip,
             source.Value.Height * texture.Height
         );
         var scaledOrigin = origin.Value * scale.Value;
 
-        blits.Enqueue(new Blit {
+        blits.Add(new Blit {
             texture    = texture,
             sourceRect = src,
             destRect   = new Rectangle(pos.X, pos.Y, scale.Value.X, scale.Value.Y),
@@ -208,12 +232,12 @@ public class Renderer {
     
     public Vector2 ScreenToWorldPos(Vector2 screenPos) {
         var cameraCenter = (camera.Position * camera.Zoom) - new Vector2(Find.Game.ScreenWidth/2f, Find.Game.ScreenHeight/2f);
-        return (screenPos + cameraCenter) / (Game.WorldScale * camera.Zoom);
+        return (screenPos + cameraCenter) / camera.Zoom;
     }
     
     // TODO: make sure this is correct since this is literally AI generated
     public Vector2 WorldToScreenPos(Vector2 worldPos) {
-        return worldPos * (Game.WorldScale * camera.Zoom) - (camera.Position * camera.Zoom) + new Vector2(Find.Game.ScreenWidth/2f, Find.Game.ScreenHeight/2f);
+        return worldPos * camera.Zoom - (camera.Position * camera.Zoom) + new Vector2(Find.Game.ScreenWidth/2f, Find.Game.ScreenHeight/2f);
     }
 
     public bool IsPosOnScreen(Vector2 pos, float margin = 0) {

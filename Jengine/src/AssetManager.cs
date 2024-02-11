@@ -209,7 +209,7 @@ public class AssetManager {
     }
 
     public Texture2D GetTexture(string path) {
-        var shortPath = path.Replace(TexturePath, "");
+        var shortPath = path.Replace(TexturePath + "/", "");
 
         if (!textureMap.ContainsKey(shortPath)) {
             Texture2D texture;

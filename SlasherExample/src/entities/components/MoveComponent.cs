@@ -1,11 +1,12 @@
 ﻿using JEngine;
 using JEngine.entities;
+using JEngine.util;
 
 namespace SlasherExample.entities;
 
 public class MoveComponent : Component {
     // Config
-    public float acceleration = 3f;
+    public float acceleration = 20f;
 
     // Properties
     protected override Type[] Dependencies => [typeof(InputComponent), typeof(PhysicsComponent)];
@@ -15,7 +16,7 @@ public class MoveComponent : Component {
     public MoveComponent(Entity entity, ComponentData? data) : base(entity, data) {}
 
     public override void Update() {
-        Physics.AddForce(Input.inputVector * acceleration);
+        Physics.AddForce(Input.inputVector.Normalised() * acceleration);
     }
 
     public override void Serialise() {

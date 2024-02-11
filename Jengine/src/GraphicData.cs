@@ -11,9 +11,15 @@ public struct GraphicData {
     public  Color     colour = Color.White;
     private Texture2D texture;
 
-    [JsonProperty] private string spritePath = "";
-    [JsonProperty] private int    cellWidth  = 0;
-    [JsonProperty] private int    cellHeight = 0;
+    [JsonProperty] private string spritePath      = "";
+    [JsonProperty] private int    cellWidth       = 0;
+    [JsonProperty] private int    cellHeight      = 0;
+    private                int    cellIndex       = 0;
+
+    public bool flipX = false;
+
+    private int animationFrames = 0;
+    private int animationSpeed  = 0;
 
     // Properties
     public Texture2D Texture
@@ -37,20 +43,39 @@ public struct GraphicData {
         SetSprite(path);
     }
 
-    public void SetSprite(string path)
-    {
+    public void SetSprite(string path) {
         spritePath = path;
         Texture = Find.AssetManager.GetTexture(spritePath);
     }
 
-    public void Blit(Vector2 pos, float rotation, Vector2 scale, float depth, Color? overrideColour = null, int index = 0, int? pickId = null, Shader? fragShader = null) {
-        var source = GetCellBounds(index);
+    public void SetSpritesheet(string path, int cellWidth, int cellHeight) {
+        SetSprite(path);
+        this.cellWidth  = cellWidth;
+        this.cellHeight = cellHeight;
+    }
+
+    public void SetIndex(int index) {
+        cellIndex = index;
+    }
+
+    public void SetAnimation(int startIndex, int frames, int speed) {
+        cellIndex       = startIndex;
+        animationFrames = frames;
+        animationSpeed  = speed;
+    }
+
+    public void Blit(Vector2 pos, float rotation, Vector2 scale, float depth, Color? overrideColour = null, int? index = null, int? pickId = null, Shader? fragShader = null) {
+        if (index == null)
+            index = GetAnimationFrame();
+
+        var source = GetCellBounds(index.Value);
 
         Find.Renderer.Blit(
             texture: Texture,
             pos: pos,
             scale: new Vector2(Texture.Width * source.Width, Texture.Height * source.Height) * scale,
             rotation: rotation,
+            flipX: flipX,
             depth: depth,
             origin: origin,
             source: source,
@@ -58,6 +83,13 @@ public struct GraphicData {
             fragShader: fragShader,
             pickId: pickId
         );
+    }
+
+    private int GetAnimationFrame() {
+        if (animationSpeed == 0 || animationFrames == 0)
+            return cellIndex;
+
+        return cellIndex + Find.Game.Ticks % animationSpeed / (animationSpeed / animationFrames);
     }
     
     public Rectangle GetCellBounds(int cellIndex) {

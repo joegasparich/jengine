@@ -16,7 +16,6 @@ public class RenderComponent : Component {
     // State
     public  Vector2           Offset = Vector2.Zero;
     public  Color?            OverrideColour;
-    public  int               SpriteIndex = 0; // TODO: move this shit into graphics now that they are per instance
     public  GraphicData       BaseGraphic;
     private GraphicData       bakedGraphic;
     private List<GraphicData> attachments = new();
@@ -45,12 +44,11 @@ public class RenderComponent : Component {
             return;
 
         bakedGraphic.Blit(
-            pos: (entity.pos + Offset) * Game.WorldScale,
+            pos: (entity.pos + Offset),
             rotation: 0f,
             scale: Vector2.One,
             depth: Find.Renderer.GetDepth(entity.pos.Y),
             overrideColour: OverrideColour,
-            index: SpriteIndex,
             pickId: entity.Selectable ? entity.id : null
         );
 
