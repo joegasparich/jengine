@@ -8,28 +8,34 @@ using JEngine.scenes;
 
 namespace JEngine;
 
-public class GameSettings {
+public class PlayerConfig {
     public int screenWidth  = 1280;
     public int screenHeight = 720;
+}
+
+public class GameConfig {
+    public double msPerUpdate  = 1000 / 60f;
+    public int    worldScalePx = 1; // This is the scale of entity positions to screen pixels
 }
 
 public class Game {
     // Constants
     // TODO: Config options
-    private const int    MsPerUpdate         = 10;
-    private const int    DefaultScreenWidth  = 1280;
-    private const int    DefaultScreenHeight = 720;
-    private const string SettingsFilePath    = "settings.json";
+    public const int    DefaultScreenWidth  = 1280;
+    public const int    DefaultScreenHeight = 720;
+    private const string ConfigFilePath      = "config.json";
     public const  int    LargerThanWorld     = 10000;
 
-    public GameSettings settings;
+    public GameConfig   gameConfig;
+    public PlayerConfig playerConfig;
 
     // Managers
     public InputManager input;
     public Renderer     renderer;
-    public AssetManager assetManager;
+    public AssetManager assets;
     public SaveManager  saveManager;
     public SceneManager sceneManager;
+    public PhysicsManager physics;
 
     // Collections
     private Dictionary<int, Entity> entities;
@@ -48,7 +54,7 @@ public class Game {
     public int      ScreenWidth     => Raylib.GetScreenWidth();
     public int      ScreenHeight    => Raylib.GetScreenHeight();
     public bool     IsPaused        => paused;
-    
+
     public void Run() {
         Debug.Log("Application Started");
         Init();
@@ -66,13 +72,15 @@ public class Game {
         Raylib.InitWindow(DefaultScreenWidth, DefaultScreenHeight, "JEngine");
         Raylib.SetExitKey(KeyboardKey.Null);
 
-        settings = new();
+        gameConfig = new();
+        playerConfig = new();
 
         input = new();
         renderer = new();
-        assetManager = new();
+        assets = new();
         saveManager = new();
         sceneManager = new();
+        physics = new();
 
         entities = new();
         entitiesToAdd = new();
@@ -81,12 +89,13 @@ public class Game {
 
     protected virtual void Init() {
         renderer.Init();
+        physics.Init();
 
-        LoadSettings();
+        LoadConfig();
 
-        Raylib.SetWindowSize(settings.screenWidth, settings.screenHeight);
+        Raylib.SetWindowSize(playerConfig.screenWidth, playerConfig.screenHeight);
 
-        assetManager.LoadAssets();
+        assets.LoadAssets();
         StaticConstructorUtility.CallConstructors();
     }
 
@@ -104,7 +113,7 @@ public class Game {
             var elapsed = currentTime - lastTime;
             lag += elapsed;
 
-            while (lag >= MsPerUpdate) {
+            while (lag >= gameConfig.msPerUpdate) {
                 if (!paused) {
                     // Do Update
                     PreUpdate();
@@ -116,7 +125,7 @@ public class Game {
 
                 ConstantUpdate();
 
-                lag -= MsPerUpdate;
+                lag -= gameConfig.msPerUpdate;
             }
             
             lastTime = currentTime;
@@ -144,8 +153,8 @@ public class Game {
     }
     
     protected virtual void Update() {
+        physics.Update();
         sceneManager.GetCurrentScene()?.Update();
-
         renderer.Update();
 
         foreach (var entity in entities.Values) {
@@ -191,10 +200,28 @@ public class Game {
         }
 
         framesSinceGameStart++;
+
+
+        for (var i = 0; i < 16 + 1; i++) {
+            Debug.DrawLine(
+                new Vector2(0, i) * gameConfig.worldScalePx,
+                new Vector2(16, i) * gameConfig.worldScalePx,
+                Color.White
+            );
+        }
+        // Vertical
+        for (var i = 0; i < 16 + 1; i++) {
+            Debug.DrawLine(
+                new Vector2(i, 0) * gameConfig.worldScalePx,
+                new Vector2(i, 16) * gameConfig.worldScalePx,
+                Color.White
+            );
+        }
     }
 
     public virtual void RenderLate() {
         sceneManager.GetCurrentScene()?.RenderLate();
+        physics.RenderLate();
     }
 
     public virtual void Render2D() {
@@ -216,9 +243,9 @@ public class Game {
     protected virtual void OnScreenResized() {
         renderer.OnScreenResized();
 
-        settings.screenWidth = ScreenWidth;
-        settings.screenHeight = ScreenHeight;
-        SaveSettings();
+        playerConfig.screenWidth = ScreenWidth;
+        playerConfig.screenHeight = ScreenHeight;
+        SaveConfig();
     }
 
         public int RegisterEntity(Entity entity, int? id) {
@@ -311,16 +338,16 @@ public class Game {
             sceneManager.GetCurrentScene().PostLoad();
     }
 
-    public void SaveSettings() {
-        File.WriteAllText(SettingsFilePath, JsonConvert.SerializeObject(settings, Formatting.Indented));
+    public void SaveConfig() {
+        File.WriteAllText(ConfigFilePath, JsonConvert.SerializeObject(playerConfig, Formatting.Indented));
     }
 
-    public void LoadSettings() {
-        if (!File.Exists(SettingsFilePath)) {
-            SaveSettings();
+    public void LoadConfig() {
+        if (!File.Exists(ConfigFilePath)) {
+            SaveConfig();
             return;
         }
         
-        settings = JsonConvert.DeserializeObject<GameSettings>(File.ReadAllText(SettingsFilePath));
+        playerConfig = JsonConvert.DeserializeObject<PlayerConfig>(File.ReadAllText(ConfigFilePath));
     }
 }

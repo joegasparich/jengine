@@ -14,8 +14,8 @@ public static class JMath {
     public static int PositiveMod(int x, int m) => (x % m + m) % m;
     
     // Trig
-    public static float DegToRad(float deg) => deg * (float)Math.PI / 180f;
-    public static float RadToDeg(float rad) => rad * 180f / (float)Math.PI;
+    public const float DegToRad = MathF.PI / 180.0f;
+    public const float RadToDeg = 180f / (float)Math.PI;
     
     // Vectors
     public static Vector2 XY(this Vector3 v) => new Vector2(v.X, v.Y);

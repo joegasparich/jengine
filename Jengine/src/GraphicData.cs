@@ -7,7 +7,7 @@ namespace JEngine;
 
 public struct GraphicData {
     // Config
-    public  Vector2   origin = new(0.5f);
+    public  Vector2   origin = Vector2.Zero;
     public  Color     colour = Color.White;
     private Texture2D texture;
 
@@ -16,7 +16,7 @@ public struct GraphicData {
     [JsonProperty] private int    cellHeight      = 0;
     private                int    cellIndex       = 0;
 
-    public bool flipX = false;
+    public bool flipX;
 
     private int animationFrames = 0;
     private int animationSpeed  = 0;
@@ -50,6 +50,10 @@ public struct GraphicData {
 
     public void SetSpritesheet(string path, int cellWidth, int cellHeight) {
         SetSprite(path);
+
+        if (cellWidth > Texture.Width || cellHeight > Texture.Height)
+            Debug.Warn($"Spritesheet cell size is larger than texture size ({cellWidth}, {cellHeight})");
+
         this.cellWidth  = cellWidth;
         this.cellHeight = cellHeight;
     }
@@ -64,24 +68,40 @@ public struct GraphicData {
         animationSpeed  = speed;
     }
 
-    public void Blit(Vector2 pos, float rotation, Vector2 scale, float depth, Color? overrideColour = null, int? index = null, int? pickId = null, Shader? fragShader = null) {
+    public void Draw(
+        Vector2 pos,
+        float rotation = 0,
+        Vector2? scale = null,
+        float depth = 0,
+        bool flipX = false,
+        bool flipY = false,
+        Color? overrideColour = null,
+        int? index = null,
+        int? pickId = null,
+        Shader? fragShader = null,
+        bool now = false
+    ) {
+        scale ??= Vector2.One;
+
         if (index == null)
             index = GetAnimationFrame();
 
         var source = GetCellBounds(index.Value);
 
-        Find.Renderer.Blit(
+        Find.Renderer.Draw(
             texture: Texture,
             pos: pos,
             scale: new Vector2(Texture.Width * source.Width, Texture.Height * source.Height) * scale,
             rotation: rotation,
-            flipX: flipX,
+            flipX: this.flipX || flipX,
+            flipY: flipY,
             depth: depth,
             origin: origin,
             source: source,
             color: overrideColour ?? colour,
             fragShader: fragShader,
-            pickId: pickId
+            pickId: pickId,
+            now: now
         );
     }
 
@@ -94,8 +114,8 @@ public struct GraphicData {
     
     public Rectangle GetCellBounds(int cellIndex) {
         if (Texture.Empty()) return new Rectangle(0, 0, 1, 1);
-        
-        var cols = Texture.Width        / CellWidth;
+
+        var cols = Texture.Width / CellWidth;
         return GetCellBounds(cellIndex % cols, cellIndex / cols);
     }
 

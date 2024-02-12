@@ -43,8 +43,8 @@ public class RenderComponent : Component {
         if (!ShouldRender)
             return;
 
-        bakedGraphic.Blit(
-            pos: (entity.pos + Offset),
+        bakedGraphic.Draw(
+            pos: (entity.pos + Offset) * Find.Config.worldScalePx,
             rotation: 0f,
             scale: Vector2.One,
             depth: Find.Renderer.GetDepth(entity.pos.Y),
@@ -73,7 +73,7 @@ public class RenderComponent : Component {
         var renderTexture = Raylib.LoadRenderTexture(BaseGraphic.Texture.Width, BaseGraphic.Texture.Height);
 
         Raylib.BeginTextureMode(renderTexture);
-        Raylib.ClearBackground(new Color(0, 0, 0, 0));
+        Raylib.ClearBackground(Colour.Transparent);
         Raylib.DrawTexturePro(
             BaseGraphic.Texture,
             new Rectangle(0, 0, BaseGraphic.Texture.Width, -BaseGraphic.Texture.Height),

@@ -4,7 +4,7 @@ using JEngine.entities;
 
 namespace SlasherExample.entities;
 
-public class PhysicsComponent : Component {
+public class SimplePhysicsComponent : Component {
     // Config
     public float Mass     = 50;
     public float Friction = 0.5f;
@@ -13,7 +13,7 @@ public class PhysicsComponent : Component {
     private Vector2 velocity = Vector2.Zero;
     private Vector2 force    = Vector2.Zero;
 
-    public PhysicsComponent(Entity entity, ComponentData? data) : base(entity, data) {}
+    public SimplePhysicsComponent(Entity entity, ComponentData? data) : base(entity, data) {}
 
     public override void Update() {
         entity.pos = entity.pos + velocity;

@@ -213,6 +213,8 @@ public class AssetManager {
 
         if (!textureMap.ContainsKey(shortPath)) {
             Texture2D texture;
+
+            path = ValidatePath(path);
             
             if (!File.Exists(path)) {
                 Debug.Warn("Could not find path to texture " + path);
@@ -225,6 +227,25 @@ public class AssetManager {
         }
 
         return textureMap[shortPath];
+    }
+
+    public JObject GetJson(string path) {
+        path = ValidatePath(path);
+
+        if (!File.Exists(path)) {
+            Debug.Warn("Could not find JSON file at " + path);
+            return null;
+        }
+
+        try {
+            var json = File.ReadAllText(path);
+            var data = JsonConvert.DeserializeObject<JObject>(json)!;
+            return data;
+        } catch (Exception e) {
+            Debug.Error($"Failed to load json with path: {path}", e);
+        }
+
+        return null;
     }
 
     public Def? GetDef(string id, bool suppressError = false) {
@@ -288,5 +309,12 @@ public class AssetManager {
         // TODO: Cache this
 
         return defMap[typeof(T)].Values.Cast<T>().ToList();
+    }
+
+    private string ValidatePath(string path) {
+        if (!path.Contains("assets/"))
+            path = path.Insert(0, "assets/");
+
+        return path;
     }
 }

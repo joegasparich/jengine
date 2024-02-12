@@ -12,7 +12,7 @@ public class PlayerAnimationComponent : Component
     private const int DownIndex       = 0;
     private const int RightIndex      = 6;
     private const int UpIndex         = 12;
-    private const int AnimationSpeed  = 90;
+    private const int AnimationSpeed  = 48;
 
     private Dir4 direction = Dir4.South;
 

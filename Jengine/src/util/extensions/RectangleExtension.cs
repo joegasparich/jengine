@@ -10,6 +10,17 @@ public static class RectangleExtension {
     public static Vector2 Dimensions(this Rectangle rect) {
         return new Vector2(rect.Width, rect.Height);
     }
+    public static Vector2 Center(this Rectangle rect) {
+        return new Vector2(rect.X + rect.Width/2, rect.Y + rect.Height/2);
+    }
+    public static Vector2[] Vertices(this Rectangle rect) {
+        return [
+            new Vector2(rect.X, rect.Y),
+            new Vector2(rect.X + rect.Width, rect.Y),
+            new Vector2(rect.X + rect.Width, rect.Y + rect.Height),
+            new Vector2(rect.X, rect.Y + rect.Height)
+        ];
+    }
     public static bool Contains(this Rectangle rect, Vector2 point) {
         return JMath.PointInRect(rect, point);
     }

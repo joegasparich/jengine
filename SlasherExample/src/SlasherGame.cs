@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using JEngine;
+﻿using JEngine;
 using Raylib_cs;
 using SlasherExample.scenes;
 
@@ -8,10 +7,13 @@ namespace SlasherExample;
 public class SlasherGame : Game
 {
     private const string SaveFileName = "slasher";
+
     protected override void Init() {
-        renderer.resolution = new(640, 360);
+        gameConfig.worldScalePx = 16;
 
         base.Init();
+
+        Find.Camera.zoom = 4f;
 
         Find.SceneManager.LoadScene(new Scene_Play("Play"));
     }
