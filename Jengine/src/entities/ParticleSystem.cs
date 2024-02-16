@@ -59,27 +59,30 @@ public class ParticleSystem : Entity {
             if (settings.scaleOverLifetime != null)
                 particles[i].scale = settings.scaleOverLifetime.Calculate(pct);
             
-            if (particles[i].lifetime <= 0) {
-                var col = settings.colour;
-                
-                if (settings.colourOverLifetime != null)
-                    col = settings.colourOverLifetime.Calculate(0);
-                else if (settings.colourGradient != null)
-                    col = settings.colourGradient.Calculate(Rand.Float(Find.Game.Ticks));
-
-                var speed = settings.speedOverLifetime?.Calculate(0) ?? settings.speed.Random();
-                var scale = settings.scaleOverLifetime?.Calculate(0) ?? settings.scale.Random();
-                
-                particles[i] = new Particle {
-                    active   = true,
-                    position = Vector2.Zero,
-                    velocity = new Vector2(0, -speed).Rotate(settings.direction.Random() * JMath.DegToRad),
-                    scale    = scale,
-                    lifetime = settings.lifetime,
-                    colour   = col
-                };
-            }
+            if (particles[i].lifetime <= 0)
+                particles[i] = CreateParticle();
         }
+    }
+
+    private Particle CreateParticle() {
+        var col = settings.colour;
+                
+        if (settings.colourOverLifetime != null)
+            col = settings.colourOverLifetime.Calculate(0);
+        else if (settings.colourGradient != null)
+            col = settings.colourGradient.Calculate(Rand.Float(Find.Game.Ticks));
+
+        var speed = settings.speedOverLifetime?.Calculate(0) ?? settings.speed.Random();
+        var scale = settings.scaleOverLifetime?.Calculate(0) ?? settings.scale.Random();
+        
+        return new Particle {
+            active   = true,
+            position = Vector2.Zero,
+            velocity = new Vector2(0, -speed).Rotate(settings.direction.Random() * JMath.DegToRad),
+            scale    = scale,
+            lifetime = settings.lifetime,
+            colour   = col
+        };
     }
 
     public override void Render() {

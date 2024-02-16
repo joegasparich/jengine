@@ -6,7 +6,7 @@ using Raylib_cs;
 namespace JEngine; 
 
 public static class Debug {
-    public static void Log(string message, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string? file = null, [CallerMemberName] string? caller = null) {
+    public static void Log(object message, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string? file = null, [CallerMemberName] string? caller = null) {
         var finalSlash = Math.Max(file.LastIndexOf('\\'), file.LastIndexOf('/'));
         var fileName   = file.Substring(finalSlash + 1);
             
@@ -14,7 +14,7 @@ public static class Debug {
         Console.WriteLine("{0,-10}{1,-120}{2} {3}", "[info]", message, fileName, $"{caller}:{lineNumber}");
     }
 
-    public static void Warn(string message, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string? file = null, [CallerMemberName] string? caller = null) {
+    public static void Warn(object message, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string? file = null, [CallerMemberName] string? caller = null) {
         var finalSlash = Math.Max(file.LastIndexOf('\\'), file.LastIndexOf('/'));
         var fileName   = file.Substring(finalSlash + 1);
         
@@ -22,7 +22,7 @@ public static class Debug {
         Console.WriteLine("{0,-10}{1,-120}{2} {3}", "[warn]", message, fileName, $"{caller}:{lineNumber}");
     }
     
-    public static void Error(string message, Exception? e = null, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string? file = null, [CallerMemberName] string? caller = null) {
+    public static void Error(object message, Exception? e = null, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string? file = null, [CallerMemberName] string? caller = null) {
         var finalSlash = Math.Max(file.LastIndexOf('\\'), file.LastIndexOf('/'));
         var fileName   = file.Substring(finalSlash + 1);
         

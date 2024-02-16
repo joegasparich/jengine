@@ -5,23 +5,24 @@ using JEngine.util;
 
 namespace JEngine;
 
-public struct GraphicData {
-    // Config
-    public  Vector2   origin = Vector2.Zero;
-    public  Color     colour = Color.White;
-    private Texture2D texture;
+public class GraphicData {
+    [JsonProperty] private string spritePath = "";
+    
+    public Vector2 origin = Vector2.Zero;
+    public Color   colour = Color.White;
+    public bool    flipX;
 
-    [JsonProperty] private string spritePath      = "";
-    [JsonProperty] private int    cellWidth       = 0;
-    [JsonProperty] private int    cellHeight      = 0;
-    private                int    cellIndex       = 0;
+    // Spritesheet
+    [JsonProperty] private int cellWidth;
+    [JsonProperty] private int cellHeight;
+    private                int cellIndex;
 
-    public bool flipX;
-
-    private int animationFrames = 0;
-    private int animationSpeed  = 0;
+    // Animation
+    private int animationFrames;
+    private int animationSpeed;
 
     // Properties
+    private Texture2D texture;
     public Texture2D Texture
     {
         get {

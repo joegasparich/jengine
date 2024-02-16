@@ -1,4 +1,4 @@
-﻿namespace Jengine.util;
+﻿namespace JEngine.util;
 
 public class Dir4 : IEquatable<Dir4>
 {

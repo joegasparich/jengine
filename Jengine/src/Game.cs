@@ -94,6 +94,7 @@ public class Game {
         LoadConfig();
 
         Raylib.SetWindowSize(playerConfig.screenWidth, playerConfig.screenHeight);
+        Raylib.InitAudioDevice();
 
         assets.LoadAssets();
         StaticConstructorUtility.CallConstructors();

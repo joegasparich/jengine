@@ -149,8 +149,8 @@ public class Renderer {
         color  ??= Color.White;
         
         // Cull offscreen draw calls
-        // if (!now && !IsPosOnScreen(pos, MathF.Max(scale.Value.X, scale.Value.Y)))
-        //     return;
+        if (!now && !IsPosOnScreen(pos, MathF.Max(scale.Value.X, scale.Value.Y)))
+            return;
 
         var src = new Rectangle(
             source.Value.X      * texture.Width,

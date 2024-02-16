@@ -12,6 +12,7 @@ public class AssetManager {
     // Constants
     private const string DefPath = "assets/defs";
     private const string TexturePath = "assets/textures";
+    private const string SoundPath = "assets/sounds";
     private readonly JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings {
         Converters = new List<JsonConverter> {
             new DefConverter(),
@@ -20,16 +21,18 @@ public class AssetManager {
         },
     });
     private Texture2D defaultTexture;
+    private Sound defaultSound;
     
     // State
     private readonly Dictionary<string, Texture2D>             textureMap     = new();
+    private readonly Dictionary<string, Sound>                 soundMap       = new();
     private readonly Dictionary<Type, Dictionary<string, Def>> defMap         = new();
     private readonly Dictionary<string, Def>                   defMapFlat     = new();
     public readonly  List<(object, ExpressionValueProvider)>   unresolvedDefs = new();
 
     public void LoadAssets() {
-        // Textures
         LoadTextures();
+        LoadSounds();
         
         // Defs
         var dataQueue = GetDataQueue();
@@ -55,6 +58,22 @@ public class AssetManager {
         }
         
         defaultTexture = GetTexture(TexturePath + "/placeholder.png");
+    }
+
+    private void LoadSounds() {
+        foreach (var path in FileUtility.GetFiles(SoundPath, "*.*", SearchOption.AllDirectories)) {
+            if (!path.EndsWith(".wav"))
+                continue;
+
+            try {
+                GetSound(path);
+            } catch (Exception e) {
+                Debug.Error($"Failed to load sound with path: {path}", e);
+                soundMap.Remove(path);
+            }
+        }
+        
+        defaultSound = GetSound(SoundPath + "/placeholder.wav");
     }
 
     private static Queue<JObject> GetDataQueue() {
@@ -227,6 +246,27 @@ public class AssetManager {
         }
 
         return textureMap[shortPath];
+    }
+    
+    public Sound GetSound(string path) {
+        var shortPath = path.Replace(SoundPath + "/", "");
+
+        if (!soundMap.ContainsKey(shortPath)) {
+            Sound sound;
+
+            path = ValidatePath(path);
+            
+            if (!File.Exists(path)) {
+                Debug.Warn("Could not find path to sound " + path);
+                sound = defaultSound;
+            } else {
+                sound = Raylib.LoadSound(path);
+            }
+            
+            soundMap.Add(shortPath, sound);
+        }
+
+        return soundMap[shortPath];
     }
 
     public JObject GetJson(string path) {

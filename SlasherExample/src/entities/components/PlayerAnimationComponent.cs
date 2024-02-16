@@ -1,10 +1,10 @@
 ﻿using System.Numerics;
 using JEngine.entities;
-using Jengine.util;
+using JEngine.util;
 
 namespace SlasherExample.entities;
 
-public class PlayerAnimationComponent : Component
+public class PlayerAnimationComponent : AnimationComponent
 {
     private const int AnimationFrames = 6;
     private const int IdleIndex       = 0;

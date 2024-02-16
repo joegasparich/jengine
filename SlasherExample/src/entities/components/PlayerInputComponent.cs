@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
 using JEngine;
 using JEngine.entities;
-using JEngine.util;
 using Raylib_cs;
 
 namespace SlasherExample.entities;
