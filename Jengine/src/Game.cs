@@ -200,23 +200,6 @@ public class Game {
         }
 
         framesSinceGameStart++;
-
-
-        for (var i = 0; i < 16 + 1; i++) {
-            Debug.DrawLine(
-                new Vector2(0, i) * gameConfig.worldScalePx,
-                new Vector2(16, i) * gameConfig.worldScalePx,
-                Color.White
-            );
-        }
-        // Vertical
-        for (var i = 0; i < 16 + 1; i++) {
-            Debug.DrawLine(
-                new Vector2(i, 0) * gameConfig.worldScalePx,
-                new Vector2(i, 16) * gameConfig.worldScalePx,
-                Color.White
-            );
-        }
     }
 
     public virtual void RenderLate() {

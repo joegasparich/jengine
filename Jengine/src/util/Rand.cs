@@ -24,6 +24,11 @@ public class Rand {
         return (float)rand.NextDouble();
     }
     
+    public static float Float(int seed) {
+        var rand = new Random(seed);
+        return (float)rand.NextDouble();
+    }
+    
     public static float Float(float min, float max) {
         var rand = new Random();
         var randomNum = (float)rand.NextDouble() * (max - min) + min;

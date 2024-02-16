@@ -31,6 +31,12 @@ public static class VectorExtension {
         
         return v / v.Length();
     }
+    public static Vector2 Truncate(this Vector2 v, float max) {
+        if (v.LengthSquared() > max * max) 
+            return v.Normalised() * max;
+        
+        return v;
+    }
     public static Vector3 ToVector3(this Vector2 v) {
         return new Vector3(v.X, v.Y, 0);
     }
@@ -41,10 +47,16 @@ public static class VectorExtension {
         y = v.Y;
         z = v.Z;
     }
+    
+    public static Vector2 Rotate(this Vector2 v, float angleRad) {
+        var s = MathF.Sin(angleRad);
+        var c = MathF.Cos(angleRad);
+        return new Vector2(v.X * c - v.Y * s, v.X * s + v.Y * c);
+    }
 
-    public static Vector2 RotateAround(this Vector2 a, Vector2 b, float angle) {
-        var s = MathF.Sin(angle);
-        var c = MathF.Cos(angle);
+    public static Vector2 RotateAround(this Vector2 a, Vector2 b, float angleRad) {
+        var s = MathF.Sin(angleRad);
+        var c = MathF.Cos(angleRad);
         var x = a.X - b.X;
         var y = a.Y - b.Y;
         var xnew = x * c - y * s;

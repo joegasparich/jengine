@@ -16,4 +16,8 @@ public struct FloatRange {
     public float Random() {
         return Rand.Float() * (max - min) + min;
     }
+
+    public float Lerp(float t) {
+        return min + (max - min) * t;
+    }
 }
