@@ -84,7 +84,6 @@ public class Renderer {
                     foreach (var drawCall in drawCalls) {
                         DrawNow(drawCall);
                     }
-
                     Raylib.EndShaderMode();
 
                     Find.Game.RenderLate();
@@ -97,7 +96,6 @@ public class Renderer {
                 // if (DebugSettings.Get(DebugSetting.DrawPickBuffer))
                 //     RenderPickBuffer();
 
-                Find.Game.Render2D();
             }
             Raylib.EndTextureMode();
 
@@ -110,6 +108,9 @@ public class Renderer {
                 Color.White
             );
         }
+
+        Find.Game.Render2D();
+
         Raylib.EndDrawing();
 
         drawCalls.Clear();

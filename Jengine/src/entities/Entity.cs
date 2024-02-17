@@ -80,6 +80,12 @@ public class Entity : ISerialisable, IReferencable {
         }
     }
 
+    public virtual void OnGUI() {
+        foreach (var component in components.Values) {
+            component.OnGUI();
+        }
+    }
+
     public virtual void Destroy() {
         foreach (var component in components.Values) {
             component.End();

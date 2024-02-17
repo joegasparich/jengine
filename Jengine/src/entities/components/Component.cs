@@ -10,7 +10,7 @@ public class ComponentData {
     [JsonProperty]
     private string compClass;
 
-    public virtual Type CompClass => Type.GetType("Zoo.entities." + compClass);
+    public virtual Type CompClass => Type.GetType("JEngine.entities." + compClass);
 }
 
 public abstract class Component : ISerialisable {
@@ -36,7 +36,8 @@ public abstract class Component : ISerialisable {
     public virtual void Update()                {}
     public virtual void PostUpdate()            {}
     public virtual void UpdateRare()            {}
-    public virtual void Render() {}
+    public virtual void Render()                {}
+    public virtual void OnGUI()                 {}
     public virtual void OnInput(InputEvent evt) {}
     public virtual void End()                   {}
 

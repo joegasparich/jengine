@@ -5,12 +5,14 @@ using Newtonsoft.Json.Linq;
 using JEngine.entities;
 using JEngine.util;
 using JEngine.scenes;
+using JEngine.ui;
 
 namespace JEngine;
 
 public class PlayerConfig {
-    public int screenWidth  = 1280;
-    public int screenHeight = 720;
+    public int   screenWidth  = 1280;
+    public int   screenHeight = 720;
+    public float uiScale = 1f;
 }
 
 public class GameConfig {
@@ -21,8 +23,8 @@ public class GameConfig {
 public class Game {
     // Constants
     // TODO: Config options
-    public const int    DefaultScreenWidth  = 1280;
-    public const int    DefaultScreenHeight = 720;
+    public const  int    DefaultScreenWidth  = 1280;
+    public const  int    DefaultScreenHeight = 720;
     private const string ConfigFilePath      = "config.json";
     public const  int    LargerThanWorld     = 10000;
 
@@ -30,12 +32,13 @@ public class Game {
     public PlayerConfig playerConfig;
 
     // Managers
-    public InputManager input;
-    public Renderer     renderer;
-    public AssetManager assets;
-    public SaveManager  saveManager;
-    public SceneManager sceneManager;
+    public InputManager   input;
+    public Renderer       renderer;
+    public AssetManager   assets;
+    public SaveManager    saveManager;
+    public SceneManager   sceneManager;
     public PhysicsManager physics;
+    public UIManager      ui;
 
     // Collections
     private Dictionary<int, Entity> entities;
@@ -81,6 +84,7 @@ public class Game {
         saveManager = new();
         sceneManager = new();
         physics = new();
+        ui = new();
 
         entities = new();
         entitiesToAdd = new();
@@ -209,6 +213,7 @@ public class Game {
     }
 
     public virtual void Render2D() {
+        ui.Render();
     }
 
     public virtual void OnInput(InputEvent evt) {
@@ -222,6 +227,14 @@ public class Game {
 
         if (!evt.consumed)
             renderer.camera.OnInput(evt);
+    }
+
+    public virtual void OnGUI() {
+        Find.SceneManager.GetCurrentScene()?.OnGUI();
+
+        foreach (var entity in entities.Values) {
+            entity.OnGUI();
+        }
     }
 
     protected virtual void OnScreenResized() {

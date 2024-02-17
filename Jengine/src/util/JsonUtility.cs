@@ -104,7 +104,7 @@ public class CompJsonConverter : JsonConverter {
         var components  = new List<ComponentData>();
 
         foreach (JProperty child in token) {
-            var compType = Type.GetType($"Zoo.entities.{child.Name}");
+            var compType = Type.GetType($"JEngine.entities.{child.Name}");
 
             if (!compType.IsAssignableTo(typeof(Component))) {
                 Debug.Warn("Component type not found: " + child.Name);

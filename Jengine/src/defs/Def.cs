@@ -10,7 +10,7 @@ public class Def {
     public string? name;
 
     // Properties
-    public Type DefType => Type.GetType("Zoo.defs." + @class);
+    public Type DefType => Type.GetType("JEngine.defs." + @class);
 
     public DefRef GetRef() {
         return new DefRef(id);

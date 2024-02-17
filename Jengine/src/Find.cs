@@ -1,4 +1,5 @@
 ﻿using JEngine.scenes;
+using JEngine.ui;
 
 namespace JEngine;
 
@@ -13,4 +14,5 @@ public static class Find
     public static SceneManager SceneManager => Game.sceneManager;
     public static SaveManager  SaveManager  => Game.saveManager;
     public static Camera       Camera       => Renderer.camera;
+    public static UIManager    UI           => Game.ui;
 }

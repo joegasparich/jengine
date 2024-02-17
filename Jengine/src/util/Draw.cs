@@ -13,7 +13,7 @@ public static class Draw {
         Mipmaps = 1,
         Format = PixelFormat.UncompressedR8G8B8A8
     }; // Texture used on shapes drawing (white pixel loaded by rlgl)
-    private static Rectangle texShapesRec = new(0, 0, 1, 1); // Texture rectangle to draw shapes
+    private static Rectangle texShapesRect = new(0, 0, 1, 1); // Texture rectangle to draw shapes
 
     // Draw a line  (Vector version)
     public static void DrawLine(Vector2 startPos, Vector2 endPos, Color color, float zPos)
@@ -84,20 +84,28 @@ public static class Draw {
             bottomRight.Y = y + (dx + rec.Width)*sinRotation + (dy + rec.Height)*cosRotation;
         }
 
-        Rlgl.CheckRenderBatchLimit(10);
-        Rlgl.Begin(DrawMode.Triangles);
+        Rlgl.SetTexture(texShapes.Id);
 
+        Rlgl.Begin(DrawMode.Quads);
+
+        Rlgl.Normal3f(0.0f, 0.0f, 1.0f);
         Rlgl.Color4ub(color.R, color.G, color.B, color.A);
 
-        Rlgl.Vertex3f(topLeft.X, topLeft.Y, zPos);
-        Rlgl.Vertex3f(bottomLeft.X, bottomLeft.Y, zPos);
-        Rlgl.Vertex3f(topRight.X, topRight.Y, zPos);
+        Rlgl.TexCoord2f(texShapesRect.X/texShapes.Width, texShapesRect.Y/texShapes.Height);
+        Rlgl.Vertex2f(topLeft.X, topLeft.Y);
 
-        Rlgl.Vertex3f(topRight.X, topRight.Y, zPos);
-        Rlgl.Vertex3f(bottomLeft.X, bottomLeft.Y, zPos);
-        Rlgl.Vertex3f(bottomRight.X, bottomRight.Y, zPos);
+        Rlgl.TexCoord2f(texShapesRect.X/texShapes.Width, (texShapesRect.Y + texShapesRect.Height)/texShapes.Height);
+        Rlgl.Vertex2f(bottomLeft.X, bottomLeft.Y);
+
+        Rlgl.TexCoord2f((texShapesRect.X + texShapesRect.Width)/texShapes.Width, (texShapesRect.Y + texShapesRect.Height)/texShapes.Height);
+        Rlgl.Vertex2f(bottomRight.X, bottomRight.Y);
+
+        Rlgl.TexCoord2f((texShapesRect.X + texShapesRect.Width)/texShapes.Width, texShapesRect.Y/texShapes.Height);
+        Rlgl.Vertex2f(topRight.X, topRight.Y);
 
         Rlgl.End();
+
+        Rlgl.SetTexture(0);
     }
 
     // Draw a color-filled rectangle (Vector version)
@@ -164,16 +172,16 @@ public static class Draw {
         for (var i = 0; i < segments / 2; i++) {
             Rlgl.Color4ub(color.R, color.G, color.B, color.A);
 
-            Rlgl.TexCoord2f(texShapesRec.X / texShapes.Width, texShapesRec.Y / texShapes.Height);
+            Rlgl.TexCoord2f(texShapesRect.X / texShapes.Width, texShapesRect.Y / texShapes.Height);
             Rlgl.Vertex3f(center.X, center.Y, zPos);
 
-            Rlgl.TexCoord2f((texShapesRec.X + texShapesRec.Width) / texShapes.Width, texShapesRec.Y / texShapes.Height);
+            Rlgl.TexCoord2f((texShapesRect.X + texShapesRect.Width) / texShapes.Width, texShapesRect.Y / texShapes.Height);
             Rlgl.Vertex3f(center.X + MathF.Cos(JMath.DegToRad * (angle + stepLength * 2.0f)) * radius, center.Y + MathF.Sin(JMath.DegToRad * (angle + stepLength * 2.0f)) * radius, zPos);
 
-            Rlgl.TexCoord2f((texShapesRec.X + texShapesRec.Width) / texShapes.Width, (texShapesRec.Y + texShapesRec.Height) / texShapes.Height);
+            Rlgl.TexCoord2f((texShapesRect.X + texShapesRect.Width) / texShapes.Width, (texShapesRect.Y + texShapesRect.Height) / texShapes.Height);
             Rlgl.Vertex3f(center.X + MathF.Cos(JMath.DegToRad * (angle + stepLength)) * radius, center.Y + MathF.Sin(JMath.DegToRad * (angle + stepLength)) * radius, zPos);
 
-            Rlgl.TexCoord2f(texShapesRec.X / texShapes.Width, (texShapesRec.Y + texShapesRec.Height) / texShapes.Height);
+            Rlgl.TexCoord2f(texShapesRect.X / texShapes.Width, (texShapesRect.Y + texShapesRect.Height) / texShapes.Height);
             Rlgl.Vertex3f(center.X + MathF.Cos(JMath.DegToRad * angle) * radius, center.Y + MathF.Sin(JMath.DegToRad * angle) * radius, zPos);
 
             angle += (stepLength * 2.0f);
@@ -183,16 +191,16 @@ public static class Draw {
         if (segments % 2 == 1) {
             Rlgl.Color4ub(color.R, color.G, color.B, color.A);
 
-            Rlgl.TexCoord2f(texShapesRec.X / texShapes.Width, texShapesRec.Y / texShapes.Height);
+            Rlgl.TexCoord2f(texShapesRect.X / texShapes.Width, texShapesRect.Y / texShapes.Height);
             Rlgl.Vertex3f(center.X, center.Y, zPos);
 
-            Rlgl.TexCoord2f((texShapesRec.X + texShapesRec.Width) / texShapes.Width, (texShapesRec.Y + texShapesRec.Height) / texShapes.Height);
+            Rlgl.TexCoord2f((texShapesRect.X + texShapesRect.Width) / texShapes.Width, (texShapesRect.Y + texShapesRect.Height) / texShapes.Height);
             Rlgl.Vertex3f(center.X + MathF.Cos(JMath.DegToRad * (angle + stepLength)) * radius, center.Y + MathF.Sin(JMath.DegToRad * (angle + stepLength)) * radius, zPos);
 
-            Rlgl.TexCoord2f(texShapesRec.X / texShapes.Width, (texShapesRec.Y + texShapesRec.Height) / texShapes.Height);
+            Rlgl.TexCoord2f(texShapesRect.X / texShapes.Width, (texShapesRect.Y + texShapesRect.Height) / texShapes.Height);
             Rlgl.Vertex3f(center.X + MathF.Cos(JMath.DegToRad * angle) * radius, center.Y + MathF.Sin(JMath.DegToRad * angle) * radius, zPos);
 
-            Rlgl.TexCoord2f((texShapesRec.X + texShapesRec.Width) / texShapes.Width, texShapesRec.Y / texShapes.Height);
+            Rlgl.TexCoord2f((texShapesRect.X + texShapesRect.Width) / texShapes.Width, texShapesRect.Y / texShapes.Height);
             Rlgl.Vertex3f(center.X, center.Y, zPos);
         }
 
