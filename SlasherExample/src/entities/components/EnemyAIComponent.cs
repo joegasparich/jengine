@@ -5,7 +5,8 @@ using JEngine.util;
 namespace SlasherExample.entities;
 
 public class EnemyAIComponent : InputComponent {
-    private const int TargetCheckInterval = 60;
+    private const int   TargetCheckInterval = 60;
+    private const float VisionRadius        = 3;
 
     private Entity? target;
     
@@ -35,7 +36,12 @@ public class EnemyAIComponent : InputComponent {
         }
         
         if (target == null) {
-            target = Find.Game.GetEntitiesByTag(EntityTags.Player).FirstOrDefault();
+            foreach (var player in Find.Game.GetEntitiesByTag(EntityTags.Player)) {
+                if (player.pos.InRangeOf(entity.pos, VisionRadius)) {
+                    target = player;
+                    break;
+                }
+            }
         }
     }
 }

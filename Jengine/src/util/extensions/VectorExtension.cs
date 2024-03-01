@@ -19,7 +19,7 @@ public static class VectorExtension {
     public static float DistanceSquared(this Vector2 a, Vector2 b) {
         return MathF.Pow(a.X - b.X, 2) + MathF.Pow(a.Y - b.Y, 2);
     }
-    public static bool InDistOf(this Vector2 a, Vector2 b, float range) {
+    public static bool InRangeOf(this Vector2 a, Vector2 b, float range) {
         return a.DistanceSquared(b) < range * range;
     }
     public static float Magnitude(this Vector2 v) {

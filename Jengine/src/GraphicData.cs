@@ -110,7 +110,7 @@ public class GraphicData {
         if (animationSpeed == 0 || animationFrames == 0)
             return cellIndex;
 
-        return cellIndex + Find.Game.Ticks % animationSpeed / (animationSpeed / animationFrames);
+        return cellIndex + (Find.Game.Ticks % animationSpeed) / (animationSpeed / animationFrames);
     }
     
     public Rectangle GetCellBounds(int cellIndex) {

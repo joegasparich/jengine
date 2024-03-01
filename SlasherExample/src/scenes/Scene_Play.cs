@@ -28,7 +28,7 @@ public class Scene_Play : Scene
 
         player = EntityGenerators.CreatePlayer(new Vector2(8, 8));
 
-        EntityGenerators.CreateEnemy(new Vector2(12, 12));
+        EntityGenerators.CreateSlime(new Vector2(14, 14));
 
         tileManager.LoadLDTKLevel(LevelPath, 0);
     }

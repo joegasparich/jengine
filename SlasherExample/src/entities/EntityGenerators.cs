@@ -10,6 +10,7 @@ public static class EntityTags {
 
 public static class EntityGenerators {
     private const string GuySpritePath = "characters/player.png";
+    private const string SlimeSpritePath = "characters/slime.png";
     
     public static Entity CreatePlayer(Vector2 pos) {
         var graphic = new GraphicData();
@@ -30,20 +31,22 @@ public static class EntityGenerators {
         return player;
     }
     
-    public static Entity CreateEnemy(Vector2 pos) {
+    public static Entity CreateSlime(Vector2 pos) {
         var graphic = new GraphicData();
-        graphic.SetSpritesheet(GuySpritePath, 48, 48);
+        graphic.SetSpritesheet(SlimeSpritePath, 32, 32);
         graphic.origin = new Vector2(0.5f);
         
-        var enemy = Create.CreateEntity();
-        enemy.pos = pos;
-        enemy.AddComponent<RenderComponent>(new RenderComponentData { GraphicData = graphic });
-        enemy.AddComponent<PhysicsComponent>();
-        var move = enemy.AddComponent<MoveComponent>();
+        var slime = Create.CreateEntity();
+        slime.pos = pos;
+        slime.AddComponent<RenderComponent>(new RenderComponentData { GraphicData = graphic });
+        slime.AddComponent<PhysicsComponent>();
+        var move = slime.AddComponent<MoveComponent>();
         move.acceleration = 0.0015f;
-        enemy.AddComponent<EnemyAIComponent>();
-        enemy.AddComponent<PersonAnimationComponent>();
+        slime.AddComponent<EnemyAIComponent>();
+        var anim = slime.AddComponent<EnemyAnimationComponent>();
+        anim.AddAnimation(EnemyAnimationComponent.Idle, new Animation(0, 4, 48));
+        anim.AddAnimation(EnemyAnimationComponent.Walk, new Animation(7, 6, 48));
 
-        return enemy;
+        return slime;
     }
 }

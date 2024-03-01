@@ -36,6 +36,8 @@ public class PersonAnimationComponent : AnimationComponent
         }
 
         SetAnimation(direction, Input.inputVector != Vector2.Zero);
+        
+        Render.Graphics.flipX = direction == Dir4.West;
     }
 
     private void SetAnimation(Dir4 dir, bool moving) {
@@ -47,7 +49,5 @@ public class PersonAnimationComponent : AnimationComponent
             Render.Graphics.SetAnimation(baseIndex + DownIndex, AnimationFrames, AnimationSpeed);
         if (dir == Dir4.North)
             Render.Graphics.SetAnimation(baseIndex + UpIndex, AnimationFrames, AnimationSpeed);
-
-        Render.Graphics.flipX = dir == Dir4.West;
     }
 }

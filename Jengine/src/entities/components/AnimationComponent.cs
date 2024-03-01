@@ -9,14 +9,18 @@ public class Animation {
         StartIndex = startIndex;
         NumFrames = numFrames;
         Speed = speed;
+        
+        if (speed < numFrames)
+            Debug.Warn("Animation speed is less than number of frames");
     }
 }
 
 public class AnimationComponent : Component {
-    private Dictionary<string, Animation> animations = new();
-    
-    protected override Type[]          Dependencies => [typeof(RenderComponent)];
-    private            RenderComponent Render       => entity.GetComponent<RenderComponent>();
+    private   Dictionary<string, Animation> animations = new();
+    protected string                        CurrentAnimation { get; private set; }
+
+    protected override Type[]          Dependencies     => [typeof(RenderComponent)];
+    protected          RenderComponent Render           => entity.GetComponent<RenderComponent>();
     
     public AnimationComponent(Entity entity, ComponentData? data = null) : base(entity, data) { }
     
@@ -25,8 +29,13 @@ public class AnimationComponent : Component {
     }
     
     public void PlayAnimation(string name) {
+        if (CurrentAnimation == name)
+            return;
+        
         if (animations.TryGetValue(name, out var animation)) {
             Render.Graphics.SetAnimation(animation.StartIndex, animation.NumFrames, animation.Speed);
+            
+            CurrentAnimation = name;
         }
     }
 }
