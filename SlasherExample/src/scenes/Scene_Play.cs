@@ -33,15 +33,15 @@ public class Scene_Play : Scene
         tileManager.LoadLDTKLevel(LevelPath, 0);
     }
 
-    public override void OnInput(InputEvent evt) {
-        if (evt.consumed)
-            return;
-
-        if (evt.mouseDown == MouseButton.Left) {
-            var worldPos = evt.mouseWorldPos;
-            player.pos = worldPos;
-        }
-    }
+    // public override void OnInput(InputEvent evt) {
+    //     if (evt.consumed)
+    //         return;
+    //
+    //     if (evt.mouseDown == MouseButton.Left) {
+    //         var worldPos = evt.mouseWorldPos;
+    //         player.pos = worldPos;
+    //     }
+    // }
 
     // public override void PostUpdate() {
     //     if (Find.Renderer.GetPickIdAtPos(Find.Input.GetMousePos()) == player.id) {
@@ -49,9 +49,9 @@ public class Scene_Play : Scene
     //     }
     // }
 
-    public override void Render() {
-        base.Render();
+    public override void Draw() {
+        base.Draw();
 
-        tileManager.Render();
+        tileManager.Draw();
     }
 }

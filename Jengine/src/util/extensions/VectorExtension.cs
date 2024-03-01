@@ -37,6 +37,9 @@ public static class VectorExtension {
         
         return v;
     }
+    public static float Angle(this Vector2 v) {
+        return MathF.Atan2(v.Y, v.X) * JMath.RadToDeg;
+    }
     public static Vector3 ToVector3(this Vector2 v) {
         return new Vector3(v.X, v.Y, 0);
     }

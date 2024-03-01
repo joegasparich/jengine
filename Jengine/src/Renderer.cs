@@ -47,6 +47,7 @@ public class Renderer {
     private RenderTexture2D screenBuffer;
     private RenderTexture2D pickBuffer;
     private Image           pickImage;
+    private bool            drawingWorld;
 
     public void Init() {
         Debug.Log("Initialising Renderer");
@@ -69,7 +70,7 @@ public class Renderer {
         // Debug.Log(Find.Input.GetMouseWorldPos().ToString());
     }
 
-    public void Render() {
+    public void Draw() {
         Raylib.BeginDrawing();
         {
             Raylib.BeginTextureMode(screenBuffer);
@@ -78,7 +79,8 @@ public class Renderer {
 
                 Raylib.BeginMode3D(camera.Cam);
                 {
-                    Find.Game.Render();
+                    drawingWorld = true;
+                    Find.Game.Draw();
 
                     Raylib.BeginShaderMode(DiscardAlphaShader);
                     foreach (var drawCall in drawCalls) {
@@ -87,6 +89,7 @@ public class Renderer {
                     Raylib.EndShaderMode();
 
                     Find.Game.RenderLate();
+                    drawingWorld = false;
                 }
                 Raylib.EndMode3D();
 
@@ -107,7 +110,7 @@ public class Renderer {
             );
         }
 
-        Find.Game.Render2D();
+        Find.Game.DrawUI();
         
         // RenderPickBuffer();
 
@@ -148,7 +151,11 @@ public class Renderer {
         origin ??= new Vector2(0, 0);
         source ??= new Rectangle(0, 0, 1, 1);
         color  ??= Color.White;
-        
+
+        bool IsPosOnScreen(Vector2 pos, float margin) => 
+            pos.X > camera.Position.X - Find.Game.ScreenWidth / 2f - margin && pos.X < camera.Position.X + Find.Game.ScreenWidth / 2f + margin && 
+            pos.Y > camera.Position.Y - Find.Game.ScreenHeight / 2f - margin && pos.Y < camera.Position.Y + Find.Game.ScreenHeight / 2f + margin;
+
         // Cull offscreen draw calls
         if (!now && !IsPosOnScreen(pos, MathF.Max(scale.Value.X, scale.Value.Y)))
             return;
@@ -187,8 +194,11 @@ public class Renderer {
             Raylib.EndShaderMode();
             Raylib.BeginShaderMode(drawCall.fragShader.Value);
         }
+
+        if (drawingWorld)
+            drawCall.destRect.Position *= Find.Config.worldScalePx;
             
-        util.Draw.DrawTexturePro3D(
+        util.Draw.DrawTexture(
             drawCall.texture,
             drawCall.sourceRect,
             drawCall.destRect,
@@ -237,7 +247,7 @@ public class Renderer {
     }
     
     public int GetPickIdAtPos(Vector2 screenPos) {
-        if (!IsPosOnScreen(screenPos))
+        if (!InScreenBounds(screenPos))
             return -1;
         
         var pixel = Raylib.GetImageColor(pickImage, screenPos.X.FloorToInt(), Find.Game.ScreenHeight - screenPos.Y.FloorToInt());
@@ -258,10 +268,9 @@ public class Renderer {
         var cameraCenter = (camera.Position * camera.zoom) - new Vector2(Find.Game.ScreenWidth / 2f, Find.Game.ScreenHeight / 2f);
         return (worldPos * (Find.Config.worldScalePx * camera.zoom)) - cameraCenter;
     }
-
-    public bool IsPosOnScreen(Vector2 pos, float margin = 0) {
-        return pos.X > -margin && pos.X < Find.Game.ScreenWidth + margin
-            && pos.Y > -margin && pos.Y < Find.Game.ScreenHeight + margin;
+    
+    public bool InScreenBounds(Vector2 screenPos) {
+        return screenPos.X > 0 && screenPos.X < Find.Game.ScreenWidth && screenPos.Y > 0 && screenPos.Y < Find.Game.ScreenHeight;
     }
 
     public bool IsWorldPosOnScreen(Vector2 worldPos, float margin = 32) {

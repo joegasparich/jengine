@@ -13,8 +13,8 @@ public abstract class Scene : ISerialisable {
     public virtual void Update()                {}
     public virtual void PostUpdate()            {}
     public virtual void ConstantUpdate()              {}
-    public virtual void Render()                {}
-    public virtual void RenderLate()            {}
+    public virtual void Draw()                {}
+    public virtual void DrawLate()            {}
     public virtual void OnGUI()                 {}
     public virtual void OnInput(InputEvent evt) {}
 

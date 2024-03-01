@@ -27,7 +27,7 @@ public static class Draw {
     }
     
     // Draw lines sequence
-    public static void DrawLineStrip3D(Vector2[] points, Color color, float zPos)
+    public static void DrawLineStrip(Vector2[] points, Color color, float zPos)
     {
         if (points.Length >= 2)
         {
@@ -45,7 +45,7 @@ public static class Draw {
     }
 
     // Draw a color-filled rectangle with pro parameters
-    public static void DrawRectanglePro3D(Rectangle rec, Vector2 origin, float rotation, Color color, float zPos)
+    public static void DrawRectangle(Rectangle rec, Vector2 origin, float rotation, Color color, float zPos)
     {
         Vector2 topLeft;
         Vector2 topRight;
@@ -111,7 +111,7 @@ public static class Draw {
     // Draw a color-filled rectangle (Vector version)
     // NOTE: On OpenGL 3.3 and ES2 we use QUADS to avoid drawing order issues
     public static void DrawRectangle(Vector2 position, Vector2 size, Color color, float zPos) {
-        DrawRectanglePro3D(new Rectangle(position.X, position.Y, size.X, size.Y), new Vector2(0.0f, 0.0f), 0.0f, color, zPos);
+        DrawRectangle(new Rectangle(position.X, position.Y, size.X, size.Y), new Vector2(0.0f, 0.0f), 0.0f, color, zPos);
     }
 
     // Draw a triangle fan defined by points
@@ -224,7 +224,7 @@ public static class Draw {
         Rlgl.End();
     }
     
-    public static void DrawTexturePro3D(
+    public static void DrawTexture(
         Texture2D texture,
         Rectangle sourceRect,
         Rectangle destRect,

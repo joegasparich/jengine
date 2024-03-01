@@ -19,8 +19,8 @@ public class AnimationComponent : Component {
     private   Dictionary<string, Animation> animations = new();
     protected string                        CurrentAnimation { get; private set; }
 
-    protected override Type[]          Dependencies     => [typeof(RenderComponent)];
-    protected          RenderComponent Render           => entity.GetComponent<RenderComponent>();
+    protected override Type[]          Dependencies => [typeof(RenderComponent)];
+    protected          RenderComponent Render     => entity.GetComponent<RenderComponent>();
     
     public AnimationComponent(Entity entity, ComponentData? data = null) : base(entity, data) { }
     

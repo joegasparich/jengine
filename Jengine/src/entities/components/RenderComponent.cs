@@ -7,27 +7,27 @@ namespace JEngine.entities;
 public class RenderComponentData : ComponentData {
     public override Type CompClass => typeof(RenderComponent);
 
-    public GraphicData GraphicData;
+    public Graphic Graphic;
 }
 
 public class RenderComponent : Component {
     public static Type DataType => typeof(RenderComponentData);
 
     // State
-    public  Vector2           Offset = Vector2.Zero;
-    public  Color?            OverrideColour;
-    public  GraphicData       BaseGraphic;
-    private GraphicData       bakedGraphic;
-    private List<GraphicData> attachments = new();
+    public  Vector2       Offset = Vector2.Zero;
+    public  Color?        OverrideColour;
+    public  Graphic       BaseGraphic;
+    private Graphic       bakedGraphic;
+    private List<Graphic> attachments = new();
 
     // Properties
     public RenderComponentData Data => (RenderComponentData)data;
-    public ref GraphicData Graphics => ref bakedGraphic;
+    public ref Graphic Graphics => ref bakedGraphic;
 
     private bool ShouldRender => true;
 
     public RenderComponent(Entity entity, RenderComponentData? data) : base(entity, data) {
-        BaseGraphic  = data.GraphicData;
+        BaseGraphic  = data.Graphic;
         bakedGraphic = BaseGraphic;
     }
 
@@ -39,12 +39,12 @@ public class RenderComponent : Component {
         BakeAttachments();
     }
 
-    public override void Render() {
+    public override void Draw() {
         if (!ShouldRender)
             return;
 
         bakedGraphic.Draw(
-            pos: (entity.pos + Offset) * Find.Config.worldScalePx,
+            pos: entity.pos + Offset,
             rotation: 0f,
             scale: Vector2.One,
             depth: Find.Renderer.GetDepth(entity.pos.Y),

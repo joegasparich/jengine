@@ -8,7 +8,7 @@ namespace JEngine;
 public class TileManager
 {
     class TileGrid {
-        public GraphicData TileSet;
+        public Graphic TileSet;
 
         private int[] tiles;
         private int   width;
@@ -18,7 +18,7 @@ public class TileManager
         public int   Width => width;
         public int   Height => height;
 
-        public TileGrid(GraphicData tileSet, int width, int height) {
+        public TileGrid(Graphic tileSet, int width, int height) {
             TileSet = tileSet;
             this.width = width;
             this.height = height;
@@ -43,7 +43,7 @@ public class TileManager
         foreach (JObject layer in level["layerInstances"]) {
             var tileSetPath = layer["__tilesetRelPath"].Value<string>();
             var tileSetData = json["defs"]["tilesets"].Where(ts => ts["relPath"].Value<string>() == tileSetPath).First();
-            var tileSet = new GraphicData();
+            var tileSet = new Graphic();
             tileSet.SetSpritesheet(tileSetPath.Substring(tileSetPath.IndexOf("textures/") + 9), tileSetData["tileGridSize"].Value<int>(), tileSetData["tileGridSize"].Value<int>());
 
             var grid = new TileGrid(tileSet, layer["__cWid"].Value<int>(), layer["__cHei"].Value<int>());
@@ -81,7 +81,7 @@ public class TileManager
         return texture.Texture;
     }
 
-    public void Render() {
+    public void Draw() {
         for (var i = 0; i < layers.Count; i++) {
             Raylib.DrawTexture(layerTextures[i], 0, 0, Colour.White);
         }

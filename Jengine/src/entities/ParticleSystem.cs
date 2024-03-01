@@ -85,8 +85,8 @@ public class ParticleSystem : Entity {
         };
     }
 
-    public override void Render() {
-        base.Render();
+    public override void Draw() {
+        base.Draw();
         
         for (var i = 0; i < particles.Length; i++) {
             if (!particles[i].active) 

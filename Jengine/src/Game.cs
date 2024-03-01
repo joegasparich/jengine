@@ -142,7 +142,7 @@ public class Game {
             // This needs to be out here otherwise we can get duplicate input events
             input.ProcessInput();
             
-            renderer.Render();
+            renderer.Draw();
         }
     }
     
@@ -198,23 +198,23 @@ public class Game {
         DoEntityReg();
     }
 
-    public virtual void Render() {
-        sceneManager.GetCurrentScene()?.Render();
+    public virtual void Draw() {
+        sceneManager.GetCurrentScene()?.Draw();
 
         foreach (var entity in entities.Values) {
-            entity.Render();
+            entity.Draw();
         }
 
         framesSinceGameStart++;
     }
 
     public virtual void RenderLate() {
-        sceneManager.GetCurrentScene()?.RenderLate();
+        sceneManager.GetCurrentScene()?.DrawLate();
         physics.RenderLate();
     }
 
-    public virtual void Render2D() {
-        ui.Render();
+    public virtual void DrawUI() {
+        ui.DrawUI();
     }
 
     public virtual void OnInput(InputEvent evt) {

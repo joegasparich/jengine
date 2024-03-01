@@ -5,7 +5,7 @@ using JEngine.util;
 
 namespace JEngine;
 
-public class GraphicData {
+public class Graphic {
     [JsonProperty] private string spritePath = "";
     
     public Vector2 origin = Vector2.Zero;
@@ -38,9 +38,9 @@ public class GraphicData {
     public int CellHeight => cellHeight == 0 ? Texture.Height : cellHeight;
 
     [JsonConstructor]
-    public GraphicData() {}
+    public Graphic() {}
 
-    public GraphicData(string path) {
+    public Graphic(string path) {
         SetSprite(path);
     }
 

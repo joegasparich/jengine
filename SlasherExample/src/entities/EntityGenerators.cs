@@ -13,13 +13,13 @@ public static class EntityGenerators {
     private const string SlimeSpritePath = "characters/slime.png";
     
     public static Entity CreatePlayer(Vector2 pos) {
-        var graphic = new GraphicData();
+        var graphic = new Graphic();
         graphic.SetSpritesheet(GuySpritePath, 48, 48);
         graphic.origin = new Vector2(0.5f);
         
         var player = Create.CreateEntity();
         player.pos = pos;
-        player.AddComponent<RenderComponent>(new RenderComponentData { GraphicData = graphic });
+        player.AddComponent<RenderComponent>(new RenderComponentData { Graphic = graphic });
         player.AddComponent<PhysicsComponent>();
         player.AddComponent<MoveComponent>();
         player.AddComponent<PlayerInputComponent>();
@@ -32,13 +32,13 @@ public static class EntityGenerators {
     }
     
     public static Entity CreateSlime(Vector2 pos) {
-        var graphic = new GraphicData();
+        var graphic = new Graphic();
         graphic.SetSpritesheet(SlimeSpritePath, 32, 32);
         graphic.origin = new Vector2(0.5f);
         
         var slime = Create.CreateEntity();
         slime.pos = pos;
-        slime.AddComponent<RenderComponent>(new RenderComponentData { GraphicData = graphic });
+        slime.AddComponent<RenderComponent>(new RenderComponentData { Graphic = graphic });
         slime.AddComponent<PhysicsComponent>();
         var move = slime.AddComponent<MoveComponent>();
         move.acceleration = 0.0015f;

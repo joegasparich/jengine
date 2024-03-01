@@ -27,7 +27,7 @@ public class Entity : ISerialisable, IReferencable {
     public virtual EntityDef              Def        => def;
     public virtual string                 Name       => Def?.name ?? "Unnamed Entity";
     public         RenderComponent        Renderer   => GetComponent<RenderComponent>();
-    public         GraphicData            Graphics   => GetComponent<RenderComponent>().Graphics;
+    public         Graphic            Graphics   => GetComponent<RenderComponent>().Graphics;
     public virtual bool                   Selectable => true;
     public         IEnumerable<string>    Tags       => tags;
 
@@ -84,9 +84,9 @@ public class Entity : ISerialisable, IReferencable {
         }
     }
 
-    public virtual void Render() {
+    public virtual void Draw() {
         foreach (var component in components.Values) {
-            component.Render();
+            component.Draw();
         }
     }
 

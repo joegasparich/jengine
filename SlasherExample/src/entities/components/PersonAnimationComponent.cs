@@ -17,7 +17,6 @@ public class PersonAnimationComponent : AnimationComponent
     private Dir4 direction = Dir4.South;
 
     protected override Type[] Dependencies => [typeof(RenderComponent), typeof(InputComponent)];
-    private RenderComponent Render => entity.GetComponent<RenderComponent>();
     private InputComponent Input => entity.GetComponent<InputComponent>();
 
     public PersonAnimationComponent(Entity entity, ComponentData? data = null) : base(entity, data) {}

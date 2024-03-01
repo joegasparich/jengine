@@ -97,7 +97,7 @@ public class UIManager {
         SetCursor(MouseCursor.Default);
     }
 
-    public void Render() {
+    public void DrawUI() {
         currentEvent = UIEvent.Draw;
         Find.Game.OnGUI();
 

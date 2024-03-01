@@ -6,7 +6,7 @@ public class EntityDef : Def {
     public List<ComponentData> components = new();
     public List<string>        Tags       = new();
 
-    public GraphicData? GraphicData => GetComponentData<RenderComponentData>()?.GraphicData;
+    public Graphic? Graphic => GetComponentData<RenderComponentData>()?.Graphic;
 
     // TODO: Cache
     public T? GetComponentData<T>() where T : ComponentData {

@@ -36,7 +36,7 @@ public abstract class Component : ISerialisable {
     public virtual void Update()                {}
     public virtual void PostUpdate()            {}
     public virtual void UpdateRare()            {}
-    public virtual void Render()                {}
+    public virtual void Draw()                {}
     public virtual void OnGUI()                 {}
     public virtual void OnInput(InputEvent evt) {}
     public virtual void End()                   {}
