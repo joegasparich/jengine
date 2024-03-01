@@ -217,8 +217,8 @@ public static class Draw {
 
         // NOTE: Circle outline is drawn pixel by pixel every degree (0 to 360)
         for (var i = 0; i < 360; i += 10) {
-            Rlgl.Vertex2f(center.X + MathF.Cos(JMath.DegToRad * i) * radius, center.Y + MathF.Sin(JMath.DegToRad * i) * radius);
-            Rlgl.Vertex2f(center.X + MathF.Cos(JMath.DegToRad * (i + 10)) * radius, center.Y + MathF.Sin(JMath.DegToRad * (i + 10)) * radius);
+            Rlgl.Vertex3f(center.X + MathF.Cos(JMath.DegToRad * i) * radius, center.Y + MathF.Sin(JMath.DegToRad * i) * radius, zPos);
+            Rlgl.Vertex3f(center.X + MathF.Cos(JMath.DegToRad * (i + 10)) * radius, center.Y + MathF.Sin(JMath.DegToRad * (i + 10)) * radius, zPos);
         }
 
         Rlgl.End();

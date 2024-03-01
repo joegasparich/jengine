@@ -41,9 +41,10 @@ public class Game {
     public UIManager      ui;
 
     // Collections
-    private Dictionary<int, Entity> entities;
-    private List<Entity>            entitiesToAdd;
-    private List<Entity>            entitiesToRemove;
+    private Dictionary<int, Entity>          entities;
+    private List<Entity>                     entitiesToAdd;
+    private List<Entity>                     entitiesToRemove;
+    private Dictionary<string, List<Entity>> entitiesByTag = new();
 
     // State
     private int      ticksSinceGameStart;
@@ -259,8 +260,27 @@ public class Game {
         entity.id = id;
 
         entities.Add(entity.id, entity);
+        entity.AddTag(EntityTags.All);
+                
+        foreach (var tag in entity.Tags) {
+            Notify_EntityTagged(entity, tag);
+        }
 
         return id;
+    }
+    
+    public void Notify_EntityTagged(Entity entity, string tag) {
+        if (!entitiesByTag.ContainsKey(tag))
+            entitiesByTag.Add(tag, new List<Entity>());
+
+        entitiesByTag[tag].Add(entity);
+    }
+    
+    public void Notify_EntityUntagged(Entity entity, string tag) {
+        if (!entitiesByTag.ContainsKey(tag))
+            return;
+
+        entitiesByTag[tag].Remove(entity);
     }
 
     public void UnregisterEntity(Entity entity) {
@@ -284,6 +304,10 @@ public class Game {
                 continue;
 
             entities.Remove(entity.id);
+            
+            foreach (var tag in entity.Tags) {
+                entitiesByTag[tag].Remove(entity);
+            }
         }
         entitiesToRemove.Clear();
     }
@@ -293,6 +317,14 @@ public class Game {
             return null;
 
         return entities[id];
+    }
+    
+    public IEnumerable<Entity> GetEntitiesByTag(string tag) {
+        if (!entitiesByTag.ContainsKey(tag)) yield break;
+
+        foreach (var entity in entitiesByTag[tag]) {
+            yield return entity;
+        }
     }
 
     public void ClearEntities() {
@@ -306,6 +338,7 @@ public class Game {
         entities.Clear();
         entitiesToAdd.Clear();
         entitiesToRemove.Clear();
+        entitiesByTag.Clear();
     }
 
     public void Pause(bool pause) {

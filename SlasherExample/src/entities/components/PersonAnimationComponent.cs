@@ -4,7 +4,7 @@ using JEngine.util;
 
 namespace SlasherExample.entities;
 
-public class PlayerAnimationComponent : AnimationComponent
+public class PersonAnimationComponent : AnimationComponent
 {
     private const int AnimationFrames = 6;
     private const int IdleIndex       = 0;
@@ -20,17 +20,20 @@ public class PlayerAnimationComponent : AnimationComponent
     private RenderComponent Render => entity.GetComponent<RenderComponent>();
     private InputComponent Input => entity.GetComponent<InputComponent>();
 
-    public PlayerAnimationComponent(Entity entity, ComponentData? data = null) : base(entity, data) {}
+    public PersonAnimationComponent(Entity entity, ComponentData? data = null) : base(entity, data) {}
 
     public override void PostUpdate() {
-        if (Input.inputVector.X > 0)
-            direction = Dir4.East;
-        else if (Input.inputVector.X < 0)
-            direction = Dir4.West;
-        else if (Input.inputVector.Y > 0)
-            direction = Dir4.South;
-        else if (Input.inputVector.Y < 0)
-            direction = Dir4.North;
+        if (MathF.Abs(Input.inputVector.X) >= MathF.Abs(Input.inputVector.Y)) {
+            if (Input.inputVector.X > 0)
+                direction = Dir4.East;
+            else if (Input.inputVector.X < 0)
+                direction = Dir4.West;
+        } else {
+            if (Input.inputVector.Y > 0)
+                direction = Dir4.South;
+            else if (Input.inputVector.Y < 0)
+                direction = Dir4.North;
+        }
 
         SetAnimation(direction, Input.inputVector != Vector2.Zero);
     }

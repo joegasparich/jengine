@@ -10,7 +10,6 @@ namespace SlasherExample.scenes;
 public class Scene_Play : Scene
 {
     // Constants
-    private const string GuySpritePath = "characters/player.png";
     private const string LevelPath     = "levels/level.ldtk";
 
     // State
@@ -27,18 +26,9 @@ public class Scene_Play : Scene
         Find.Game.physics.RegisterCollider(new Rectangle(16, -1, 1, 18));
         Find.Game.physics.RegisterCollider(new Rectangle(-1, 16, 18, 1));
 
-        var graphic = new GraphicData();
-        graphic.SetSpritesheet(GuySpritePath, 48, 48);
-        graphic.origin = new Vector2(0.5f);
+        player = EntityGenerators.CreatePlayer(new Vector2(8, 8));
 
-        player = Create.CreateEntity();
-        player.pos = new Vector2(8, 8);
-        player.AddComponent<RenderComponent>(new RenderComponentData { GraphicData = graphic });
-        player.AddComponent<PhysicsComponent>();
-        player.AddComponent<MoveComponent>();
-        player.AddComponent<PlayerInputComponent>();
-        player.AddComponent<PlayerAnimationComponent>();
-        player.AddComponent<CameraFollowComponent>();
+        EntityGenerators.CreateEnemy(new Vector2(12, 12));
 
         tileManager.LoadLDTKLevel(LevelPath, 0);
     }
@@ -52,6 +42,12 @@ public class Scene_Play : Scene
             player.pos = worldPos;
         }
     }
+
+    // public override void PostUpdate() {
+    //     if (Find.Renderer.GetPickIdAtPos(Find.Input.GetMousePos()) == player.id) {
+    //         player.Renderer.OverrideColour = Color.SkyBlue;
+    //     }
+    // }
 
     public override void Render() {
         base.Render();

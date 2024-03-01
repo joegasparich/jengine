@@ -24,6 +24,10 @@ public class PhysicsManager {
     }
 
     public void RenderLate() {
+        // DrawDebug();
+    }
+
+    private void DrawDebug() {
         var body = world.GetBodyList();
         while (body != null) {
             var fixture = body.GetFixtureList();

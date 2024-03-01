@@ -5,11 +5,16 @@ using JEngine.util;
 
 namespace JEngine.entities;
 
+public static class EntityTags {
+    public const string All = "All";
+}
+
 public class Entity : ISerialisable, IReferencable {
     // Config
     public  int                         id;
     private Dictionary<Type, Component> components = new();
     private EntityDef?                  def;
+    private HashSet<string>             tags { get; } = new();
 
     // State
     public Vector2 pos;
@@ -24,10 +29,15 @@ public class Entity : ISerialisable, IReferencable {
     public         RenderComponent        Renderer   => GetComponent<RenderComponent>();
     public         GraphicData            Graphics   => GetComponent<RenderComponent>().Graphics;
     public virtual bool                   Selectable => true;
+    public         IEnumerable<string>    Tags       => tags;
 
     public Entity() {}
     public Entity(EntityDef? def) {
         this.def = def;
+
+        foreach (var tag in def.Tags) {
+            tags.Add(tag);
+        }
     }
 
     public virtual void Serialise() {
@@ -173,6 +183,22 @@ public class Entity : ISerialisable, IReferencable {
         }
 
         return false;
+    }
+    
+    public void AddTag(string tag) {
+        tags.Add(tag);
+        
+        Find.Game.Notify_EntityTagged(this, tag);
+    }
+    
+    public void RemoveTag(string tag) {
+        tags.Remove(tag);
+        
+        Find.Game.Notify_EntityUntagged(this, tag);
+    }
+    
+    public bool HasTag(string tag) {
+        return tags.Contains(tag);
     }
 
     public string UniqueId => $"entity.{id}";

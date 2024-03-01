@@ -4,6 +4,7 @@ namespace JEngine.defs;
 
 public class EntityDef : Def {
     public List<ComponentData> components = new();
+    public List<string>        Tags       = new();
 
     public GraphicData? GraphicData => GetComponentData<RenderComponentData>()?.GraphicData;
 

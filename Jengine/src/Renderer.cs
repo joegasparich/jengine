@@ -93,8 +93,6 @@ public class Renderer {
                 RenderPickIdsToBuffer();
                 Raylib.UnloadImage(pickImage);
                 pickImage = Raylib.LoadImageFromTexture(pickBuffer.Texture);
-                // if (DebugSettings.Get(DebugSetting.DrawPickBuffer))
-                //     RenderPickBuffer();
 
             }
             Raylib.EndTextureMode();
@@ -110,6 +108,8 @@ public class Renderer {
         }
 
         Find.Game.Render2D();
+        
+        // RenderPickBuffer();
 
         Raylib.EndDrawing();
 
@@ -237,6 +237,9 @@ public class Renderer {
     }
     
     public int GetPickIdAtPos(Vector2 screenPos) {
+        if (!IsPosOnScreen(screenPos))
+            return -1;
+        
         var pixel = Raylib.GetImageColor(pickImage, screenPos.X.FloorToInt(), Find.Game.ScreenHeight - screenPos.Y.FloorToInt());
         if (pixel.Equals(Color.White)) 
             return -1;
@@ -257,8 +260,8 @@ public class Renderer {
     }
 
     public bool IsPosOnScreen(Vector2 pos, float margin = 0) {
-        return pos.X > camera.Position.X - Find.Game.ScreenWidth/2f  - margin && pos.X < camera.Position.X + Find.Game.ScreenWidth/2f + margin
-            && pos.Y > camera.Position.Y - Find.Game.ScreenHeight/2f - margin && pos.Y < camera.Position.Y + Find.Game.ScreenHeight/2f + margin;
+        return pos.X > -margin && pos.X < Find.Game.ScreenWidth + margin
+            && pos.Y > -margin && pos.Y < Find.Game.ScreenHeight + margin;
     }
 
     public bool IsWorldPosOnScreen(Vector2 worldPos, float margin = 32) {
