@@ -1,19 +1,23 @@
 namespace JEngine.entities;
 
 public class Animation {
-    public int StartIndex;
-    public int NumFrames;
-    public int Speed;
+    public int  StartIndex;
+    public int  NumFrames;
+    public int  Duration;
+    public bool Loop;
     
-    public Animation(int startIndex, int numFrames, int speed) {
+    public Animation(int startIndex, int numFrames, int duration, bool loop = true) {
         StartIndex = startIndex;
         NumFrames = numFrames;
-        Speed = speed;
+        Duration = duration;
+        Loop = loop;
         
-        if (speed < numFrames)
-            Debug.Warn("Animation speed is less than number of frames");
+        if (duration < numFrames)
+            Debug.Warn("Animation duration is less than number of frames");
     }
 }
+
+// TODO: AnimationComponentData
 
 public class AnimationComponent : Component {
     private   Dictionary<string, Animation> animations = new();
@@ -33,7 +37,7 @@ public class AnimationComponent : Component {
             return;
         
         if (animations.TryGetValue(name, out var animation)) {
-            Render.Graphics.SetAnimation(animation.StartIndex, animation.NumFrames, animation.Speed);
+            Render.Graphics.SetAnimation(animation.StartIndex, animation.NumFrames, animation.Duration, animation.Loop);
             
             CurrentAnimation = name;
         }

@@ -5,6 +5,8 @@ using Box2D.NetStandard.Dynamics.Fixtures;
 
 namespace JEngine.entities;
 
+// TODO: PhysicsComponentData
+
 public class PhysicsComponent : Component {
     private Body body;
 

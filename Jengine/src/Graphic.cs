@@ -18,8 +18,10 @@ public class Graphic {
     private                int cellIndex;
 
     // Animation
-    private int animationFrames;
-    private int animationSpeed;
+    private int  animationFrames;
+    private int  animationDurationTicks;
+    private int  animationStartTick;
+    private bool loopAnimation = true;
 
     // Properties
     private Texture2D texture;
@@ -43,6 +45,9 @@ public class Graphic {
     public Graphic(string path) {
         SetSprite(path);
     }
+    public Graphic(string path, int cellWidth, int cellHeight) {
+        SetSpritesheet(path, cellWidth, cellHeight);
+    }
 
     public void SetSprite(string path) {
         spritePath = path;
@@ -63,10 +68,12 @@ public class Graphic {
         cellIndex = index;
     }
 
-    public void SetAnimation(int startIndex, int frames, int speed) {
+    public void SetAnimation(int startIndex, int frames, int speed, bool loop = true) {
         cellIndex       = startIndex;
         animationFrames = frames;
-        animationSpeed  = speed;
+        animationDurationTicks  = speed;
+        loopAnimation   = loop;
+        animationStartTick = Find.Game.Ticks;
     }
 
     public void Draw(
@@ -107,10 +114,15 @@ public class Graphic {
     }
 
     private int GetAnimationFrame() {
-        if (animationSpeed == 0 || animationFrames == 0)
+        if (animationDurationTicks == 0 || animationFrames == 0)
             return cellIndex;
 
-        return cellIndex + (Find.Game.Ticks % animationSpeed) / (animationSpeed / animationFrames);
+        var curTick = Find.Game.Ticks - animationStartTick;
+
+        if (!loopAnimation && curTick >= animationDurationTicks)
+            return cellIndex + animationFrames - 1;
+
+        return cellIndex + (curTick % animationDurationTicks) / (animationDurationTicks / animationFrames);
     }
     
     public Rectangle GetCellBounds(int cellIndex) {

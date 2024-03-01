@@ -27,7 +27,7 @@ public class Entity : ISerialisable, IReferencable {
     public virtual EntityDef              Def        => def;
     public virtual string                 Name       => Def?.name ?? "Unnamed Entity";
     public         RenderComponent        Renderer   => GetComponent<RenderComponent>();
-    public         Graphic            Graphics   => GetComponent<RenderComponent>().Graphics;
+    public         Graphic                Graphics   => GetComponent<RenderComponent>().Graphics;
     public virtual bool                   Selectable => true;
     public         IEnumerable<string>    Tags       => tags;
 

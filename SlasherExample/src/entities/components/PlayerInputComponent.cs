@@ -8,10 +8,16 @@ namespace SlasherExample.entities;
 
 public class PlayerInputComponent : InputComponent
 {
-    private Graphic Cursor = new("cursor.png");
-    public PlayerInputComponent(Entity entity, ComponentData? data) : base(entity, data) {}
-
+    private readonly Graphic Cursor = new("cursor.png");
+    private readonly Effect  SlashEffect = new() {
+        graphic = new Graphic("slash.png", 16, 16),
+        animation = new Animation(0, 3, 12, loop: false),
+        duration = 12
+    };
+    
     private Vector2 AimVector => (Find.Input.GetMouseWorldPos() - entity.pos).Normalised();
+
+    public PlayerInputComponent(Entity entity, ComponentData? data) : base(entity, data) {}
 
     public override void Setup(bool fromSave) {
         base.Setup(fromSave);
@@ -26,6 +32,15 @@ public class PlayerInputComponent : InputComponent
         if (Find.Input.IsKeyHeld(KeyboardKey.S)) inputVector.Y += 1;
         if (Find.Input.IsKeyHeld(KeyboardKey.A)) inputVector.X -= 1;
         if (Find.Input.IsKeyHeld(KeyboardKey.D)) inputVector.X += 1;
+    }
+
+    public override void OnInput(InputEvent evt) {
+        if (evt.consumed)
+            return;
+
+        if (evt.mouseDown == MouseButton.Left) {
+            SlashEffect.Spawn(entity.pos);
+        }
     }
 
     public override void Draw() {
