@@ -1,4 +1,3 @@
-using System.Numerics;
 using Newtonsoft.Json.Linq;
 using JEngine.defs;
 using JEngine.util;
@@ -17,22 +16,28 @@ public class Entity : ISerialisable, IReferencable {
     private HashSet<string>             tags { get; } = new();
 
     // State
-    public Vector2 pos;
+    private Transform transform;
+    public  Entity?   parent;
 
     // Unsaved
     public bool destroyed;
     
     // Properties
-    public         IEnumerable<Component> Components => components.Values;
-    public virtual EntityDef              Def        => def;
-    public virtual string                 Name       => Def?.name ?? "Unnamed Entity";
-    public         RenderComponent        Renderer   => GetComponent<RenderComponent>();
-    public         Graphic                Graphics   => GetComponent<RenderComponent>().Graphics;
-    public virtual bool                   Selectable => true;
-    public         IEnumerable<string>    Tags       => tags;
+    public         IEnumerable<Component> Components      => components.Values;
+    public virtual EntityDef              Def             => def;
+    public virtual string                 Name            => Def?.name ?? "Unnamed Entity";
+    public         RenderComponent        Renderer        => GetComponent<RenderComponent>();
+    public         Graphic                Graphic         => GetComponent<RenderComponent>().Graphics;
+    public virtual bool                   Selectable      => true;
+    public         IEnumerable<string>    Tags            => tags;
+    public         Transform              Transform       => transform;
 
-    public Entity() {}
+    public Entity() {
+        transform = new Transform(this);
+    }
     public Entity(EntityDef? def) {
+        transform = new Transform(this);
+        
         this.def = def;
 
         foreach (var tag in def.Tags) {
@@ -43,8 +48,8 @@ public class Entity : ISerialisable, IReferencable {
     public virtual void Serialise() {
         Find.SaveManager.ArchiveValue("type", () => GetType().ToString(), null);
         Find.SaveManager.ArchiveValue("id",   ref id);
-        Find.SaveManager.ArchiveValue("pos",  ref pos);
-        
+        Find.SaveManager.ArchiveDeep("transform",  ref transform);
+
         Find.SaveManager.ArchiveCustom("components",
             () => EntitySerialiseUtility.SaveComponents(components.Values),
             data => EntitySerialiseUtility.LoadComponents(this, data as JArray),

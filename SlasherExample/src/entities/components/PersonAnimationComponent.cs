@@ -19,7 +19,14 @@ public class PersonAnimationComponent : AnimationComponent
     protected override Type[] Dependencies => [typeof(RenderComponent), typeof(InputComponent)];
     private InputComponent Input => entity.GetComponent<InputComponent>();
 
-    public PersonAnimationComponent(Entity entity, ComponentData? data = null) : base(entity, data) {}
+    public PersonAnimationComponent(Entity entity, ComponentData? data = null) : base(entity, data) {
+        AddAnimation("IdleRight", new Animation(IdleIndex + RightIndex, AnimationFrames, AnimationSpeed));
+        AddAnimation("IdleUp", new Animation(IdleIndex + UpIndex, AnimationFrames, AnimationSpeed));
+        AddAnimation("IdleDown", new Animation(IdleIndex + DownIndex, AnimationFrames, AnimationSpeed));
+        AddAnimation("WalkRight", new Animation(WalkIndex + RightIndex, AnimationFrames, AnimationSpeed));
+        AddAnimation("WalkUp", new Animation(WalkIndex + UpIndex, AnimationFrames, AnimationSpeed));
+        AddAnimation("WalkDown", new Animation(WalkIndex + DownIndex, AnimationFrames, AnimationSpeed));
+    }
 
     public override void PostUpdate() {
         if (MathF.Abs(Input.inputVector.X) >= MathF.Abs(Input.inputVector.Y)) {
@@ -40,13 +47,11 @@ public class PersonAnimationComponent : AnimationComponent
     }
 
     private void SetAnimation(Dir4 dir, bool moving) {
-        var baseIndex = moving ? WalkIndex : IdleIndex;
-
         if (dir == Dir4.East || dir == Dir4.West)
-            Render.Graphics.SetAnimation(baseIndex + RightIndex, AnimationFrames, AnimationSpeed);
+            PlayAnimation(moving ? "WalkRight" : "IdleRight");
         if (dir == Dir4.South)
-            Render.Graphics.SetAnimation(baseIndex + DownIndex, AnimationFrames, AnimationSpeed);
+            PlayAnimation(moving ? "WalkDown" : "IdleDown");
         if (dir == Dir4.North)
-            Render.Graphics.SetAnimation(baseIndex + UpIndex, AnimationFrames, AnimationSpeed);
+            PlayAnimation(moving ? "WalkUp" : "IdleUp");
     }
 }

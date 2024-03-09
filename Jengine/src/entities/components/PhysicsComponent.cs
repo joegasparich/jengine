@@ -17,7 +17,7 @@ public class PhysicsComponent : Component {
 
         var def = new BodyDef();
         def.type = BodyType.Dynamic;
-        def.position = entity.pos;
+        def.position = entity.Transform.LocalPosition;
         def.linearDamping = 0.05f;
 
         var shape = new CircleShape {
@@ -35,12 +35,14 @@ public class PhysicsComponent : Component {
     }
 
     public override void PreUpdate() {
-        if (entity.pos != body.Position)
-            body.SetTransform(entity.pos, 0f);
+        if (entity.Transform.LocalPosition != body.Position)
+            body.SetTransform(entity.Transform.LocalPosition, 0f);
+
+        // TODO: Rotation as well
     }
 
     public override void PostUpdate() {
-        entity.pos = body.Position;
+        entity.Transform.LocalPosition = body.Position;
     }
 
     public void AddForce(Vector2 force) {

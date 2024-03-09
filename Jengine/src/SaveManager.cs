@@ -138,6 +138,11 @@ public class SaveManager {
     // Serialise basic type
     // This just uses Newtonsoft.JSON to handle the type
     public void ArchiveValue<T>(string label, ref T? value) {
+        if (value is ISerialisable)
+            Debug.Warn(label + " is ISerialisable, use ArchiveDeep instead");
+        else if (value is IReferencable)
+            Debug.Warn(label + " is IReferencable, use ArchiveRef instead");
+
         switch (mode) {
             case SerialiseMode.Saving:
                 if (value == null) 

@@ -44,10 +44,10 @@ public class RenderComponent : Component {
             return;
 
         bakedGraphic.Draw(
-            pos: entity.pos + Offset,
-            rotation: 0f,
-            scale: Vector2.One,
-            depth: Find.Renderer.GetDepth(entity.pos.Y),
+            pos: entity.Transform.GlobalPosition + Offset,
+            rotation: -entity.Transform.GlobalRotation, // TODO: Figure out its negative
+            scale: entity.Transform.GlobalScale,
+            depth: Find.Renderer.GetDepth(entity.Transform.GlobalPosition.Y),
             overrideColour: OverrideColour,
             pickId: entity.Selectable ? entity.id : null
         );

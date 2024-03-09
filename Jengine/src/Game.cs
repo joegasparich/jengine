@@ -251,8 +251,6 @@ public class Game {
 
         entitiesToAdd.Add(entity);
 
-        Debug.Log($"Registered entity {entity.id}");
-
         return entity.id;
     }
 

@@ -10,12 +10,14 @@ public class PlayerInputComponent : InputComponent
 {
     private readonly Graphic Cursor = new("cursor.png");
     private readonly Effect  SlashEffect = new() {
-        graphic = new Graphic("slash.png", 16, 16),
+        graphic = new Graphic("slash.png", 16, 16) {
+            origin = new Vector2(0.5f)
+        },
         animation = new Animation(0, 3, 12, loop: false),
         duration = 12
     };
     
-    private Vector2 AimVector => (Find.Input.GetMouseWorldPos() - entity.pos).Normalised();
+    private Vector2 AimVector => (Find.Input.GetMouseWorldPos() - entity.Transform.GlobalPosition).Normalised();
 
     public PlayerInputComponent(Entity entity, ComponentData? data) : base(entity, data) {}
 
@@ -39,7 +41,9 @@ public class PlayerInputComponent : InputComponent
             return;
 
         if (evt.mouseDown == MouseButton.Left) {
-            SlashEffect.Spawn(entity.pos);
+            var angle = AimVector.AngleDeg();
+            SlashEffect.Spawn(new Vector2(1.5f, 0).RotateAround(Vector2.Zero, angle), angle, parent: entity);
+            evt.Consume();
         }
     }
 
@@ -47,8 +51,8 @@ public class PlayerInputComponent : InputComponent
         base.Draw();
 
         Cursor.Draw(
-            entity.pos,
-            rotation: AimVector.Angle() + 90,
+            entity.Transform.GlobalPosition,
+            rotation: AimVector.AngleDeg() + 90,
             depth: (int)Depth.UI,
             overrideColour: Color.White.WithAlpha(0.5f)
         );

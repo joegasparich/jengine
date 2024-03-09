@@ -16,7 +16,7 @@ public class SimplePhysicsComponent : Component {
     public SimplePhysicsComponent(Entity entity, ComponentData? data) : base(entity, data) {}
 
     public override void Update() {
-        entity.pos = entity.pos + velocity;
+        entity.Transform.LocalPosition += velocity;
     }
 
     public override void PostUpdate() {

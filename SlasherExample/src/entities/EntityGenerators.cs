@@ -18,7 +18,7 @@ public static class EntityGenerators {
         graphic.origin = new Vector2(0.5f);
         
         var player = Create.CreateEntity();
-        player.pos = pos;
+        player.Transform.LocalPosition = pos;
         player.AddComponent<RenderComponent>(new RenderComponentData { Graphic = graphic });
         player.AddComponent<PhysicsComponent>();
         player.AddComponent<MoveComponent>();
@@ -37,7 +37,7 @@ public static class EntityGenerators {
         graphic.origin = new Vector2(0.5f);
         
         var slime = Create.CreateEntity();
-        slime.pos = pos;
+        slime.Transform.LocalPosition = pos;
         slime.AddComponent<RenderComponent>(new RenderComponentData { Graphic = graphic });
         slime.AddComponent<PhysicsComponent>();
         var move = slime.AddComponent<MoveComponent>();

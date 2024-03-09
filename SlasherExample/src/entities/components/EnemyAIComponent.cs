@@ -25,7 +25,7 @@ public class EnemyAIComponent : InputComponent {
         if (target == null)
             return;
 
-        inputVector = (target.pos - entity.pos).Normalised();
+        inputVector = (target.Transform.GlobalPosition - entity.Transform.LocalPosition).Normalised();
     }
     
     private void CheckForTarget() {
@@ -37,7 +37,7 @@ public class EnemyAIComponent : InputComponent {
         
         if (target == null) {
             foreach (var player in Find.Game.GetEntitiesByTag(EntityTags.Player)) {
-                if (player.pos.InRangeOf(entity.pos, VisionRadius)) {
+                if (player.Transform.GlobalPosition.InRangeOf(entity.Transform.LocalPosition, VisionRadius)) {
                     target = player;
                     break;
                 }

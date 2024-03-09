@@ -37,7 +37,7 @@ public static class VectorExtension {
         
         return v;
     }
-    public static float Angle(this Vector2 v) {
+    public static float AngleDeg(this Vector2 v) {
         return MathF.Atan2(v.Y, v.X) * JMath.RadToDeg;
     }
     public static Vector3 ToVector3(this Vector2 v) {
@@ -57,11 +57,11 @@ public static class VectorExtension {
         return new Vector2(v.X * c - v.Y * s, v.X * s + v.Y * c);
     }
 
-    public static Vector2 RotateAround(this Vector2 a, Vector2 b, float angleRad) {
-        var s = MathF.Sin(angleRad);
-        var c = MathF.Cos(angleRad);
-        var x = a.X - b.X;
-        var y = a.Y - b.Y;
+    public static Vector2 RotateAround(this Vector2 a, Vector2 b, float angleDeg) {
+        var s    = MathF.Sin(angleDeg * JMath.DegToRad);
+        var c    = MathF.Cos(angleDeg * JMath.DegToRad);
+        var x    = a.X - b.X;
+        var y    = a.Y - b.Y;
         var xnew = x * c - y * s;
         var ynew = x * s + y * c;
         return new Vector2(xnew + b.X, ynew + b.Y);

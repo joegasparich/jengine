@@ -7,14 +7,17 @@ public class Effect {
     public Animation? animation;
     public int        duration = -1;
     
-    public Entity Spawn(Vector2 pos) {
+    public Entity Spawn(Vector2 pos, float rotation, Entity? parent = null) {
         var effect = Create.CreateEntity();
-        effect.pos = pos;
+        effect.Transform.LocalPosition = pos;
+        effect.Transform.LocalRotation = rotation;
         var render = effect.AddComponent<RenderComponent>(new RenderComponentData { Graphic = graphic });
         if (animation != null)
             render.Graphics.SetAnimation(animation.StartIndex, animation.NumFrames, animation.Duration, animation.Loop);
         if (duration > 0)
             effect.AddComponent<AutoDestroyComponent>(new AutoDestroyComponentData { Timer = duration });
+        if (parent != null)
+            effect.parent = parent;
         
         return effect;
     }

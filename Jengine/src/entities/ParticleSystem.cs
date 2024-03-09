@@ -102,9 +102,9 @@ public class ParticleSystem : Entity {
             
             Find.Renderer.Draw(
                 texture: settings.texture,
-                pos: pos * Find.Game.gameConfig.worldScalePx + particles[i].position,
+                pos: Transform.GlobalPosition * Find.Game.gameConfig.worldScalePx + particles[i].position,
                 scale: new Vector2(particles[i].scale, particles[i].scale),
-                depth: Find.Renderer.GetDepth(pos.Y),
+                depth: Find.Renderer.GetDepth(Transform.GlobalPosition.Y),
                 color: col
             );
         }

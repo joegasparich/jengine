@@ -33,6 +33,7 @@ internal class DrawCall {
 public class Renderer {
     // Resources
     private static readonly Shader OutlineShader      = Raylib.LoadShader(null, "assets/shaders/outline.fsh");
+    private static readonly Shader BasicShader        = Raylib.LoadShader(null, "assets/shaders/basic.fsh");
     private static readonly Shader DiscardAlphaShader = Raylib.LoadShader(null, "assets/shaders/discard_alpha.fsh");
     private static readonly Shader PickShader         = Raylib.LoadShader(null, "assets/shaders/pick.fsh");
     private static readonly int    PickColourLoc      = Raylib.GetShaderLocation(PickShader, "pickColor");
@@ -40,7 +41,7 @@ public class Renderer {
     public RendererConfig renderConfig = new();
     
     // Collections
-    private List<DrawCall> drawCalls = new();
+    private SortedList<float, DrawCall> drawCalls = new(new DuplicateKeyComparer<float>());
     
     // State
     public  Camera          camera;
@@ -64,6 +65,8 @@ public class Renderer {
         Raylib.SetShaderValue(OutlineShader, outlineColLoc, new Vector4(0.4f, 0.7f, 1f, 1f), ShaderUniformDataType.Vec4);
 
         Rlgl.EnableDepthTest();
+        Rlgl.EnableColorBlend();
+        Rlgl.SetBlendMode(BlendMode.Alpha);
     }
 
     public void Update() {
@@ -82,9 +85,9 @@ public class Renderer {
                     drawingWorld = true;
                     Find.Game.Draw();
 
-                    Raylib.BeginShaderMode(DiscardAlphaShader);
+                    Raylib.BeginShaderMode(BasicShader);
                     foreach (var drawCall in drawCalls) {
-                        DrawNow(drawCall);
+                        DrawNow(drawCall.Value);
                     }
                     Raylib.EndShaderMode();
 
@@ -184,7 +187,7 @@ public class Renderer {
         if (now) {
             DrawNow(call);
         } else {
-            drawCalls.Add(call);
+            drawCalls.Add(-depth, call);
         }
     }
 
@@ -210,7 +213,7 @@ public class Renderer {
         
         if (!picking && drawCall.fragShader.HasValue) {
             Raylib.EndShaderMode();
-            Raylib.BeginShaderMode(DiscardAlphaShader);
+            Raylib.BeginShaderMode(BasicShader);
         }
     }
     
@@ -222,12 +225,12 @@ public class Renderer {
         Raylib.BeginMode3D(camera.Cam);
         {
             foreach (var drawCall in drawCalls) {
-                if (!drawCall.pickId.HasValue)
+                if (!drawCall.Value.pickId.HasValue)
                     continue;
 
                 Raylib.BeginShaderMode(PickShader);
-                Raylib.SetShaderValue(PickShader, PickColourLoc, Colour.IntToColour(drawCall.pickId.Value).ToVector3(), ShaderUniformDataType.Vec3);
-                DrawNow(drawCall, true);
+                Raylib.SetShaderValue(PickShader, PickColourLoc, Colour.IntToColour(drawCall.Value.pickId.Value).ToVector3(), ShaderUniformDataType.Vec3);
+                DrawNow(drawCall.Value, true);
                 Raylib.EndShaderMode();
             }
         }
