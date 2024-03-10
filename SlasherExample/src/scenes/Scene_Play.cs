@@ -26,9 +26,9 @@ public class Scene_Play : Scene
         Find.Game.physics.RegisterCollider(new Rectangle(16, -1, 1, 18));
         Find.Game.physics.RegisterCollider(new Rectangle(-1, 16, 18, 1));
 
-        player = EntityGenerators.CreatePlayer(new Vector2(8, 8));
+        player = EntityFactories.CreatePlayer(new Vector2(8, 8));
 
-        EntityGenerators.CreateSlime(new Vector2(14, 14));
+        EntityFactories.CreateSlime(new Vector2(14, 14));
 
         tileManager.LoadLDTKLevel(LevelPath, 0);
     }

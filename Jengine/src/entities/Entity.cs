@@ -14,6 +14,7 @@ public class Entity : ISerialisable, IReferencable {
     private Dictionary<Type, Component> components = new();
     private EntityDef?                  def;
     private HashSet<string>             tags { get; } = new();
+    private string?                     name;
 
     // State
     private Transform transform;
@@ -23,14 +24,14 @@ public class Entity : ISerialisable, IReferencable {
     public bool destroyed;
     
     // Properties
-    public         IEnumerable<Component> Components      => components.Values;
-    public virtual EntityDef              Def             => def;
-    public virtual string                 Name            => Def?.name ?? "Unnamed Entity";
-    public         RenderComponent        Renderer        => GetComponent<RenderComponent>();
-    public         Graphic                Graphic         => GetComponent<RenderComponent>().Graphics;
-    public virtual bool                   Selectable      => true;
-    public         IEnumerable<string>    Tags            => tags;
-    public         Transform              Transform       => transform;
+    public         IEnumerable<Component> Components => components.Values;
+    public virtual EntityDef              Def        => def;
+    public virtual string                 Name       => name ?? Def?.name ?? "Unnamed Entity";
+    public         RenderComponent        Renderer   => GetComponent<RenderComponent>();
+    public         Graphic                Graphic    => GetComponent<RenderComponent>().Graphics;
+    public virtual bool                   Selectable => true;
+    public         IEnumerable<string>    Tags       => tags;
+    public         Transform              Transform  => transform;
 
     public Entity() {
         transform = new Transform(this);
@@ -92,6 +93,12 @@ public class Entity : ISerialisable, IReferencable {
     public virtual void Draw() {
         foreach (var component in components.Values) {
             component.Draw();
+        }
+    }
+
+    public virtual void DrawLate() {
+        foreach (var component in components.Values) {
+            component.DrawLate();
         }
     }
 
@@ -189,6 +196,10 @@ public class Entity : ISerialisable, IReferencable {
 
         return false;
     }
+
+    public void SetName(string name) {
+        this.name = name;
+    }
     
     public void AddTag(string tag) {
         tags.Add(tag);
@@ -204,6 +215,10 @@ public class Entity : ISerialisable, IReferencable {
     
     public bool HasTag(string tag) {
         return tags.Contains(tag);
+    }
+
+    public override string ToString() {
+        return Name;
     }
 
     public string UniqueId => $"entity.{id}";

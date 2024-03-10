@@ -36,26 +36,4 @@ public static class Debug {
         if (!condition)
             throw new Exception(message);
     }
-    
-    public static void DrawCircle(Vector2 centre, float radius, Color colour) {
-        Draw.DrawCircle(centre, radius, colour, (int)Depth.Debug);
-    }
-
-    public static void DrawCircleLines(Vector2 centre, float radius, Color colour) {
-        Draw.DrawCircleLines(centre, radius, colour, (int)Depth.Debug);
-    }
-
-    public static void DrawLine(Vector2 start, Vector2 end, Color colour) {
-        Draw.DrawLine(start, end, colour, (int)Depth.Debug);
-    }
-
-    public static void DrawRect(Vector2 start, Vector2 dimensions, Color colour) {
-        Draw.DrawRectangle(start, dimensions, colour, (int)Depth.Debug);
-    }
-
-    public static void DrawPolygon(List<Vector2> points, Color colour) {
-        var pointsCopy = new List<Vector2>(points) {points.Average()};
-        pointsCopy.Append(points[1]);
-        Draw.DrawTriangleFan(pointsCopy.Select(point => point).ToArray(), colour, (int)Depth.Debug);
-    }
 }

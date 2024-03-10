@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
-using Box2D.NetStandard.Collision.Shapes;
-using Box2D.NetStandard.Dynamics.Bodies;
-using Box2D.NetStandard.Dynamics.World;
+using Box2DSharp.Collision.Shapes;
+using Box2DSharp.Dynamics;
+using JEngine.entities;
 using JEngine.util;
 using Raylib_cs;
 using Color = Raylib_cs.Color;
@@ -10,6 +10,7 @@ namespace JEngine;
 
 public class PhysicsManager {
     public World world;
+    private Dictionary<Body, Entity> bodyToEntity = new();
 
     private float msPerUpdate;
 
@@ -23,30 +24,43 @@ public class PhysicsManager {
         world.Step(msPerUpdate, 6, 3);
     }
 
-    public void RenderLate() {
+    public void DrawLate() {
         // DrawDebug();
     }
 
+    public Body RegisterBody(BodyDef def, Entity entity) {
+        var body = world.CreateBody(def);
+        bodyToEntity[body] = entity;
+
+        return body;
+    }
+
+    public Entity? GetEntityFromBody(Body body) {
+        if (!bodyToEntity.ContainsKey(body))
+            return null;
+
+        return bodyToEntity[body];
+    }
+
     private void DrawDebug() {
-        var body = world.GetBodyList();
-        while (body != null) {
-            var fixture = body.GetFixtureList();
-            if (fixture.Shape is CircleShape circle) {
-                Debug.DrawCircleLines(body.Position * Find.Game.gameConfig.worldScalePx, circle.Radius * Find.Game.gameConfig.worldScalePx, Color.Red);
-            } else if (fixture.Shape is PolygonShape poly) {
-                var vertices = poly.GetVertices();
-                for (var i = 0; i < vertices.Length; i++) {
-                    var vertex     = vertices[i];
-                    var nextVertex = vertices[(i + 1) % vertices.Length];
-                    Debug.DrawLine(
-                        (body.Position + vertex) * Find.Game.gameConfig.worldScalePx,
-                        (body.Position + nextVertex) * Find.Game.gameConfig.worldScalePx,
-                        Color.Red
-                    );
+        foreach (var body in world.BodyList) {
+            foreach (var fixture in body.FixtureList) {
+                if (fixture.Shape is CircleShape circle) {
+                    Drawing.DrawCircleLines(body.GetPosition() * Find.Game.gameConfig.worldScalePx, circle.Radius * Find.Game.gameConfig.worldScalePx, Color.Red, (int)Depth.Debug);
+                } else if (fixture.Shape is PolygonShape poly) {
+                    var vertices = poly.Vertices;
+                    for (var i = 0; i < poly.Count; i++) {
+                        var vertex     = vertices[i];
+                        var nextVertex = vertices[(i + 1) % poly.Count];
+                        Drawing.DrawLine(
+                            (body.GetPosition() + vertex) * Find.Game.gameConfig.worldScalePx,
+                            (body.GetPosition() + nextVertex) * Find.Game.gameConfig.worldScalePx,
+                            Color.Red,
+                            (int)Depth.Debug
+                        );
+                    }
                 }
             }
-
-            body = body.GetNext();
         };
     }
 
@@ -55,6 +69,6 @@ public class PhysicsManager {
         var shape = new PolygonShape();
         shape.Set(rect.Vertices());
         var body = world.CreateBody(def);
-        body.CreateFixture(shape);
+        body.CreateFixture(new FixtureDef { Shape = shape, Friction = 0 });
     }
 }

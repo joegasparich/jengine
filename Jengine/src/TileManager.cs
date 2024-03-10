@@ -83,7 +83,7 @@ public class TileManager
 
     public void Draw() {
         for (var i = 0; i < layers.Count; i++) {
-            Raylib.DrawTexture(layerTextures[i], 0, 0, Colour.White);
+            Drawing.DrawTexture(layerTextures[i], new Vector2(0), posZ: (int)Depth.Ground);
         }
     }
 }

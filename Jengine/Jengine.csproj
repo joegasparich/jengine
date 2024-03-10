@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Box2D.NetStandard" Version="2.4.7-alpha" />
+      <PackageReference Include="Box2DSharp" Version="0.6.0" />
       <PackageReference Include="LinqAF" Version="3.0.0" />
       <PackageReference Include="Raylib-cs" Version="6.0.0" />
     </ItemGroup>

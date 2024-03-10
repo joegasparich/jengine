@@ -5,7 +5,7 @@ namespace JEngine.util;
 
 // Most of these functions are just copied from here but with a zPos parameter added
 // https://github.com/raysan5/raylib/blob/e5d332dea23e65f66e7e7b279dc712afeb9404c9/src/rshapes.c
-public static class Draw {
+public static class Drawing {
     private static Texture2D texShapes = new() {
         Id = 1,
         Width = 1,
@@ -44,7 +44,10 @@ public static class Draw {
         }
     }
 
-    // Draw a color-filled rectangle with pro parameters
+    public static void DrawRectangle(Vector2 position, Vector2 size, Color color, float zPos) {
+        DrawRectangle(new Rectangle(position.X, position.Y, size.X, size.Y), new Vector2(0.0f, 0.0f), 0.0f, color, zPos);
+    }
+
     public static void DrawRectangle(Rectangle rec, Vector2 origin, float rotation, Color color, float zPos)
     {
         Vector2 topLeft;
@@ -92,26 +95,31 @@ public static class Draw {
         Rlgl.Color4ub(color.R, color.G, color.B, color.A);
 
         Rlgl.TexCoord2f(texShapesRect.X/texShapes.Width, texShapesRect.Y/texShapes.Height);
-        Rlgl.Vertex2f(topLeft.X, topLeft.Y);
+        Rlgl.Vertex3f(topLeft.X, topLeft.Y, zPos);
 
         Rlgl.TexCoord2f(texShapesRect.X/texShapes.Width, (texShapesRect.Y + texShapesRect.Height)/texShapes.Height);
-        Rlgl.Vertex2f(bottomLeft.X, bottomLeft.Y);
+        Rlgl.Vertex3f(bottomLeft.X, bottomLeft.Y, zPos);
 
         Rlgl.TexCoord2f((texShapesRect.X + texShapesRect.Width)/texShapes.Width, (texShapesRect.Y + texShapesRect.Height)/texShapes.Height);
-        Rlgl.Vertex2f(bottomRight.X, bottomRight.Y);
+        Rlgl.Vertex3f(bottomRight.X, bottomRight.Y, zPos);
 
         Rlgl.TexCoord2f((texShapesRect.X + texShapesRect.Width)/texShapes.Width, texShapesRect.Y/texShapes.Height);
-        Rlgl.Vertex2f(topRight.X, topRight.Y);
+        Rlgl.Vertex3f(topRight.X, topRight.Y, zPos);
 
         Rlgl.End();
 
         Rlgl.SetTexture(0);
     }
 
-    // Draw a color-filled rectangle (Vector version)
-    // NOTE: On OpenGL 3.3 and ES2 we use QUADS to avoid drawing order issues
-    public static void DrawRectangle(Vector2 position, Vector2 size, Color color, float zPos) {
-        DrawRectangle(new Rectangle(position.X, position.Y, size.X, size.Y), new Vector2(0.0f, 0.0f), 0.0f, color, zPos);
+    public static void DrawRectangleOutline(Vector2 position, Vector2 size, Color color, float zPos) {
+        DrawRectangleOutline(new Rectangle(position.X, position.Y, size.X, size.Y), color, zPos);
+    }
+
+    public static void DrawRectangleOutline(Rectangle rectangle, Color color, float zPos) {
+        DrawLine(new Vector2(rectangle.X, rectangle.Y), new Vector2(rectangle.X + rectangle.Width, rectangle.Y), color, zPos);
+        DrawLine(new Vector2(rectangle.X + rectangle.Width, rectangle.Y), new Vector2(rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height), color, zPos);
+        DrawLine(new Vector2(rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height), new Vector2(rectangle.X, rectangle.Y + rectangle.Height), color, zPos);
+        DrawLine(new Vector2(rectangle.X, rectangle.Y + rectangle.Height), new Vector2(rectangle.X, rectangle.Y), color, zPos);
     }
 
     // Draw a triangle fan defined by points
@@ -223,12 +231,38 @@ public static class Draw {
 
         Rlgl.End();
     }
+
+    public static void DrawTexture(
+        Texture2D texture,
+        Vector2 position,
+        float? rotation = null,
+        Vector2? scale = null,
+        Vector2? origin = null,
+        float? posZ = null,
+        Color? tint = null
+    ) {
+        rotation ??= 0;
+        scale ??= new Vector2(1, 1);
+        origin ??= new Vector2(0, 0);
+        posZ ??= 0;
+        tint ??= Color.White;
+
+        DrawTexture(
+            texture,
+            new Rectangle(0, 0, texture.Width, texture.Height),
+            new Rectangle(position.X, position.Y, texture.Width * scale.Value.X, texture.Height * scale.Value.Y),
+            origin.Value,
+            rotation.Value,
+            posZ.Value,
+            tint.Value
+        );
+    }
     
     public static void DrawTexture(
         Texture2D texture,
         Rectangle sourceRect,
         Rectangle destRect,
-        Vector3 origin,
+        Vector2 origin,
         float rotation,
         float posZ,
         Color tint
@@ -252,7 +286,7 @@ public static class Draw {
         Rlgl.PushMatrix();
         Rlgl.Translatef(destRect.X, destRect.Y, 0);
         Rlgl.Rotatef(rotation, 0.0f, 0.0f, 1.0f);
-        Rlgl.Translatef(-origin.X, -origin.Y, -origin.Z);
+        Rlgl.Translatef(-origin.X, -origin.Y, 0);
         
         Rlgl.Begin(DrawMode.Quads);
         Rlgl.Color4ub(tint.R, tint.G, tint.B, tint.A);

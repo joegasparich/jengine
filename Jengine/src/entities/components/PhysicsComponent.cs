@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
-using Box2D.NetStandard.Collision.Shapes;
-using Box2D.NetStandard.Dynamics.Bodies;
-using Box2D.NetStandard.Dynamics.Fixtures;
+using Box2DSharp.Collision.Shapes;
+using Box2DSharp.Dynamics;
 
 namespace JEngine.entities;
 
@@ -16,36 +15,36 @@ public class PhysicsComponent : Component {
         base.Setup(fromSave);
 
         var def = new BodyDef();
-        def.type = BodyType.Dynamic;
-        def.position = entity.Transform.LocalPosition;
-        def.linearDamping = 0.05f;
+        def.BodyType = BodyType.DynamicBody;
+        def.Position = entity.Transform.LocalPosition;
+        def.LinearDamping = 0.05f;
+        def.FixedRotation = true;
 
         var shape = new CircleShape {
             Radius = 0.5f
         };
         var fixtureDef = new FixtureDef {
-            shape = shape,
-            density = 10f,
-            friction = 0f,
-
+            Shape = shape,
+            Density = 10f,
+            Friction = 0f,
         };
 
-        body = Find.Game.physics.world.CreateBody(def);
+        body = Find.Game.physics.RegisterBody(def, entity);
         body.CreateFixture(fixtureDef);
     }
 
     public override void PreUpdate() {
-        if (entity.Transform.LocalPosition != body.Position)
+        if (entity.Transform.LocalPosition != body.GetPosition())
             body.SetTransform(entity.Transform.LocalPosition, 0f);
 
         // TODO: Rotation as well
     }
 
     public override void PostUpdate() {
-        entity.Transform.LocalPosition = body.Position;
+        entity.Transform.LocalPosition = body.GetPosition();
     }
 
     public void AddForce(Vector2 force) {
-        body.ApplyForce(force, body.GetLocalCenter());
+        body.ApplyForce(force, body.GetLocalCenter(), true);
     }
 }

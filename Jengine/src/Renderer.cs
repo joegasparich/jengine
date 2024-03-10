@@ -7,7 +7,6 @@ namespace JEngine;
 public enum Depth
 {
     Ground = -1,
-    Overlay = -4,
     YSorting = - 5,
     Debug = -8,
     UI = -9,
@@ -22,7 +21,7 @@ internal class DrawCall {
     public Texture2D texture;
     public Rectangle sourceRect; 
     public Rectangle destRect; 
-    public Vector3   origin; 
+    public Vector2   origin;
     public float     rotation; 
     public float     posZ;
     public Color     tint;
@@ -64,7 +63,7 @@ public class Renderer {
         var outlineColLoc = Raylib.GetShaderLocation(OutlineShader, "outlineCol");
         Raylib.SetShaderValue(OutlineShader, outlineColLoc, new Vector4(0.4f, 0.7f, 1f, 1f), ShaderUniformDataType.Vec4);
 
-        Rlgl.EnableDepthTest();
+        // Rlgl.EnableDepthTest();
         Rlgl.EnableColorBlend();
         Rlgl.SetBlendMode(BlendMode.Alpha);
     }
@@ -82,17 +81,17 @@ public class Renderer {
 
                 Raylib.BeginMode3D(camera.Cam);
                 {
+                    Raylib.BeginShaderMode(DiscardAlphaShader);
                     drawingWorld = true;
                     Find.Game.Draw();
 
-                    Raylib.BeginShaderMode(BasicShader);
                     foreach (var drawCall in drawCalls) {
                         DrawNow(drawCall.Value);
                     }
-                    Raylib.EndShaderMode();
 
-                    Find.Game.RenderLate();
+                    Find.Game.DrawLate();
                     drawingWorld = false;
+                    Raylib.EndShaderMode();
                 }
                 Raylib.EndMode3D();
 
@@ -176,7 +175,7 @@ public class Renderer {
             texture = texture,
             sourceRect = src,
             destRect = new Rectangle(pos.X, pos.Y, scale.Value.X, scale.Value.Y),
-            origin = new Vector3(scaledOrigin.X, scaledOrigin.Y, 0),
+            origin = new Vector2(scaledOrigin.X, scaledOrigin.Y),
             rotation = rotation,
             posZ = depth,
             tint = color.Value,
@@ -201,7 +200,7 @@ public class Renderer {
         if (drawingWorld)
             drawCall.destRect.Position *= Find.Config.worldScalePx;
             
-        util.Draw.DrawTexture(
+        Drawing.DrawTexture(
             drawCall.texture,
             drawCall.sourceRect,
             drawCall.destRect,
@@ -213,7 +212,7 @@ public class Renderer {
         
         if (!picking && drawCall.fragShader.HasValue) {
             Raylib.EndShaderMode();
-            Raylib.BeginShaderMode(BasicShader);
+            Raylib.BeginShaderMode(DiscardAlphaShader);
         }
     }
     

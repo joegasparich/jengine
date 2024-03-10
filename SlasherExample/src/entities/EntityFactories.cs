@@ -8,7 +8,7 @@ public static class EntityTags {
     public const string Player = "Player";
 }
 
-public static class EntityGenerators {
+public static class EntityFactories {
     private const string GuySpritePath = "characters/player.png";
     private const string SlimeSpritePath = "characters/slime.png";
     
@@ -25,8 +25,10 @@ public static class EntityGenerators {
         player.AddComponent<PlayerInputComponent>();
         player.AddComponent<PersonAnimationComponent>();
         player.AddComponent<CameraFollowComponent>();
+        player.AddComponent<AttackerComponent>();
         
         player.AddTag(EntityTags.Player);
+        player.SetName("Player");
 
         return player;
     }
@@ -46,6 +48,8 @@ public static class EntityGenerators {
         var anim = slime.AddComponent<EnemyAnimationComponent>();
         anim.AddAnimation(EnemyAnimationComponent.Idle, new Animation(0, 4, 48));
         anim.AddAnimation(EnemyAnimationComponent.Walk, new Animation(7, 6, 48));
+
+        slime.SetName("Slime");
 
         return slime;
     }

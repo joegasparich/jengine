@@ -16,8 +16,11 @@ public class PlayerInputComponent : InputComponent
         animation = new Animation(0, 3, 12, loop: false),
         duration = 12
     };
-    
-    private Vector2 AimVector => (Find.Input.GetMouseWorldPos() - entity.Transform.GlobalPosition).Normalised();
+
+    protected override Type[] Dependencies => [typeof(AttackerComponent)];
+
+    private AttackerComponent Attacker  => entity.GetComponent<AttackerComponent>();
+    private Vector2           AimVector => Find.Input.GetMouseWorldPos() - entity.Transform.GlobalPosition;
 
     public PlayerInputComponent(Entity entity, ComponentData? data) : base(entity, data) {}
 
@@ -43,6 +46,7 @@ public class PlayerInputComponent : InputComponent
         if (evt.mouseDown == MouseButton.Left) {
             var angle = AimVector.AngleDeg();
             SlashEffect.Spawn(new Vector2(1.5f, 0).RotateAround(Vector2.Zero, angle), angle, parent: entity);
+            Attacker.DoAttack(angle);
             evt.Consume();
         }
     }
@@ -53,7 +57,8 @@ public class PlayerInputComponent : InputComponent
         Cursor.Draw(
             entity.Transform.GlobalPosition,
             rotation: AimVector.AngleDeg() + 90,
-            depth: (int)Depth.UI,
+            scale: new Vector2(0.5f),
+            depth: (int)Depth.YSorting,
             overrideColour: Color.White.WithAlpha(0.5f)
         );
     }

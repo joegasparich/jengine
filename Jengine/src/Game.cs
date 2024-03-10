@@ -204,13 +204,18 @@ public class Game {
         foreach (var entity in entities.Values) {
             entity.Draw();
         }
-
-        framesSinceGameStart++;
     }
 
-    public virtual void RenderLate() {
+    public virtual void DrawLate() {
         sceneManager.GetCurrentScene()?.DrawLate();
-        physics.RenderLate();
+
+        foreach (var entity in entities.Values) {
+            entity.DrawLate();
+        }
+
+        physics.DrawLate();
+
+        framesSinceGameStart++;
     }
 
     public virtual void DrawUI() {
