@@ -4,8 +4,9 @@ public class Animation {
     public int  StartIndex;
     public int  NumFrames;
     public int  Duration;
-    public bool Loop;
+    public bool Loop = true;
     
+    public Animation() {}
     public Animation(int startIndex, int numFrames, int duration, bool loop = true) {
         StartIndex = startIndex;
         NumFrames = numFrames;
@@ -17,17 +18,32 @@ public class Animation {
     }
 }
 
-// TODO: AnimationComponentData
+public class AnimationComponentData : ComponentData {
+    public Dictionary<string, Animation> Animations = new();
+    public string                        DefaultAnimation;
+}
 
 public class AnimationComponent : Component {
-    private   Dictionary<string, Animation> animations = new();
-    protected string                        CurrentAnimation { get; private set; }
+    public static Type DataType => typeof(AnimationComponentData);
+    
+    private       Dictionary<string, Animation> animations = new();
+    protected     string                        CurrentAnimation { get; private set; }
 
-    protected override Type[]          Dependencies => [typeof(RenderComponent)];
-    protected          RenderComponent Render     => entity.GetComponent<RenderComponent>();
+    protected override Type[]                 Dependencies => [typeof(RenderComponent)];
+    public             AnimationComponentData Data         => (AnimationComponentData)data;
+    protected          RenderComponent        Render       => entity.GetComponent<RenderComponent>();
     
     public AnimationComponent(Entity entity, ComponentData? data = null) : base(entity, data) { }
-    
+
+    public override void Setup(bool fromSave) {
+        base.Setup(fromSave);
+        
+        foreach (var (name, animation) in Data.Animations)
+            AddAnimation(name, animation);
+        
+        PlayAnimation(Data.DefaultAnimation);
+    }
+
     public void AddAnimation(string name, Animation animation) {
         animations.Add(name, animation);
     }

@@ -6,7 +6,7 @@ using Raylib_cs;
 
 namespace JEngine;
 
-public class AudioData {
+public class Audio {
     [JsonProperty] private string soundPath = "";
 
     public float volume    = 1;
@@ -26,9 +26,9 @@ public class AudioData {
     }
     
     [JsonConstructor]
-    public AudioData() {}
+    public Audio() {}
 
-    public AudioData(string path) {
+    public Audio(string path) {
         SetSound(path);
     }
 

@@ -5,8 +5,6 @@ using Raylib_cs;
 namespace JEngine.entities;
 
 public class RenderComponentData : ComponentData {
-    public override Type CompClass => typeof(RenderComponent);
-
     public Graphic Graphic;
 }
 

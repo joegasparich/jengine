@@ -1,4 +1,5 @@
-﻿using JEngine.entities;
+﻿using System.Numerics;
+using JEngine.entities;
 
 namespace JEngine.defs;
 

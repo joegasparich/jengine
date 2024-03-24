@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Reflection;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using JEngine.defs;
@@ -45,8 +46,8 @@ public class DefConverter : JsonConverter {
         var def = Activator.CreateInstance(objectType) as Def;
         def.id = reader.Value as string;
 
-
         // TODO: Feels hacky, make it better if I support more collections than just lists
+        // What does this even do?
         if (reader.Path.EndsWith("]") && !reader.Path.EndsWith("[0]"))
             return def;
 
@@ -104,7 +105,7 @@ public class CompJsonConverter : JsonConverter {
         var components  = new List<ComponentData>();
 
         foreach (JProperty child in token) {
-            var compType = Type.GetType($"JEngine.entities.{child.Name}");
+            var compType = TypeUtility.GetTypeByName(child.Name);
 
             if (!compType.IsAssignableTo(typeof(Component))) {
                 Debug.Warn("Component type not found: " + child.Name);
@@ -112,14 +113,21 @@ public class CompJsonConverter : JsonConverter {
             }
 
             var compDataType = compType.GetProperty("DataType")?.GetValue(null) as Type;
-            ComponentData componentData;
-            if (compDataType != null) {
-                componentData = child.Value.ToObject(compDataType, internalSerializer) as ComponentData;
-            } else {
-                componentData = child.Value.ToObject(typeof(ComponentData), internalSerializer) as ComponentData;
-                var compClassProp = componentData.GetType().GetField("compClass", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                compClassProp.SetValue(componentData, child.Name);
+
+            var searchType = compType;
+            while (compDataType == null && searchType.BaseType != null) {
+                searchType   = searchType.BaseType;
+                compDataType = searchType.GetProperty("DataType")?.GetValue(null) as Type;
             }
+
+            ComponentData componentData;
+            if (compDataType != null)
+                componentData = child.Value.ToObject(compDataType, internalSerializer) as ComponentData;
+            else
+                componentData = child.Value.ToObject(typeof(ComponentData), internalSerializer) as ComponentData;
+            
+            var compClassProp = typeof(ComponentData).GetField("compClass", BindingFlags.NonPublic | BindingFlags.Instance);
+            compClassProp.SetValue(componentData, child.Name);
             components.Add(componentData);
         }
 

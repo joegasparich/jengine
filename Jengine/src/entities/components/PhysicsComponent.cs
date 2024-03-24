@@ -4,10 +4,27 @@ using Box2DSharp.Dynamics;
 
 namespace JEngine.entities;
 
-// TODO: PhysicsComponentData
+public enum ShapeType {
+    Circle,
+    Rectangle,
+}
+
+public struct Collider {
+    public ShapeType Shape;
+    public float     Radius;
+}
+
+public class PhysicsComponentData : ComponentData {
+    public Collider Collider;
+}
+
 
 public class PhysicsComponent : Component {
+    public static Type DataType => typeof(PhysicsComponentData);
+
     private Body body;
+    
+    public PhysicsComponentData Data => (PhysicsComponentData)data;
 
     public PhysicsComponent(Entity entity, ComponentData? data = null) : base(entity, data) {}
 
@@ -19,17 +36,26 @@ public class PhysicsComponent : Component {
         def.Position = entity.Transform.LocalPosition;
         def.LinearDamping = 0.05f;
         def.FixedRotation = true;
+        
+        body = Find.Game.physics.RegisterBody(def, entity);
 
-        var shape = new CircleShape {
-            Radius = 0.5f
-        };
+        Shape shape;
+        
+        switch (Data.Collider.Shape) {
+            case ShapeType.Circle:
+                shape = new CircleShape {
+                    Radius = Data.Collider.Radius
+                };
+                break;
+            default:
+                throw new NotImplementedException();
+        }
         var fixtureDef = new FixtureDef {
             Shape = shape,
             Density = 10f,
             Friction = 0f,
         };
 
-        body = Find.Game.physics.RegisterBody(def, entity);
         body.CreateFixture(fixtureDef);
     }
 

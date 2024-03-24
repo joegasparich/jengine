@@ -17,6 +17,7 @@ public class AssetManager {
         Converters = new List<JsonConverter> {
             new DefConverter(),
             new TypeConverter(),
+            new CompJsonConverter(),
             new LerpPointsConverter()
         },
     });
@@ -220,6 +221,23 @@ public class AssetManager {
                 }
 
                 provider.SetValue(obj, genericList);
+            } else if (val.GetType().IsGenericType && val.GetType().GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
+                var dict        = (IDictionary)val;
+                var genericDict = Activator.CreateInstance(dict.GetType()) as IDictionary;
+
+                foreach (DictionaryEntry entry in dict) {
+                    var key = entry.Key;
+                    var value = entry.Value;
+                    
+                    if (key is Def kd)
+                        key = GetDef(kd.id);
+                    if (value is Def vd)
+                        value = GetDef(vd.id);
+                    
+                    genericDict.Add(key, value);
+                }
+                
+                provider.SetValue(obj, genericDict);
             } else
                 Debug.Error("Failed to resolve def reference, unsupported collection: " + val.GetType().Name);
 
@@ -247,6 +265,12 @@ public class AssetManager {
 
         return textureMap[shortPath];
     }
+
+    public Image LoadImage(string path) {
+        path = ValidatePath(path);
+
+        return Raylib.LoadImage(path);
+    }
     
     public Sound GetSound(string path) {
         var shortPath = path.Replace(SoundPath + "/", "");
@@ -269,7 +293,7 @@ public class AssetManager {
         return soundMap[shortPath];
     }
 
-    public JObject GetJson(string path) {
+    public JObject? GetJson(string path) {
         path = ValidatePath(path);
 
         if (!File.Exists(path)) {

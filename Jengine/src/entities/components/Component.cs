@@ -1,3 +1,4 @@
+using JEngine.util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -10,7 +11,7 @@ public class ComponentData {
     [JsonProperty]
     private string compClass;
 
-    public virtual Type CompClass => Type.GetType("JEngine.entities." + compClass);
+    public virtual Type CompClass => TypeUtility.GetTypeByName(compClass);
 }
 
 public abstract class Component : ISerialisable {
@@ -25,6 +26,9 @@ public abstract class Component : ISerialisable {
     public Component(Entity entity, ComponentData? data = null) {
         this.entity = entity;
         this.data   = data;
+        
+        if (this.data == null && GetType().GetProperty("DataType")?.GetValue(null) is Type type)
+            this.data = Activator.CreateInstance(type) as ComponentData;
     }
 
     public virtual void Setup(bool fromSave) {

@@ -1,8 +1,6 @@
 namespace JEngine.entities;
 
 public class AutoDestroyComponentData : ComponentData {
-    public override Type CompClass => typeof(AutoDestroyComponent);
-    
     public int Timer;
 }
 

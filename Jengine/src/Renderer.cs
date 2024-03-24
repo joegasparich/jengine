@@ -77,7 +77,7 @@ public class Renderer {
         {
             Raylib.BeginTextureMode(screenBuffer);
             {
-                Raylib.ClearBackground(Color.Gray);
+                Raylib.ClearBackground(Color.Black);
 
                 Raylib.BeginMode3D(camera.Cam);
                 {
@@ -131,7 +131,8 @@ public class Renderer {
     }
 
     public float GetDepth(float yPos) {
-        return Math.Clamp(yPos / Game.LargerThanWorld, 0, 1) * -1 + (int)Depth.YSorting;
+        var posRelToCam = yPos - camera.WorldPos.Y;
+        return Math.Clamp(posRelToCam / 10000, 0, 1) * -1 + (int)Depth.YSorting;
     }
 
     public void Draw(
@@ -154,12 +155,8 @@ public class Renderer {
         source ??= new Rectangle(0, 0, 1, 1);
         color  ??= Color.White;
 
-        bool IsPosOnScreen(Vector2 pos, float margin) => 
-            pos.X > camera.Position.X - Find.Game.ScreenWidth / 2f - margin && pos.X < camera.Position.X + Find.Game.ScreenWidth / 2f + margin && 
-            pos.Y > camera.Position.Y - Find.Game.ScreenHeight / 2f - margin && pos.Y < camera.Position.Y + Find.Game.ScreenHeight / 2f + margin;
-
         // Cull offscreen draw calls
-        if (!now && !IsPosOnScreen(pos, MathF.Max(scale.Value.X, scale.Value.Y)))
+        if (!now && !IsWorldPosOnScreen(pos, MathF.Max(scale.Value.X, scale.Value.Y)))
             return;
 
         var src = new Rectangle(

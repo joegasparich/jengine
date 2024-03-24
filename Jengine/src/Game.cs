@@ -26,7 +26,6 @@ public class Game {
     public const  int    DefaultScreenWidth  = 1280;
     public const  int    DefaultScreenHeight = 720;
     private const string ConfigFilePath      = "config.json";
-    public const  int    LargerThanWorld     = 10000;
 
     public GameConfig   gameConfig;
     public PlayerConfig playerConfig;
@@ -228,11 +227,9 @@ public class Game {
                 entity.OnInput(evt);
         }
 
-        if (!evt.consumed)
-            sceneManager.GetCurrentScene()?.OnInput(evt);
-
-        if (!evt.consumed)
-            renderer.camera.OnInput(evt);
+        sceneManager.GetCurrentScene()?.OnInput(evt);
+        physics.OnInput(evt);
+        renderer.camera.OnInput(evt);
     }
 
     public virtual void OnGUI() {
@@ -251,7 +248,7 @@ public class Game {
         SaveConfig();
     }
 
-        public int RegisterEntity(Entity entity, int? id) {
+        public int RegisterEntity(Entity entity, int? id = null) {
         entity.id = id ?? nextEntityId++;
 
         entitiesToAdd.Add(entity);

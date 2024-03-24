@@ -47,4 +47,20 @@ public class Rand {
     public static bool Chance(float chance) {
         return Float(0, 1) < chance;
     }
+
+    public static T ElementByWeight<T>(IEnumerable<(T, float)> elements) {
+        float totalWeight = 0;
+        foreach (var e in elements)
+            totalWeight += e.Item2;
+
+        var   random      = Float(0, totalWeight);
+        
+        foreach (var (element, weight) in elements) {
+            if (random < weight)
+                return element;
+            random -= weight;
+        }
+        
+        return elements.Last().Item1;
+    }
 }
