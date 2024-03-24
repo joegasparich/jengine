@@ -41,7 +41,7 @@ public static class Gui {
     public const            int   Margin         = 10;
     public const            int   ButtonHeight   = 30;
     public const            int   HeaderFontSize = 20;
-    private static readonly Color _highlightColor = new(255, 255, 255, 150);
+    private static readonly Color highlightColor = new(255, 255, 255, 150);
     public static readonly  Color UiButtonColour = new(230, 230, 230, 255);
     private const           float FontSpacing    = 0f;
 
@@ -51,15 +51,15 @@ public static class Gui {
     public static int       FontSize   = UiManager.DefaultFontSize;
     
     // State
-    private static Stack<ClipPlane> _clipPlanePool    = new();
-    private static Stack<ClipPlane> _activeClipPlanes = new();
+    private static Stack<ClipPlane> clipPlanePool    = new();
+    private static Stack<ClipPlane> activeClipPlanes = new();
     
     // Properties
-    public static float UiScale => Find.UI.UiScale;
+    public static float UiScale => Find.Ui.UiScale;
 
     static Gui() {
         for (var i = 0; i < 10; i++) {
-            _clipPlanePool.Push(new ClipPlane());
+            clipPlanePool.Push(new ClipPlane());
         }
     }
 
@@ -79,29 +79,29 @@ public static class Gui {
 
     public static Vector2 MeasureText(string text) {
         var scaledFontSize = FontSize * UiScale;
-        return Raylib.MeasureTextEx(Find.UI.DefaultFont, text, scaledFontSize, FontSpacing);
+        return Raylib.MeasureTextEx(Find.Ui.DefaultFont, text, scaledFontSize, FontSpacing);
     }
     public static Vector2 MeasureText(FormattedString text) {
         var scaledFontSize = FontSize * UiScale;
-        return Raylib.MeasureTextEx(Find.UI.DefaultFont, text.StripTags, scaledFontSize, FontSpacing);
+        return Raylib.MeasureTextEx(Find.Ui.DefaultFont, text.StripTags, scaledFontSize, FontSpacing);
     }
     
     // Clipping
     public static void StartClip(Rectangle rect) {
-        if (_clipPlanePool.NullOrEmpty()) {
+        if (clipPlanePool.NullOrEmpty()) {
             Debug.Error("Ran out of clip planes!");
             return;
         }
         
-        var plane = _clipPlanePool.Pop();
+        var plane = clipPlanePool.Pop();
         plane.SetRect(rect);
         Raylib.BeginTextureMode(plane.RenderTexture);
-        _activeClipPlanes.Push(plane);
+        activeClipPlanes.Push(plane);
     }
 
     public static void EndClip() {
         Raylib.EndTextureMode();
-        var plane = _activeClipPlanes.Pop();
+        var plane = activeClipPlanes.Pop();
         
         Raylib.DrawTexturePro(
             plane.RenderTexture.Texture,
@@ -112,31 +112,31 @@ public static class Gui {
             Color.White
         );
         
-        _clipPlanePool.Push(plane);
+        clipPlanePool.Push(plane);
     }
     
     // Draw functions
     public static void DrawRect(Rectangle rect, Color col) {
-        if (Find.UI.CurrentEvent != UIEvent.Draw) 
+        if (Find.Ui.CurrentEvent != UiEvent.Draw) 
             return;
 
-        var absRect = Find.UI.GetAbsRect(rect);
+        var absRect = Find.Ui.GetAbsRect(rect);
         Raylib.DrawRectangle(absRect.X.RoundToInt(), absRect.Y.RoundToInt(), absRect.Width.RoundToInt(), absRect.Height.RoundToInt(), col);
     }
     
     public static void DrawBorder(Rectangle rect, int thickness, Color col) {
-        if (Find.UI.CurrentEvent != UIEvent.Draw) 
+        if (Find.Ui.CurrentEvent != UiEvent.Draw) 
             return;
 
-        var absRect = Find.UI.GetAbsRect(rect);
+        var absRect = Find.Ui.GetAbsRect(rect);
         Raylib.DrawRectangleLinesEx(absRect, thickness, col);
     }
 
     public static void DrawTexture(Rectangle rect, Texture2D texture, Color? col = null) {
-        if (Find.UI.CurrentEvent != UIEvent.Draw) 
+        if (Find.Ui.CurrentEvent != UiEvent.Draw) 
             return;
 
-        var absRect = Find.UI.GetAbsRect(rect);
+        var absRect = Find.Ui.GetAbsRect(rect);
         Raylib.DrawTexturePro(
             texture,
             new Rectangle(0, 0, texture.Width, texture.Height),
@@ -148,10 +148,10 @@ public static class Gui {
     }
     
     public static void DrawSubTexture(Rectangle rect, Texture2D texture, Rectangle source, Color? col = null) {
-        if (Find.UI.CurrentEvent != UIEvent.Draw) 
+        if (Find.Ui.CurrentEvent != UiEvent.Draw) 
             return;
 
-        var absRect = Find.UI.GetAbsRect(rect);
+        var absRect = Find.Ui.GetAbsRect(rect);
         Raylib.DrawTexturePro(
             texture,
             new Rectangle(
@@ -168,7 +168,7 @@ public static class Gui {
     }
 
     public static void DrawTextureNPatch(Rectangle rect, Texture2D texture, int cornerSize, Color? col = null) {
-        if (Find.UI.CurrentEvent != UIEvent.Draw) 
+        if (Find.Ui.CurrentEvent != UiEvent.Draw) 
             return;
 
         var nPatchInfo = new NPatchInfo {
@@ -183,7 +183,7 @@ public static class Gui {
         Raylib.DrawTextureNPatch(
             texture,
             nPatchInfo,
-            Find.UI.GetAbsRect(rect),
+            Find.Ui.GetAbsRect(rect),
             new Vector2(0, 0),
             0,
             col ?? Color.White
@@ -191,11 +191,11 @@ public static class Gui {
     }
     
     public static void Label(Rectangle rect, FormattedString text) {
-        if (Find.UI.CurrentEvent != UIEvent.Draw) 
+        if (Find.Ui.CurrentEvent != UiEvent.Draw) 
             return;
 
         var scaledFontSize = FontSize * UiScale;
-        var absRect        = Find.UI.GetAbsRect(rect);
+        var absRect        = Find.Ui.GetAbsRect(rect);
 
         if (MeasureText(text).X > absRect.Width)
             text = WrapText(text, absRect.Width);
@@ -204,7 +204,7 @@ public static class Gui {
         var drawPos   = GetTextAlignPos(absRect, textWidth.FloorToInt());
         
         // TODO: Measure performance and maybe just use DrawTextEx as an overload if this is too slow
-        DrawFormattedText(Find.UI.DefaultFont, text, drawPos.Floor(), scaledFontSize, FontSpacing, TextColour);
+        DrawFormattedText(Find.Ui.DefaultFont, text, drawPos.Floor(), scaledFontSize, FontSpacing, TextColour);
     }
 
     public static FormattedString WrapText(FormattedString input, float maxWidth) {
@@ -218,9 +218,9 @@ public static class Gui {
         foreach (var word in words) {
             if (MeasureText(currentLine + word).X <= maxWidth) {
                 // Add the word to the current line if adding it doesn't exceed the maximum width
-                currentLine._taggedString += word._taggedString + " ";
+                currentLine.taggedString += word.taggedString + " ";
             } else {
-                wrappedText._taggedString += currentLine._taggedString.Trim() + "\n"; // Insert newline
+                wrappedText.taggedString += currentLine.taggedString.Trim() + "\n"; // Insert newline
                 currentLine =  word + " ";
             }
         }
@@ -236,18 +236,18 @@ public static class Gui {
     
     // Input functions
     public static bool ClickableArea(Rectangle rect) {
-        if (Find.UI.CurrentEvent != UIEvent.Input) 
+        if (Find.Ui.CurrentEvent != UiEvent.Input) 
             return false;
 
-        return Find.Input.GetCurrentEvent().MouseDown == MouseButton.Left && Find.UI.IsMouseOverRect(rect);
+        return Find.Input.GetCurrentEvent().MouseDown == MouseButton.Left && Find.Ui.IsMouseOverRect(rect);
     }
     
     public static bool HoverableArea(Rectangle rect) {
-        return Find.UI.IsMouseOverRect(rect);
+        return Find.Ui.IsMouseOverRect(rect);
     }
 
     public static void DrawHighlight(Rectangle rect) {
-        DrawRect(rect, _highlightColor);
+        DrawRect(rect, highlightColor);
     }
     
     // Widgets
@@ -264,7 +264,7 @@ public static class Gui {
             DrawBorder(rect, 2, Color.Black);
         
         if (HoverableArea(rect))
-            Find.UI.SetCursor(MouseCursor.PointingHand);
+            Find.Ui.SetCursor(MouseCursor.PointingHand);
 
         return ClickableArea(rect);
     }
@@ -279,7 +279,7 @@ public static class Gui {
         Label(rect, text);
 
         if (HoverableArea(rect))
-            Find.UI.SetCursor(MouseCursor.PointingHand);
+            Find.Ui.SetCursor(MouseCursor.PointingHand);
 
         return ClickableArea(rect);
     }
@@ -288,7 +288,7 @@ public static class Gui {
         DrawTexture(rect, icon, colour);
 
         if (HoverableArea(rect))
-            Find.UI.SetCursor(MouseCursor.PointingHand);
+            Find.Ui.SetCursor(MouseCursor.PointingHand);
 
         return ClickableArea(rect);
     }
@@ -299,15 +299,15 @@ public static class Gui {
         Label(rect.ContractedBy(GapTiny), text);
 
         if (HoverableArea(rect))
-            Find.UI.SetCursor(MouseCursor.IBeam);
+            Find.Ui.SetCursor(MouseCursor.IBeam);
         if (ClickableArea(rect))
-            Find.UI.SetFocus(focusId);
+            Find.Ui.SetFocus(focusId);
 
-        if (Find.UI.IsFocused(focusId)) {
+        if (Find.Ui.IsFocused(focusId)) {
             if (Find.Game.Ticks % 120 < 60)
                 DrawCaret(rect.ContractedBy(GapTiny), MeasureText(text).X);
 
-            if (Find.UI.CurrentEvent == UIEvent.Input && Find.Input.GetCurrentEvent().Type == InputEventType.Key) {
+            if (Find.Ui.CurrentEvent == UiEvent.Input && Find.Input.GetCurrentEvent().Type == InputEventType.Key) {
                 var evt = Find.Input.GetCurrentEvent();
                 if (evt.Consumed) 
                     return;
@@ -355,7 +355,7 @@ public static class Gui {
             var textMeasurements = MeasureText(text);
             var dimensions       = new Vector2(textMeasurements.X + GapSmall * 2, textMeasurements.Y + GapSmall * 2);
             
-            Find.UI.DoImmediateWindow(
+            Find.Ui.DoImmediateWindow(
                 $"{id}-tooltip",
                 new Rectangle(
                     Find.Input.GetMousePos().X,
@@ -423,9 +423,9 @@ public static class Gui {
 
 public struct TextBlock : IDisposable
 {
-    private AlignMode _oldAlignMode;
-    private Color     _oldColor;
-    private int       _oldFontSize;
+    private AlignMode oldAlignMode;
+    private Color     oldColor;
+    private int       oldFontSize;
 
     public TextBlock(AlignMode newAlignMode) : this(newAlignMode, null, null) {}
     public TextBlock(Color newColor) : this(null, newColor, null) {}
@@ -435,9 +435,9 @@ public struct TextBlock : IDisposable
     public TextBlock(Color newColor, int newFontSize) : this(null, newColor, newFontSize) {}
 
     public TextBlock(AlignMode? newAlignMode, Color? newColor, int? newFontSize) {
-        _oldAlignMode = Gui.TextAlign;
-        _oldColor     = Gui.TextColour;
-        _oldFontSize  = Gui.FontSize;
+        oldAlignMode = Gui.TextAlign;
+        oldColor     = Gui.TextColour;
+        oldFontSize  = Gui.FontSize;
 
         if (newAlignMode != null)
             Gui.TextAlign = newAlignMode.Value;
@@ -456,8 +456,8 @@ public struct TextBlock : IDisposable
 
     public void Dispose()
     {
-        Gui.TextAlign  = _oldAlignMode;
-        Gui.TextColour = _oldColor;
-        Gui.FontSize   = _oldFontSize;
+        Gui.TextAlign  = oldAlignMode;
+        Gui.TextColour = oldColor;
+        Gui.FontSize   = oldFontSize;
     }
 }

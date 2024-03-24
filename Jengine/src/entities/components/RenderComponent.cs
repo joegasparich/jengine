@@ -6,6 +6,7 @@ namespace JEngine.entities;
 
 public class RenderComponentData : ComponentData {
     public Graphic? Graphic;
+    public bool sortZ = true;
 }
 
 public class RenderComponent : Component {
@@ -15,18 +16,18 @@ public class RenderComponent : Component {
     public  Vector2        Offset = Vector2.Zero;
     public  Color?         OverrideColour;
     public  Graphic        BaseGraphic;
-    private Graphic        _bakedGraphic;
-    private List<Graphic>  _attachments = new();
+    private Graphic        bakedGraphic;
+    private List<Graphic>  attachments = new();
 
     // Properties
-    public     RenderComponentData Data     => (RenderComponentData)_data;
-    public ref Graphic?            Graphics => ref _bakedGraphic;
+    public     RenderComponentData Data     => (RenderComponentData)data;
+    public ref Graphic?            Graphics => ref bakedGraphic;
 
     private bool ShouldRender => true;
 
     public RenderComponent(Entity entity, RenderComponentData? data) : base(entity, data) {
         BaseGraphic  = data.Graphic;
-        _bakedGraphic = BaseGraphic;
+        bakedGraphic = BaseGraphic;
     }
 
     public override void Setup(bool fromSave) {
@@ -41,11 +42,11 @@ public class RenderComponent : Component {
         if (!ShouldRender)
             return;
 
-        _bakedGraphic.Draw(
+        bakedGraphic.Draw(
             pos: Entity.Transform.GlobalPosition + Offset,
             rotation: -Entity.Transform.GlobalRotation, // TODO: Figure out why its negative
             scale: Entity.Transform.GlobalScale,
-            depth: Find.Renderer.GetDepth(Entity.Transform.GlobalPosition.Y),
+            depth: Data.sortZ ? Find.Renderer.GetDepth(Entity.Transform.GlobalPosition.Y) : (int)Depth.Below,
             overrideColour: OverrideColour,
             pickId: Entity.Selectable ? Entity.Id : null
         );
@@ -56,14 +57,14 @@ public class RenderComponent : Component {
     public void AddAttachment(string spritePath) {
         var attachment = BaseGraphic;
         attachment.SetSprite(spritePath);
-        _attachments.Add(attachment);
+        attachments.Add(attachment);
 
         BakeAttachments();
     }
 
     private void BakeAttachments()
     {
-        if (_attachments.NullOrEmpty()) 
+        if (attachments.NullOrEmpty()) 
             return;
 
         // Bake the attachments into the texture
@@ -80,7 +81,7 @@ public class RenderComponent : Component {
             0,
             Color.White
         );
-        foreach (var att in _attachments) {
+        foreach (var att in attachments) {
             Raylib.DrawTexturePro(
                 att.Texture,
                 new Rectangle(0, 0, BaseGraphic.Texture.Width, -BaseGraphic.Texture.Height),
@@ -92,6 +93,6 @@ public class RenderComponent : Component {
         }
         Raylib.EndTextureMode();
 
-        _bakedGraphic.Texture = renderTexture.Texture;
+        bakedGraphic.Texture = renderTexture.Texture;
     }
 }

@@ -3,10 +3,10 @@
 namespace JEngine.util; 
 
 public static class TypeUtility {
-    public static IEnumerable<Type> GetTypesWithAttribute<Att>() where Att : Attribute {
+    public static IEnumerable<Type> GetTypesWithAttribute<TAtt>() where TAtt : Attribute {
         foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies()) {
             foreach (Type type in assembly.GetTypes()) {
-                var attribs = type.GetCustomAttributes(typeof(Att), false);
+                var attribs = type.GetCustomAttributes(typeof(TAtt), false);
                 if (attribs != null && attribs.Length > 0)
                     yield return type;
             }
@@ -42,5 +42,15 @@ public static class TypeUtility {
     public static IEnumerable<Type> GetSubclassesOfType<T>() where T : class
     {
         return Assembly.GetAssembly(typeof(T)).GetTypes().Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(T)));
+    }
+    
+    public static PropertyInfo? GetPropertyInherited(this Type type, string propertyName) {
+        while (type != null && type.BaseType != null) {
+            var property = type.GetProperty(propertyName);
+            if (property != null)
+                return property;
+            type = type.BaseType;
+        }
+        return null;
     }
 }

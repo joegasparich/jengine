@@ -26,11 +26,11 @@ public class AnimationComponentData : ComponentData {
 public class AnimationComponent(Entity entity, ComponentData? data = null) : Component(entity, data) {
     public static Type DataType => typeof(AnimationComponentData);
 
-    private   Dictionary<string, Animation> _animations = new();
+    private   Dictionary<string, Animation> animations = new();
     protected string?                       CurrentAnimation { get; private set; }
 
     protected override Type[]                  Dependencies => [typeof(RenderComponent)];
-    public             AnimationComponentData? Data         => _data as AnimationComponentData;
+    public             AnimationComponentData? Data         => data as AnimationComponentData;
     protected          RenderComponent         Render       => Entity.GetComponent<RenderComponent>()!;
 
     public override void Setup(bool fromSave) {
@@ -43,14 +43,14 @@ public class AnimationComponent(Entity entity, ComponentData? data = null) : Com
     }
 
     public void AddAnimation(string name, Animation animation) {
-        _animations.Add(name, animation);
+        animations.Add(name, animation);
     }
     
     public void PlayAnimation(string name) {
         if (CurrentAnimation == name)
             return;
         
-        if (_animations.TryGetValue(name, out var animation)) {
+        if (animations.TryGetValue(name, out var animation)) {
             Render.Graphics?.SetAnimation(animation.StartIndex, animation.NumFrames, animation.Duration, animation.Loop);
             
             CurrentAnimation = name;

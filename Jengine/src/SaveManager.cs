@@ -28,8 +28,8 @@ public enum SaveMode {
 }
 
 public class SaveFile {
-    public string name;
-    public string path;
+    public string Name;
+    public string Path;
 }
 
 public class SaveManager {
@@ -49,12 +49,12 @@ public class SaveManager {
     public JObject       CurrentSaveNode;
     public SerialiseMode Mode;
 
-    private Dictionary<ISerialisable, string> _deepSavedObjects = new();
+    private Dictionary<ISerialisable, string> deepSavedObjects = new();
 
     public void SaveCurrentScene(string name = DefaultSaveName, bool overwrite = false) {
         Debug.Log("Saving game");
 
-        _deepSavedObjects.Clear();
+        deepSavedObjects.Clear();
 
         var saveData = new JObject();
         saveData.Add("saveName", name);
@@ -119,8 +119,8 @@ public class SaveManager {
         return files.ToList()
             .OrderByDescending(File.GetLastWriteTime)
             .Select(f => new SaveFile {
-                name = Path.GetFileNameWithoutExtension(f),
-                path = f
+                Name = Path.GetFileNameWithoutExtension(f),
+                Path = f
             });
     }
 
@@ -233,7 +233,7 @@ public class SaveManager {
             case SerialiseMode.Saving:
                 if (value == null)
                     break;
-                if (_deepSavedObjects.TryGetValue(value, out var existingPath)) {
+                if (deepSavedObjects.TryGetValue(value, out var existingPath)) {
                     Debug.Warn($"{CurrentSaveNode.Path}{label} was already deep saved at {existingPath}");
                     break;
                 }
@@ -242,7 +242,7 @@ public class SaveManager {
                 CurrentSaveNode              = new JObject();
                 CurrentSaveNode["className"] = value.GetType().ToString(); 
                 value.Serialise();
-                _deepSavedObjects.Add(value, CurrentSaveNode.Path);
+                deepSavedObjects.Add(value, CurrentSaveNode.Path);
                 parent[label] = CurrentSaveNode;
                 break;
             case SerialiseMode.Loading:
@@ -286,7 +286,7 @@ public class SaveManager {
             case SerialiseMode.Saving:
                 if (value == null)
                     break;
-                if (_deepSavedObjects.TryGetValue(value, out var existingPath)) {
+                if (deepSavedObjects.TryGetValue(value, out var existingPath)) {
                     Debug.Warn($"{CurrentSaveNode.Path}{label} was already deep saved at {existingPath}");
                     break;
                 }
@@ -294,7 +294,7 @@ public class SaveManager {
                 CurrentSaveNode = new JObject();
                 CurrentSaveNode["className"] = value.GetType().ToString(); 
                 value.Serialise();
-                _deepSavedObjects.Add(value, CurrentSaveNode.Path);
+                deepSavedObjects.Add(value, CurrentSaveNode.Path);
                 parent[label] = CurrentSaveNode;
                 break;
             case SerialiseMode.Loading:
@@ -342,13 +342,13 @@ public class SaveManager {
                             
                             var serialisable = value as ISerialisable;
                             
-                            if (_deepSavedObjects.TryGetValue(serialisable, out var existingPath)) {
+                            if (deepSavedObjects.TryGetValue(serialisable, out var existingPath)) {
                                 Debug.Warn($"{CurrentSaveNode.Path}{label} was already deep saved at {existingPath}");
                                 break;
                             }
                             
                             serialisable.Serialise();
-                            _deepSavedObjects.Add(serialisable, CurrentSaveNode.Path);
+                            deepSavedObjects.Add(serialisable, CurrentSaveNode.Path);
                             break;
                     }
                 }
@@ -422,13 +422,13 @@ public class SaveManager {
                     CurrentSaveNode = new JObject();
                     array.Add(CurrentSaveNode);
                     
-                    if (_deepSavedObjects.TryGetValue(value, out var existingPath)) {
+                    if (deepSavedObjects.TryGetValue(value, out var existingPath)) {
                         Debug.Warn($"{CurrentSaveNode.Path}{label} was already deep saved at {existingPath}");
                         break;
                     }
                     
                     value.Serialise();
-                    _deepSavedObjects.Add(value, CurrentSaveNode.Path);
+                    deepSavedObjects.Add(value, CurrentSaveNode.Path);
                 }
                 parent[label] = array;
                 break;
@@ -461,13 +461,13 @@ public class SaveManager {
                    CurrentSaveNode = new JObject();
                    array.Add(CurrentSaveNode);
                    
-                   if (_deepSavedObjects.TryGetValue(value, out var existingPath)) {
+                   if (deepSavedObjects.TryGetValue(value, out var existingPath)) {
                        Debug.Warn($"{CurrentSaveNode.Path}{label} was already deep saved at {existingPath}");
                        break;
                    }
                    
                    value.Serialise();
-                   _deepSavedObjects.Add(value, CurrentSaveNode.Path);
+                   deepSavedObjects.Add(value, CurrentSaveNode.Path);
                }
                parent[label] = array;
                break;

@@ -9,25 +9,25 @@ namespace JEngine.entities;
 /// </summary>
 public class ComponentData {
     [JsonProperty]
-    private string _compClass;
+    private string compClass;
 
-    public virtual Type CompClass => TypeUtility.GetTypeByName(_compClass);
+    public virtual Type CompClass => TypeUtility.GetTypeByName(compClass);
 }
 
 public abstract class Component : ISerialisable {
     // References
     public readonly    Entity         Entity;
-    protected readonly ComponentData? _data;
+    protected readonly ComponentData? data;
     
     // Properties
     protected virtual Type[] Dependencies => Array.Empty<Type>();
     
     public Component(Entity entity, ComponentData? data = null) {
-        Entity = entity;
-        _data   = data;
+        Entity    = entity;
+        this.data = data;
         
-        if (_data == null && GetType().GetProperty("DataType")?.GetValue(null) is Type type)
-            _data = Activator.CreateInstance(type) as ComponentData;
+        if (this.data == null && GetType().GetPropertyInherited("DataType")?.GetValue(null) is Type type)
+            this.data = Activator.CreateInstance(type) as ComponentData;
     }
 
     public virtual void Setup(bool fromSave) {
@@ -48,12 +48,12 @@ public abstract class Component : ISerialisable {
     public virtual void Serialise() {
         Find.SaveManager.ArchiveValue("type", () => GetType().ToString(), null);
 
-        if (Entity.Def == null && _data != null) {
+        if (Entity.Def == null && data != null) {
             Find.SaveManager.ArchiveCustom("data",
                 () => {
                     var saveData = new JObject();
-                    saveData.Add("type", _data.GetType().ToString());
-                    saveData.Add("val", JToken.FromObject(_data, Find.SaveManager.Serializer));
+                    saveData.Add("type", data.GetType().ToString());
+                    saveData.Add("val", JToken.FromObject(data, Find.SaveManager.Serializer));
                     return saveData;
                 },
                 _ => {},

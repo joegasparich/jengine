@@ -7,22 +7,22 @@ using Raylib_cs;
 namespace JEngine;
 
 public class Audio {
-    [JsonProperty] private string _soundPath = "";
+    [JsonProperty] private string soundPath = "";
 
     public float Volume    = 1;
     public float FalloffPx = 2000;
     
     // Properties
-    private Sound _sound;
+    private Sound sound;
     public Sound Sound
     {
         get {
-            if (!Raylib.IsSoundReady(_sound))
-                _sound = Find.AssetManager.GetSound(_soundPath);
+            if (!Raylib.IsSoundReady(sound))
+                sound = Find.AssetManager.GetSound(soundPath);
 
-            return _sound;
+            return sound;
         }
-        set => _sound = value;
+        set => sound = value;
     }
     
     [JsonConstructor]
@@ -33,8 +33,8 @@ public class Audio {
     }
 
     public void SetSound(string path) {
-        _soundPath = path;
-        Sound     = Find.AssetManager.GetSound(_soundPath);
+        soundPath = path;
+        Sound     = Find.AssetManager.GetSound(soundPath);
     }
 
     public void PlayOnCamera() {

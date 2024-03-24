@@ -14,6 +14,6 @@ public static class Find
     public static SceneManager   SceneManager => Game.SceneManager;
     public static SaveManager    SaveManager  => Game.SaveManager;
     public static Camera         Camera       => Renderer.Camera;
-    public static UiManager      UI           => Game.Ui;
+    public static UiManager      Ui           => Game.Ui;
     public static PhysicsManager Physics      => Game.Physics;
 }

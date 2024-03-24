@@ -16,27 +16,27 @@ public class Dialog : Window {
     public           bool   ShowCloseX = false;
     public           bool   Draggable;
     public           int    HeaderHeight     = DefaultWindowHeaderHeight;
-    private readonly bool   _doBackground     = true;
-    protected        Color  _backgroundColour = Color.White;
+    private readonly bool   doBackground     = true;
+    protected        Color  backgroundColour = Color.White;
     
     // State
-    protected bool    _headerHovered;
-    protected bool    _isDragging;
-    private   Vector2 _dragPos = Vector2.Zero;
+    protected bool    headerHovered;
+    protected bool    isDragging;
+    private   Vector2 dragPos = Vector2.Zero;
 
     public Dialog(Rectangle rect) : base(rect) {}
     public Dialog(string id, Rectangle rect, Action<Rectangle> onUi, bool doBackground = true) : base(id, rect, onUi) {
-        _doBackground = doBackground;
+        this.doBackground = doBackground;
     }
 
     public override void DoWindowContents() {
-        if (_isDragging) {
-            var newPos = Find.Input.GetMousePos() - _dragPos;
+        if (isDragging) {
+            var newPos = Find.Input.GetMousePos() - dragPos;
             AbsRect = AbsRect with { X = newPos.X, Y = newPos.Y };
         }
         
-        if (_doBackground)
-            Gui.DrawTextureNPatch(GetRect(), Find.AssetManager.GetTexture(WindowNPatchPath), 20, _backgroundColour);
+        if (doBackground)
+            Gui.DrawTextureNPatch(GetRect(), Find.AssetManager.GetTexture(WindowNPatchPath), 20, backgroundColour);
         
         var headerRect = new Rectangle(0, 0, GetWidth(), HeaderHeight);
         if (!Title.NullOrEmpty()) {
@@ -44,17 +44,17 @@ public class Dialog : Window {
                 Gui.Label(headerRect, Title);
         }
         
-        _headerHovered = false;
+        headerHovered = false;
         if (Gui.HoverableArea(headerRect)) {
-            _headerHovered = true;
+            headerHovered = true;
         
             if (Draggable)
-                Find.UI.SetCursor(MouseCursor.PointingHand);
+                Find.Ui.SetCursor(MouseCursor.PointingHand);
         }
 
         if (ShowCloseX) {
             if (Gui.ButtonIcon(new Rectangle(GetWidth() - CloseIconSize - Gui.GapTiny, Gui.GapTiny, CloseIconSize, CloseIconSize), Find.AssetManager.GetTexture(CloseIcon), Color.Gray))
-                Find.UI.CloseWindow(Id);
+                Find.Ui.CloseWindow(Id);
         }
         
         base.DoWindowContents();
@@ -68,14 +68,14 @@ public class Dialog : Window {
         
         // Dragging
         if (Draggable) {
-            if (_headerHovered && evt.MouseDown == MouseButton.Left) {
-                _dragPos    = evt.MousePos - new Vector2(AbsRect.X, AbsRect.Y);
-                _isDragging = true;
-                Find.UI.BringWindowToFront(Id);
+            if (headerHovered && evt.MouseDown == MouseButton.Left) {
+                dragPos    = evt.MousePos - new Vector2(AbsRect.X, AbsRect.Y);
+                isDragging = true;
+                Find.Ui.BringWindowToFront(Id);
                 evt.Consume();
             }
-            if (_isDragging && evt.MouseUp == MouseButton.Left) {
-                _isDragging = false;
+            if (isDragging && evt.MouseUp == MouseButton.Left) {
+                isDragging = false;
                 evt.Consume();
             }
         }

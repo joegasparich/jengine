@@ -11,7 +11,7 @@ namespace JEngine;
 //-- Converters --//
 
 public class DefConverter : JsonConverter {
-    private bool _skipOverMe;
+    private bool skipOverMe;
 
     public override bool CanConvert(Type objectType) {
         return objectType.IsAssignableTo(typeof(Def));
@@ -19,10 +19,10 @@ public class DefConverter : JsonConverter {
 
     public override bool CanRead {
         get {
-            if (!_skipOverMe) 
+            if (!skipOverMe) 
                 return true;
 
-            _skipOverMe = false;
+            skipOverMe = false;
             return false;
 
         }
@@ -34,7 +34,7 @@ public class DefConverter : JsonConverter {
     public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer, JsonProperty prop, object target) {
         // Skip over root level Defs so they can be deserialized normally
         if (reader.Depth == 0) {
-            _skipOverMe = true;
+            skipOverMe = true;
             return serializer.Deserialize(reader, objectType);
         }
 
@@ -126,7 +126,7 @@ public class CompJsonConverter : JsonConverter {
             else
                 componentData = child.Value.ToObject(typeof(ComponentData), internalSerializer) as ComponentData;
             
-            var compClassProp = typeof(ComponentData).GetField("_compClass", BindingFlags.NonPublic | BindingFlags.Instance);
+            var compClassProp = typeof(ComponentData).GetField("compClass", BindingFlags.NonPublic | BindingFlags.Instance);
             compClassProp.SetValue(componentData, child.Name);
             components.Add(componentData);
         }

@@ -34,9 +34,9 @@ public class InputEvent {
 
 public class InputManager {
     // Constants
-    private const int _mouseButtonNull = -1;
-    private static readonly int _mouseButtonMax  = (int)MouseButton.Back;
-    private static readonly int _keyMax          = (int)KeyboardKey.KeyboardMenu;
+    private const int MouseButtonNull = -1;
+    private static readonly int mouseButtonMax  = (int)MouseButton.Back;
+    private static readonly int keyMax          = (int)KeyboardKey.KeyboardMenu;
     
     // Collections
     // private Dictionary<KeyboardKey, InputType[]> inputs = new() {
@@ -52,11 +52,11 @@ public class InputManager {
     // };
 
     // State
-    private InputEvent _currentEvent;
+    private InputEvent currentEvent;
 
     public void ProcessInput() {
         // Key events
-        for (int k = 0; k < _keyMax; k++) {
+        for (int k = 0; k < keyMax; k++) {
             var key = (KeyboardKey)k;
             if (!Raylib.IsKeyPressed(key) && !Raylib.IsKeyReleased(key) && !Raylib.IsKeyDown(key))
                 continue;
@@ -84,7 +84,7 @@ public class InputManager {
         }
         
         // Mouse events
-        for (int mb = 0; mb < _mouseButtonMax; mb++) {
+        for (int mb = 0; mb < mouseButtonMax; mb++) {
             var mouseButton = (MouseButton)mb;
             if (!Raylib.IsMouseButtonPressed(mouseButton) && !Raylib.IsMouseButtonReleased(mouseButton) && !Raylib.IsMouseButtonDown(mouseButton))
                 continue;
@@ -109,7 +109,7 @@ public class InputManager {
     }
 
     public void FireInputEvent(InputEvent evt) {
-        _currentEvent = evt;
+        currentEvent = evt;
         
         Find.Game.OnInput(evt);
         // Messenger::fire(EventType::InputEvent);
@@ -150,6 +150,6 @@ public class InputManager {
     }
     
     public InputEvent GetCurrentEvent() {
-        return _currentEvent;
+        return currentEvent;
     }
 }

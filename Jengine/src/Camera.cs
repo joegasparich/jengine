@@ -6,11 +6,11 @@ namespace JEngine;
 
 public class Camera {
     // State
-    private Camera3D _camera;
+    private Camera3D camera;
     public  float    Zoom = 1f;
 
-    public Camera3D Cam      => _camera;
-    public Vector2  Position => _camera.Position.XY();
+    public Camera3D Cam      => camera;
+    public Vector2  Position => camera.Position.Xy();
     public Vector2  WorldPos
     {
         get => Position / Find.Config.WorldScalePx;
@@ -18,7 +18,7 @@ public class Camera {
     }
 
     public Camera() {
-        _camera = new Camera3D {
+        camera = new Camera3D {
             Projection = CameraProjection.Orthographic,
             FovY       = Game.DefaultScreenHeight / Zoom,
             Position   = new Vector3(0, 0,  (int)Depth.Camera),
@@ -32,14 +32,14 @@ public class Camera {
 
     public void JumpTo(Vector2 worldPos) {
         var camPos = worldPos * Find.Config.WorldScalePx;
-        _camera.Position.X = camPos.X;
-        _camera.Position.Y = camPos.Y;
-        _camera.Target     = _camera.Position with { Z = 0 };
+        camera.Position.X = camPos.X;
+        camera.Position.Y = camPos.Y;
+        camera.Target     = camera.Position with { Z = 0 };
 
-        _camera.FovY = Find.Game.ScreenHeight / Zoom;
+        camera.FovY = Find.Game.ScreenHeight / Zoom;
     }
 
     public void OnScreenResized() {
-        _camera.FovY = Find.Game.ScreenHeight / Zoom;
+        camera.FovY = Find.Game.ScreenHeight / Zoom;
     }
 }

@@ -3,7 +3,7 @@ using JEngine.util;
 
 namespace JEngine.ui;
 
-public enum UIEvent {
+public enum UiEvent {
     None,
     Draw,
     Input
@@ -18,18 +18,18 @@ public class UiManager {
     public readonly Font DefaultFont = Raylib.LoadFontEx(DefaultFontPath, DefaultFontSize, null, 0);
     
     // State
-    private List<Window>               _windowStack       = new();
-    private Dictionary<string, Window> _openWindowMap     = new();
-    private List<Window>               _windowsToOpen     = new();
-    private HashSet<string>            _windowsToClose    = new();
-    private HashSet<string>            _immediateWindows  = new();
-    public  UIEvent                    CurrentEvent      = UIEvent.Draw;
+    private List<Window>               windowStack       = new();
+    private Dictionary<string, Window> openWindowMap     = new();
+    private List<Window>               windowsToOpen     = new();
+    private HashSet<string>            windowsToClose    = new();
+    private HashSet<string>            immediateWindows  = new();
+    public  UiEvent                    CurrentEvent      = UiEvent.Draw;
     public  Rectangle                  CurrentDrawBounds = new(0, 0, Find.Game.ScreenWidth, Find.Game.ScreenHeight); // TODO: Dynamic
 
-    private MouseCursor _cursor;
-    private string      _hoveredWindowId;
-    private string      _currentWindowId;
-    private string?     _currentFocusId = null;
+    private MouseCursor cursor;
+    private string      hoveredWindowId;
+    private string      currentWindowId;
+    private string?     currentFocusId = null;
     
     // Properties
     public float UiScale => Find.Game.PlayerConfig.UiScale;
@@ -41,33 +41,33 @@ public class UiManager {
     }
 
     public void OnInput(InputEvent evt) {
-        CurrentEvent = UIEvent.Input;
+        CurrentEvent = UiEvent.Input;
         
         // Lose focus
         if (evt.KeyDown is KeyboardKey.Escape || evt.MouseDown is MouseButton.Left)
-            _currentFocusId = null;
+            currentFocusId = null;
         
         Find.Game.OnGUI();
         
         // Clear closed immediate windows
-        for (var i = _windowStack.Count - 1; i >= 0; i--) {
-            if (_windowStack[i].Immediate && !_immediateWindows.Contains(_windowStack[i].Id)) {
-                _openWindowMap.Remove(_windowStack[i].Id);
-                _windowStack.RemoveAt(i);
+        for (var i = windowStack.Count - 1; i >= 0; i--) {
+            if (windowStack[i].Immediate && !immediateWindows.Contains(windowStack[i].Id)) {
+                openWindowMap.Remove(windowStack[i].Id);
+                windowStack.RemoveAt(i);
             }
         }
-        _immediateWindows.Clear();
+        immediateWindows.Clear();
         
         // Loop backwards so that top windows consume events first
-        for (var i = _windowStack.Count - 1; i >= 0; i--) {
-            var window = _windowStack[i];
+        for (var i = windowStack.Count - 1; i >= 0; i--) {
+            var window = windowStack[i];
 
             var mouseOver = JMath.PointInRect(window.AbsRect, evt.MousePos);
-            if (_hoveredWindowId.NullOrEmpty() && mouseOver && window.ConsumesHover)
-                _hoveredWindowId = window.Id;
+            if (hoveredWindowId.NullOrEmpty() && mouseOver && window.ConsumesHover)
+                hoveredWindowId = window.Id;
             
             CurrentDrawBounds = window.AbsRect;
-            _currentWindowId = window.Id;
+            currentWindowId = window.Id;
             window.OnInput(evt);
             
             // Consume event if it's a mouse button down on the window
@@ -77,12 +77,12 @@ public class UiManager {
             }
         }
         CurrentDrawBounds = new Rectangle(0, 0, Find.Game.ScreenWidth, Find.Game.ScreenHeight);
-        CurrentEvent      = UIEvent.None;
+        CurrentEvent      = UiEvent.None;
     }
 
     public void PostInput(InputEvent evt) {
         if (!evt.Consumed && evt.MouseDown == MouseButton.Right) {
-            foreach (var window in _windowStack) {
+            foreach (var window in windowStack) {
                 if (window.DismissOnRightClick) {
                     CloseWindow(window.Id);
                     evt.Consume();
@@ -93,105 +93,105 @@ public class UiManager {
     }
 
     public void PreRender() {
-        Raylib.SetMouseCursor(_cursor);
+        Raylib.SetMouseCursor(cursor);
         SetCursor(MouseCursor.Default);
     }
 
     public void DrawUi() {
-        CurrentEvent = UIEvent.Draw;
+        CurrentEvent = UiEvent.Draw;
         Find.Game.OnGUI();
 
         // Clear closed immediate windows
-        for (var i = _windowStack.Count - 1; i >= 0; i--) {
-            if (_windowStack[i].Immediate && !_immediateWindows.Contains(_windowStack[i].Id)) {
-                _openWindowMap.Remove(_windowStack[i].Id);
-                _windowStack.RemoveAt(i);
+        for (var i = windowStack.Count - 1; i >= 0; i--) {
+            if (windowStack[i].Immediate && !immediateWindows.Contains(windowStack[i].Id)) {
+                openWindowMap.Remove(windowStack[i].Id);
+                windowStack.RemoveAt(i);
             }
         }
-        _immediateWindows.Clear();
+        immediateWindows.Clear();
         
         // First loop through in reverse to find the hovered window
-        for (var i = _windowStack.Count - 1; i >= 0; i--) {
-            var window = _windowStack[i];
+        for (var i = windowStack.Count - 1; i >= 0; i--) {
+            var window = windowStack[i];
             if (JMath.PointInRect(window.AbsRect.Multiply(UiScale), Find.Input.GetMousePos()) && window.ConsumesHover) {
-                _hoveredWindowId = window.Id;
+                hoveredWindowId = window.Id;
                 break;
             }
         }
         
         // Render windows
-        foreach (var window in _windowStack) {
+        foreach (var window in windowStack) {
             CurrentDrawBounds = window.AbsRect;
-            _currentWindowId   = window.Id;
+            currentWindowId   = window.Id;
             window.DoWindowContents();
         }
         
         CurrentDrawBounds = new Rectangle(0, 0, Find.Game.ScreenWidth, Find.Game.ScreenHeight);
-        CurrentEvent      = UIEvent.None;
+        CurrentEvent      = UiEvent.None;
     }
 
     public void PostRender() {
-        _windowStack.RemoveAll(window => _windowsToClose.Contains(window.Id));
-        _windowStack.AddRange(_windowsToOpen);
+        windowStack.RemoveAll(window => windowsToClose.Contains(window.Id));
+        windowStack.AddRange(windowsToOpen);
         
-        _windowsToOpen.Clear();
-        _windowsToClose.Clear();
+        windowsToOpen.Clear();
+        windowsToClose.Clear();
     }
 
     public void OnScreenResized() {
-        foreach (var window in _windowStack) {
+        foreach (var window in windowStack) {
             window.OnScreenResized(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
         }
     }
 
     public string PushWindow(Window window) {
-        _windowsToOpen.Add(window);
-        _openWindowMap.Add(window.Id, window);
+        windowsToOpen.Add(window);
+        openWindowMap.Add(window.Id, window);
         return window.Id;
     }
 
     public void CloseWindow(string id) {
-        if (!_openWindowMap.ContainsKey(id)) 
+        if (!openWindowMap.ContainsKey(id)) 
             return;
         
-        _openWindowMap[id].OnClose();
+        openWindowMap[id].OnClose();
         
-        _openWindowMap.Remove(id);
-        _windowsToClose.Add(id);
+        openWindowMap.Remove(id);
+        windowsToClose.Add(id);
     }
     
     public void CloseAllWindows() {
-        foreach (var window in _windowStack) {
+        foreach (var window in windowStack) {
             window.OnClose();
         }
-        _windowStack.Clear();
-        _windowsToOpen.Clear();
-        _openWindowMap.Clear();
+        windowStack.Clear();
+        windowsToOpen.Clear();
+        openWindowMap.Clear();
     }
 
     public void BringWindowToFront(string id) {
-        var index = _windowStack.FindIndex(window => window.Id == id);
-        _windowStack.MoveItemAtIndexToBack(index);
+        var index = windowStack.FindIndex(window => window.Id == id);
+        windowStack.MoveItemAtIndexToBack(index);
     }
     
     public Window? GetWindow(string id) {
-        return _openWindowMap.TryGetValue(id, out var window) ? window : null;
+        return openWindowMap.TryGetValue(id, out var window) ? window : null;
     }
     
     public bool IsWindowOpen(string id) {
         if (id.NullOrEmpty()) 
             return false;
         
-        return _openWindowMap.ContainsKey(id);
+        return openWindowMap.ContainsKey(id);
     }
 
     public void DoImmediateWindow(string id, Rectangle rect, Action<Rectangle> onUi, bool draggable = false, bool dialog = true, bool consumesHover = true) {
-        if (CurrentEvent == UIEvent.None) {
+        if (CurrentEvent == UiEvent.None) {
             Debug.Warn("Immediate windows must be called in OnGUI");
             return;
         }
         
-        var found = _openWindowMap.ContainsKey(id);
+        var found = openWindowMap.ContainsKey(id);
 
         if (!found) {
             Window window;
@@ -204,22 +204,22 @@ public class UiManager {
             PushWindow(window);
         } else {
             if (!draggable)
-                _openWindowMap[id].AbsRect = rect;
+                openWindowMap[id].AbsRect = rect;
         }
 
-        _immediateWindows.Add(id);
+        immediateWindows.Add(id);
     }
 
     public void SetCursor(MouseCursor c) {
-        _cursor = c;
+        cursor = c;
     }
     
     public void SetFocus(string focusId) {
-        _currentFocusId = focusId;
+        currentFocusId = focusId;
     }
     
     public bool IsFocused(string focusId) {
-        return _currentFocusId == focusId;
+        return currentFocusId == focusId;
     }
 
     public Rectangle GetAbsRect(Rectangle rect) {
@@ -231,7 +231,7 @@ public class UiManager {
     }
 
     public bool IsMouseOverRect(Rectangle rect) {
-        if (_currentWindowId != _hoveredWindowId)
+        if (currentWindowId != hoveredWindowId)
             return false;
         
         return JMath.PointInRect(GetAbsRect(rect), Find.Input.GetMousePos());

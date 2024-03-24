@@ -18,9 +18,9 @@ public static class JMath {
     public const float RadToDeg = 180f / (float)Math.PI;
     
     // Vectors
-    public static Vector2 XY(this Vector3 v) => new Vector2(v.X, v.Y);
-    public static Vector2 XZ(this Vector3 v) => new Vector2(v.X, v.Z);
-    public static Vector2 YZ(this Vector3 v) => new Vector2(v.Y, v.Z);
+    public static Vector2 Xy(this Vector3 v) => new Vector2(v.X, v.Y);
+    public static Vector2 Xz(this Vector3 v) => new Vector2(v.X, v.Z);
+    public static Vector2 Yz(this Vector3 v) => new Vector2(v.Y, v.Z);
     
     // Collision
     public static bool PointInRect(Rectangle rect, Vector2 point) {

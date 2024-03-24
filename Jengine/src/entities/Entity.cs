@@ -1,3 +1,4 @@
+using System.Numerics;
 using Newtonsoft.Json.Linq;
 using JEngine.defs;
 using JEngine.util;
@@ -11,39 +12,42 @@ public static class EntityTags {
 public class Entity : ISerialisable, IReferencable {
     // Config
     public           int                         Id;
-    private readonly Dictionary<Type, Component> _components = new();
-    private          EntityDef?                  _def;
-    private          HashSet<string>             _tags = new();
-    private          string?                     _name;
+    private readonly Dictionary<Type, Component> components = new();
+    private          EntityDef?                  def;
+    private          HashSet<string>             tags = new();
+    private          string?                     name;
 
     // State
-    private Transform _transform;
+    private Transform transform;
     public  Entity?   Parent;
 
     // Unsaved
     public bool Destroyed;
     
     // Properties
-    public         IEnumerable<Component> Components => _components.Values;
-    public virtual EntityDef?             Def        => _def;
-    public virtual string                 Name       => _name ?? Def?.Name ?? "Unnamed Entity";
+    public         IEnumerable<Component> Components => components.Values;
+    public virtual EntityDef?             Def        => def;
+    public virtual string                 Name       => name ?? Def?.Name ?? "Unnamed Entity";
     public         RenderComponent?       Renderer   => GetComponent<RenderComponent>();
     public         Graphic?               Graphic    => GetComponent<RenderComponent>()?.Graphics;
     public virtual bool                   Selectable => true;
-    public         IEnumerable<string>    Tags       => _tags;
-    public         Transform              Transform  => _transform;
+    public         IEnumerable<string>    Tags       => tags;
+    public         Transform              Transform  => transform;
+    public         Vector2                Position   => transform.GlobalPosition;
+    public         float                  Rotation   => transform.GlobalRotation;
+    public         Vector2                Scale      => transform.GlobalScale;
 
     public Entity() {
-        _transform = new Transform(this);
+        transform = new Transform(this);
     }
     public Entity(EntityDef? def) {
-        _transform = new Transform(this);
+        transform = new Transform(this);
         
-        _def = def;
+        this.def = def;
 
         if (def?.Tags != null) {
             foreach (var tag in def.Tags) {
-                _tags.Add(tag);
+                tags.Add(tag);
             }
         }
     }
@@ -51,67 +55,67 @@ public class Entity : ISerialisable, IReferencable {
     public virtual void Serialise() {
         Find.SaveManager.ArchiveValue("type", () => GetType().ToString(), null);
         Find.SaveManager.ArchiveValue("id",   ref Id);
-        Find.SaveManager.ArchiveDeep("transform",  ref _transform);
+        Find.SaveManager.ArchiveDeep("transform",  ref transform);
 
         Find.SaveManager.ArchiveCustom("components",
-            () => EntitySerialiseUtility.SaveComponents(_components.Values),
+            () => EntitySerialiseUtility.SaveComponents(components.Values),
             data => EntitySerialiseUtility.LoadComponents(this, data as JArray),
-            data => EntitySerialiseUtility.ResolveRefsComponents(data as JArray, _components.Values.ToList())
+            data => EntitySerialiseUtility.ResolveRefsComponents(data as JArray, components.Values.ToList())
         );
         
-        Find.SaveManager.ArchiveDef("def", ref _def);
+        Find.SaveManager.ArchiveDef("def", ref def);
     }
 
     public virtual void Setup(bool fromSave) {
-        foreach (var component in _components.Values) {
+        foreach (var component in components.Values) {
             component.Setup(fromSave);
         }
     }
 
     public virtual void PreUpdate() {
-        foreach (var component in _components.Values) {
+        foreach (var component in components.Values) {
             component.PreUpdate();
         }
     }
 
     public virtual void Update() {
-        foreach (var component in _components.Values) {
+        foreach (var component in components.Values) {
             component.Update();
         }
     }
 
     public virtual void PostUpdate() {
-        foreach (var component in _components.Values) {
+        foreach (var component in components.Values) {
             component.PostUpdate();
         }
     }
 
     public virtual void UpdateRare() {
-        foreach (var component in _components.Values) {
+        foreach (var component in components.Values) {
             component.UpdateRare();
         }
     }
 
     public virtual void Draw() {
-        foreach (var component in _components.Values) {
+        foreach (var component in components.Values) {
             component.Draw();
         }
     }
 
     public virtual void DrawLate() {
-        foreach (var component in _components.Values) {
+        foreach (var component in components.Values) {
             component.DrawLate();
         }
     }
 
     public virtual void OnGUI() {
-        foreach (var component in _components.Values) {
+        foreach (var component in components.Values) {
             component.OnGUI();
         }
     }
 
     public virtual void Destroy() {
-        foreach (var component in _components.Values) {
+        foreach (var component in components.Values) {
             component.End();
         }
         
@@ -121,7 +125,7 @@ public class Entity : ISerialisable, IReferencable {
     }
 
     public virtual void OnInput(InputEvent evt) {
-        foreach (var component in _components.Values) {
+        foreach (var component in components.Values) {
             component.OnInput(evt);
 
             if (evt.Consumed) 
@@ -131,18 +135,18 @@ public class Entity : ISerialisable, IReferencable {
     
     // Add existing component
     public T AddComponent<T>(T component) where T : Component {
-        _components.Add(component.GetType(), component);
+        components.Add(component.GetType(), component);
         return component;
     }
     // Generate component from type
     public T AddComponent<T>(ComponentData? data = null) where T : Component {
         var component = (T)Activator.CreateInstance(typeof(T), this, data)!;
-        _components.Add(component.GetType(), component);
+        components.Add(component.GetType(), component);
         return component;
     }
     public Component AddComponent(Type type, ComponentData? data = null) {
         var component = (Component)Activator.CreateInstance(type, this, data)!;
-        _components.Add(component.GetType(), component);
+        components.Add(component.GetType(), component);
         return component;
     }
     
@@ -150,12 +154,12 @@ public class Entity : ISerialisable, IReferencable {
         if (!HasComponent(typeof(T))) 
             return null;
         
-        if (_components.ContainsKey(typeof(T)))
-            return (T)_components[typeof(T)];
+        if (components.ContainsKey(typeof(T)))
+            return (T)components[typeof(T)];
         
-        foreach (var type in _components.Keys) {
+        foreach (var type in components.Keys) {
             if (typeof(T).IsAssignableFrom(type))
-                return (T)_components[type];
+                return (T)components[type];
         }
         
         return null;
@@ -163,12 +167,12 @@ public class Entity : ISerialisable, IReferencable {
     public Component? GetComponent(Type type) {
         if (!HasComponent(type)) return null;
         
-        if (_components.ContainsKey(type))
-            return _components[type];
+        if (components.ContainsKey(type))
+            return components[type];
         
-        foreach (var t in _components.Keys) {
+        foreach (var t in components.Keys) {
             if (type.IsAssignableFrom(t)) {
-                return _components[t];
+                return components[t];
             }
         }
         
@@ -176,10 +180,10 @@ public class Entity : ISerialisable, IReferencable {
     }
 
     public bool HasComponent<T>() where T : Component {
-        if (_components.ContainsKey(typeof(T))) 
+        if (components.ContainsKey(typeof(T))) 
             return true;
         
-        foreach (var t in _components.Keys) {
+        foreach (var t in components.Keys) {
             if (typeof(T).IsAssignableFrom(t))
                 return true;
         }
@@ -188,10 +192,10 @@ public class Entity : ISerialisable, IReferencable {
     }
     
     public bool HasComponent(Type type) {
-        if (_components.ContainsKey(type)) 
+        if (components.ContainsKey(type)) 
             return true;
         
-        foreach (var t in _components.Keys) {
+        foreach (var t in components.Keys) {
             if (type.IsAssignableFrom(t))
                 return true;
         }
@@ -200,23 +204,23 @@ public class Entity : ISerialisable, IReferencable {
     }
 
     public void SetName(string name) {
-        this._name = name;
+        this.name = name;
     }
     
     public void AddTag(string tag) {
-        _tags.Add(tag);
+        tags.Add(tag);
         
         Find.Game.Notify_EntityTagged(this, tag);
     }
     
     public void RemoveTag(string tag) {
-        _tags.Remove(tag);
+        tags.Remove(tag);
         
         Find.Game.Notify_EntityUntagged(this, tag);
     }
     
     public bool HasTag(string tag) {
-        return _tags.Contains(tag);
+        return tags.Contains(tag);
     }
 
     public override string ToString() {

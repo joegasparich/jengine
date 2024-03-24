@@ -81,48 +81,48 @@ public struct IntVec2 : IEquatable<IntVec2> {
 }
 
 public struct IntVec3 : IEquatable<IntVec3> {
-    public int x;
-    public int y;
-    public int z;
+    public int X;
+    public int Y;
+    public int Z;
 
     public static IntVec2 Zero => new(0, 0);
     public static IntVec2 One  => new(1, 1);
 
     public IntVec3() {
-        x = 0;
-        y = 0;
-        z = 0;
+        X = 0;
+        Y = 0;
+        Z = 0;
     }
     public IntVec3(int n) {
-        x = n;
-        y = n;
-        z = n;
+        X = n;
+        Y = n;
+        Z = n;
     }
     public IntVec3(int x, int y) {
-        this.x = x;
-        this.y = y;
-        z      = 0;
+        this.X = x;
+        this.Y = y;
+        Z      = 0;
     }
     public IntVec3(int x, int y, int z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.X = x;
+        this.Y = y;
+        this.Z = z;
     }
 
     public static IntVec3 operator +(IntVec3 a, IntVec3 b) {
-        return new IntVec3(a.x + b.x, a.y + b.y, a.z + b.z);
+        return new IntVec3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
     }
     public static IntVec3 operator -(IntVec3 a, IntVec3 b) {
-        return new IntVec3(a.x - b.x, a.y - b.y, a.z - b.z);
+        return new IntVec3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
     }
     public static IntVec3 operator *(IntVec3 a, IntVec3 b) {
-        return new IntVec3(a.x * b.x, a.y * b.y, a.z * b.z);
+        return new IntVec3(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
     }
     public static IntVec3 operator *(IntVec3 a, int b) {
-        return new IntVec3(a.x * b, a.y * b, a.z * b);
+        return new IntVec3(a.X * b, a.Y * b, a.Z * b);
     }
     public static IntVec3 operator /(IntVec3 a, int b) {
-        return new IntVec3(a.x / b, a.y / b, a.z / b);
+        return new IntVec3(a.X / b, a.Y / b, a.Z / b);
     }
     public static bool operator ==(IntVec3 a, IntVec3 b) {
         return a.Equals(b);
@@ -131,15 +131,15 @@ public struct IntVec3 : IEquatable<IntVec3> {
         return !a.Equals(b);
     }
 
-    public static implicit operator Vector3(IntVec3 v) => new(v.x, v.y, v.z);
+    public static implicit operator Vector3(IntVec3 v) => new(v.X, v.Y, v.Z);
     
     public void Deconstruct(out float x, out float y, out float z) {
-        x = this.x;
-        y = this.y;
-        z = this.z;
+        x = this.X;
+        y = this.Y;
+        z = this.Z;
     }
 
     public bool Equals(IntVec3 other) {
-        return x == other.x && y == other.y && z == other.z;
+        return X == other.X && Y == other.Y && Z == other.Z;
     }
 }

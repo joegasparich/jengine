@@ -10,10 +10,10 @@ public class Window {
     public  bool              DismissOnRightClick = false;
     public  Rectangle         AbsRect;
     public  bool              ConsumesHover = true;
-    private Action<Rectangle> _onUi;
+    private Action<Rectangle> onUi;
     
     // Properties
-    public bool IsHovered => Find.UI.IsMouseOverRect(GetRect());
+    public bool IsHovered => Find.Ui.IsMouseOverRect(GetRect());
 
     public Window(Rectangle rect) {
         Id = Guid.NewGuid().ToString();
@@ -21,14 +21,14 @@ public class Window {
     }
 
     public Window(string id, Rectangle rect, Action<Rectangle> onUi) {
-        this.Id = id;
-        AbsRect = rect;
-        _onUi = onUi;
+        this.Id   = id;
+        AbsRect   = rect;
+        this.onUi = onUi;
     }
 
     public virtual void DoWindowContents() {
-        if (_onUi != null)
-            _onUi(GetRect());
+        if (onUi != null)
+            onUi(GetRect());
     }
 
     public virtual void OnInput(InputEvent evt) {
@@ -40,7 +40,7 @@ public class Window {
     public virtual void OnClose() {}
 
     public virtual void Close() {
-        Find.UI.CloseWindow(Id);
+        Find.Ui.CloseWindow(Id);
     }
     
     public float GetWidth() {

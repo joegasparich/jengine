@@ -6,38 +6,38 @@ using JEngine.util;
 namespace JEngine;
 
 public class Graphic {
-    [JsonProperty] private string _spritePath = "";
+    [JsonProperty] private string spritePath = "";
     
     public Vector2 Origin = Vector2.Zero;
     public Color   Colour = Color.White;
     public bool    FlipX;
 
     // Spritesheet
-    [JsonProperty] private int _cellWidth;
-    [JsonProperty] private int _cellHeight;
-    private                int _cellIndex;
+    [JsonProperty] private int cellWidth;
+    [JsonProperty] private int cellHeight;
+    [JsonProperty] private int cellIndex;
 
     // Animation
-    private int  _animationFrames;
-    private int  _animationDurationTicks;
-    private int  _animationStartTick;
-    private bool _loopAnimation = true;
+    private int  animationFrames;
+    private int  animationDurationTicks;
+    private int  animationStartTick;
+    private bool loopAnimation = true;
 
     // Properties
-    private Texture2D _texture;
+    private Texture2D texture;
     public Texture2D Texture
     {
         get {
-            if (_texture.Empty())
-                _texture = Find.AssetManager.GetTexture(_spritePath);
+            if (texture.Empty())
+                texture = Find.AssetManager.GetTexture(spritePath);
 
-            return _texture;
+            return texture;
         }
-        set => _texture = value;
+        set => texture = value;
     }
 
-    public int CellWidth  => _cellWidth  == 0 ? Texture.Width : _cellWidth;
-    public int CellHeight => _cellHeight == 0 ? Texture.Height : _cellHeight;
+    public int CellWidth  => cellWidth  == 0 ? Texture.Width : cellWidth;
+    public int CellHeight => cellHeight == 0 ? Texture.Height : cellHeight;
 
     [JsonConstructor]
     public Graphic() {}
@@ -50,8 +50,8 @@ public class Graphic {
     }
 
     public void SetSprite(string path) {
-        _spritePath = path;
-        Texture = Find.AssetManager.GetTexture(_spritePath);
+        spritePath = path;
+        Texture = Find.AssetManager.GetTexture(spritePath);
     }
 
     public void SetSpritesheet(string path, int cellWidth, int cellHeight) {
@@ -60,20 +60,20 @@ public class Graphic {
         if (cellWidth > Texture.Width || cellHeight > Texture.Height)
             Debug.Warn($"Spritesheet cell size is larger than texture size ({cellWidth}, {cellHeight})");
 
-        this._cellWidth  = cellWidth;
-        this._cellHeight = cellHeight;
+        this.cellWidth  = cellWidth;
+        this.cellHeight = cellHeight;
     }
 
     public void SetIndex(int index) {
-        _cellIndex = index;
+        cellIndex = index;
     }
 
     public void SetAnimation(int startIndex, int frames, int speed, bool loop = true) {
-        _cellIndex       = startIndex;
-        _animationFrames = frames;
-        _animationDurationTicks  = speed;
-        _loopAnimation   = loop;
-        _animationStartTick = Find.Game.Ticks;
+        cellIndex       = startIndex;
+        animationFrames = frames;
+        animationDurationTicks  = speed;
+        loopAnimation   = loop;
+        animationStartTick = Find.Game.Ticks;
     }
 
     public void Draw(
@@ -114,15 +114,15 @@ public class Graphic {
     }
 
     private int GetAnimationFrame() {
-        if (_animationDurationTicks == 0 || _animationFrames == 0)
-            return _cellIndex;
+        if (animationDurationTicks == 0 || animationFrames == 0)
+            return cellIndex;
 
-        var curTick = Find.Game.Ticks - _animationStartTick;
+        var curTick = Find.Game.Ticks - animationStartTick;
 
-        if (!_loopAnimation && curTick >= _animationDurationTicks)
-            return _cellIndex + _animationFrames - 1;
+        if (!loopAnimation && curTick >= animationDurationTicks)
+            return cellIndex + animationFrames - 1;
 
-        return _cellIndex + (curTick % _animationDurationTicks) / (_animationDurationTicks / _animationFrames);
+        return cellIndex + (curTick % animationDurationTicks) / (animationDurationTicks / animationFrames);
     }
     
     public Rectangle GetCellBounds(int cellIndex) {

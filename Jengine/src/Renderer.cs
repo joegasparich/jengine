@@ -7,9 +7,11 @@ namespace JEngine;
 public enum Depth
 {
     Ground = -1,
-    YSorting = - 5,
+    Below = -3,
+    YSorting = -5,
+    Above = -7,
     Debug = -8,
-    UI = -9,
+    Ui = -9,
     Camera = -10
 }
 
@@ -31,23 +33,23 @@ internal class DrawCall {
 
 public class Renderer {
     // Resources
-    private static readonly Shader _outlineShader      = Raylib.LoadShader(null, "assets/shaders/outline.fsh");
-    private static readonly Shader _basicShader        = Raylib.LoadShader(null, "assets/shaders/basic.fsh");
-    private static readonly Shader _discardAlphaShader = Raylib.LoadShader(null, "assets/shaders/discard_alpha.fsh");
-    private static readonly Shader _pickShader         = Raylib.LoadShader(null, "assets/shaders/pick.fsh");
-    private static readonly int    _pickColourLoc      = Raylib.GetShaderLocation(_pickShader, "pickColor");
+    private static readonly Shader outlineShader      = Raylib.LoadShader(null, "assets/shaders/outline.fsh");
+    private static readonly Shader basicShader        = Raylib.LoadShader(null, "assets/shaders/basic.fsh");
+    private static readonly Shader discardAlphaShader = Raylib.LoadShader(null, "assets/shaders/discard_alpha.fsh");
+    private static readonly Shader pickShader         = Raylib.LoadShader(null, "assets/shaders/pick.fsh");
+    private static readonly int    pickColourLoc      = Raylib.GetShaderLocation(pickShader, "pickColor");
 
     public RendererConfig RenderConfig = new();
     
     // Collections
-    private SortedList<float, DrawCall> _drawCalls = new(new DuplicateKeyComparer<float>());
+    private SortedList<float, DrawCall> drawCalls = new(new DuplicateKeyComparer<float>());
     
     // State
     public  Camera          Camera;
-    private RenderTexture2D _screenBuffer;
-    private RenderTexture2D _pickBuffer;
-    private Image           _pickImage;
-    private bool            _drawingWorld;
+    private RenderTexture2D screenBuffer;
+    private RenderTexture2D pickBuffer;
+    private Image           pickImage;
+    private bool            drawingWorld;
 
     public void Init() {
         Debug.Log("Initialising Renderer");
@@ -56,12 +58,12 @@ public class Renderer {
 
         Camera = new();
 
-        _screenBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
-        _pickBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
+        screenBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
+        pickBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
 
         // Set outline colour
-        var outlineColLoc = Raylib.GetShaderLocation(_outlineShader, "outlineCol");
-        Raylib.SetShaderValue(_outlineShader, outlineColLoc, new Vector4(0.4f, 0.7f, 1f, 1f), ShaderUniformDataType.Vec4);
+        var outlineColLoc = Raylib.GetShaderLocation(outlineShader, "outlineCol");
+        Raylib.SetShaderValue(outlineShader, outlineColLoc, new Vector4(0.4f, 0.7f, 1f, 1f), ShaderUniformDataType.Vec4);
 
         // Rlgl.EnableDepthTest();
         Rlgl.EnableColorBlend();
@@ -75,35 +77,35 @@ public class Renderer {
     public void Draw() {
         Raylib.BeginDrawing();
         {
-            Raylib.BeginTextureMode(_screenBuffer);
+            Raylib.BeginTextureMode(screenBuffer);
             {
                 Raylib.ClearBackground(Color.Black);
 
                 Raylib.BeginMode3D(Camera.Cam);
                 {
-                    Raylib.BeginShaderMode(_discardAlphaShader);
-                    _drawingWorld = true;
+                    Raylib.BeginShaderMode(discardAlphaShader);
+                    drawingWorld = true;
                     Find.Game.Draw();
 
-                    foreach (var drawCall in _drawCalls) {
+                    foreach (var drawCall in drawCalls) {
                         DrawNow(drawCall.Value);
                     }
 
                     Find.Game.DrawLate();
-                    _drawingWorld = false;
+                    drawingWorld = false;
                     Raylib.EndShaderMode();
                 }
                 Raylib.EndMode3D();
 
                 RenderPickIdsToBuffer();
-                Raylib.UnloadImage(_pickImage);
-                _pickImage = Raylib.LoadImageFromTexture(_pickBuffer.Texture);
+                Raylib.UnloadImage(pickImage);
+                pickImage = Raylib.LoadImageFromTexture(pickBuffer.Texture);
 
             }
             Raylib.EndTextureMode();
 
             Raylib.DrawTexturePro(
-                _screenBuffer.Texture,
+                screenBuffer.Texture,
                 new Rectangle(0, 0, Find.Game.ScreenWidth, -Find.Game.ScreenHeight),
                 new Rectangle(0, 0, Find.Game.ScreenWidth, Find.Game.ScreenHeight),
                 new Vector2(0, 0),
@@ -118,14 +120,14 @@ public class Renderer {
 
         Raylib.EndDrawing();
 
-        _drawCalls.Clear();
+        drawCalls.Clear();
     }
 
     public void OnScreenResized() {
-        Raylib.UnloadRenderTexture(_pickBuffer);
-        Raylib.UnloadRenderTexture(_screenBuffer);
-        _pickBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
-        _screenBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
+        Raylib.UnloadRenderTexture(pickBuffer);
+        Raylib.UnloadRenderTexture(screenBuffer);
+        pickBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
+        screenBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
 
         Camera.OnScreenResized();
     }
@@ -183,7 +185,7 @@ public class Renderer {
         if (now) {
             DrawNow(call);
         } else {
-            _drawCalls.Add(-depth, call);
+            drawCalls.Add(-depth, call);
         }
     }
 
@@ -194,7 +196,7 @@ public class Renderer {
             Raylib.BeginShaderMode(drawCall.FragShader.Value);
         }
 
-        if (_drawingWorld)
+        if (drawingWorld)
             drawCall.DestRect.Position *= Find.Config.WorldScalePx;
             
         Drawing.DrawTexture(
@@ -209,23 +211,23 @@ public class Renderer {
         
         if (!picking && drawCall.FragShader.HasValue) {
             Raylib.EndShaderMode();
-            Raylib.BeginShaderMode(_discardAlphaShader);
+            Raylib.BeginShaderMode(discardAlphaShader);
         }
     }
     
     // Picking //
 
     private void RenderPickIdsToBuffer() {
-        Raylib.BeginTextureMode(_pickBuffer);
+        Raylib.BeginTextureMode(pickBuffer);
         Raylib.ClearBackground(Color.White);
         Raylib.BeginMode3D(Camera.Cam);
         {
-            foreach (var drawCall in _drawCalls) {
+            foreach (var drawCall in drawCalls) {
                 if (!drawCall.Value.PickId.HasValue)
                     continue;
 
-                Raylib.BeginShaderMode(_pickShader);
-                Raylib.SetShaderValue(_pickShader, _pickColourLoc, Colour.IntToColour(drawCall.Value.PickId.Value).ToVector3(), ShaderUniformDataType.Vec3);
+                Raylib.BeginShaderMode(pickShader);
+                Raylib.SetShaderValue(pickShader, pickColourLoc, Colour.IntToColour(drawCall.Value.PickId.Value).ToVector3(), ShaderUniformDataType.Vec3);
                 DrawNow(drawCall.Value, true);
                 Raylib.EndShaderMode();
             }
@@ -236,8 +238,8 @@ public class Renderer {
 
     private void RenderPickBuffer() {
         Raylib.DrawTexturePro(
-            _pickBuffer.Texture,
-            new Rectangle(0, 0, _pickBuffer.Texture.Width, -_pickBuffer.Texture.Height),
+            pickBuffer.Texture,
+            new Rectangle(0, 0, pickBuffer.Texture.Width, -pickBuffer.Texture.Height),
             new Rectangle(0, Find.Game.ScreenHeight - 112, 173, 112),
             new Vector2(0, 0),
             0,
@@ -249,7 +251,7 @@ public class Renderer {
         if (!InScreenBounds(screenPos))
             return -1;
         
-        var pixel = Raylib.GetImageColor(_pickImage, screenPos.X.FloorToInt(), Find.Game.ScreenHeight - screenPos.Y.FloorToInt());
+        var pixel = Raylib.GetImageColor(pickImage, screenPos.X.FloorToInt(), Find.Game.ScreenHeight - screenPos.Y.FloorToInt());
         if (pixel.Equals(Color.White)) 
             return -1;
         

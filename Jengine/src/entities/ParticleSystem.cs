@@ -29,15 +29,15 @@ public class ParticleSettings {
 }
 
 public class ParticleSystem : Entity {
-    private ParticleSettings _settings;
-    private Particle[]       _particles;
+    private ParticleSettings settings;
+    private Particle[]       particles;
     
     public ParticleSystem(ParticleSettings settings) {
-        _settings = settings;
-        _particles = new Particle[settings.Count];
+        this.settings = settings;
+        particles = new Particle[settings.Count];
         
-        for (var i = 0; i < _particles.Length; i++) {
-            _particles[i] = new Particle {
+        for (var i = 0; i < particles.Length; i++) {
+            particles[i] = new Particle {
                 Active = false,
                 Position = Vector2.Zero,
                 Lifetime = i % settings.Lifetime,
@@ -48,39 +48,39 @@ public class ParticleSystem : Entity {
     public override void Update() {
         base.Update();
         
-        for (var i = 0; i < _particles.Length; i++) {
-            _particles[i].Position += _particles[i].Velocity;
-            _particles[i].Lifetime -= 1;
-            var pct = 1 - _particles[i].Lifetime / (float)_settings.Lifetime;
+        for (var i = 0; i < particles.Length; i++) {
+            particles[i].Position += particles[i].Velocity;
+            particles[i].Lifetime -= 1;
+            var pct = 1 - particles[i].Lifetime / (float)settings.Lifetime;
             
-            if (_settings.SpeedOverLifetime != null)
-                _particles[i].Velocity = _particles[i].Velocity.Normalised() * _settings.SpeedOverLifetime.Calculate(pct);
+            if (settings.SpeedOverLifetime != null)
+                particles[i].Velocity = particles[i].Velocity.Normalised() * settings.SpeedOverLifetime.Calculate(pct);
             
-            if (_settings.ScaleOverLifetime != null)
-                _particles[i].Scale = _settings.ScaleOverLifetime.Calculate(pct);
+            if (settings.ScaleOverLifetime != null)
+                particles[i].Scale = settings.ScaleOverLifetime.Calculate(pct);
             
-            if (_particles[i].Lifetime <= 0)
-                _particles[i] = CreateParticle();
+            if (particles[i].Lifetime <= 0)
+                particles[i] = CreateParticle();
         }
     }
 
     private Particle CreateParticle() {
-        var col = _settings.Colour;
+        var col = settings.Colour;
                 
-        if (_settings.ColourOverLifetime != null)
-            col = _settings.ColourOverLifetime.Calculate(0);
-        else if (_settings.ColourGradient != null)
-            col = _settings.ColourGradient.Calculate(Rand.Float(Find.Game.Ticks));
+        if (settings.ColourOverLifetime != null)
+            col = settings.ColourOverLifetime.Calculate(0);
+        else if (settings.ColourGradient != null)
+            col = settings.ColourGradient.Calculate(Rand.Float(Find.Game.Ticks));
 
-        var speed = _settings.SpeedOverLifetime?.Calculate(0) ?? _settings.Speed.Random();
-        var scale = _settings.ScaleOverLifetime?.Calculate(0) ?? _settings.Scale.Random();
+        var speed = settings.SpeedOverLifetime?.Calculate(0) ?? settings.Speed.Random();
+        var scale = settings.ScaleOverLifetime?.Calculate(0) ?? settings.Scale.Random();
         
         return new Particle {
             Active   = true,
             Position = Vector2.Zero,
-            Velocity = new Vector2(0, -speed).Rotate(_settings.Direction.Random() * JMath.DegToRad),
+            Velocity = new Vector2(0, -speed).Rotate(settings.Direction.Random() * JMath.DegToRad),
             Scale    = scale,
-            Lifetime = _settings.Lifetime,
+            Lifetime = settings.Lifetime,
             Colour   = col
         };
     }
@@ -88,22 +88,22 @@ public class ParticleSystem : Entity {
     public override void Draw() {
         base.Draw();
         
-        for (var i = 0; i < _particles.Length; i++) {
-            if (!_particles[i].Active) 
+        for (var i = 0; i < particles.Length; i++) {
+            if (!particles[i].Active) 
                 continue;
 
-            var pct   = 1 - _particles[i].Lifetime / (float)_settings.Lifetime;
-            var col   = _particles[i].Colour;
-            if (_settings.ColourOverLifetime != null)
-                col = _settings.ColourOverLifetime.Calculate(pct);
+            var pct   = 1 - particles[i].Lifetime / (float)settings.Lifetime;
+            var col   = particles[i].Colour;
+            if (settings.ColourOverLifetime != null)
+                col = settings.ColourOverLifetime.Calculate(pct);
             
-            if (_settings.Fade)
+            if (settings.Fade)
                 col = col.WithAlpha(pct);
             
             Find.Renderer.Draw(
-                texture: _settings.Texture,
-                pos: Transform.GlobalPosition * Find.Game.GameConfig.WorldScalePx + _particles[i].Position,
-                scale: new Vector2(_particles[i].Scale, _particles[i].Scale),
+                texture: settings.Texture,
+                pos: Transform.GlobalPosition * Find.Game.GameConfig.WorldScalePx + particles[i].Position,
+                scale: new Vector2(particles[i].Scale, particles[i].Scale),
                 depth: Find.Renderer.GetDepth(Transform.GlobalPosition.Y),
                 color: col
             );

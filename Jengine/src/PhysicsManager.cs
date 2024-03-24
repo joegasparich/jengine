@@ -17,31 +17,31 @@ public interface IContactable {
 
 public class PhysicsManager : IContactListener {
     public  World                    World;
-    private HashSet<IContactable>    _contactListeners = new();
-    private Dictionary<Body, Entity> _bodyToEntity     = new();
-    private List<Body>               _bodiesToDestroy  = new();
+    private HashSet<IContactable>    contactListeners = new();
+    private Dictionary<Body, Entity> bodyToEntity     = new();
+    private List<Body>               bodiesToDestroy  = new();
 
-    private float _msPerUpdate;
-    private bool _debug;
+    private float msPerUpdate;
+    private bool debug;
 
     public void Init() {
-        _msPerUpdate = (float)Find.Game.GameConfig.MsPerUpdate;
+        msPerUpdate = (float)Find.Game.GameConfig.MsPerUpdate;
 
         World = new World(Vector2.Zero);
         World.SetContactListener(this);
     }
 
     public void Update() {
-        World.Step(_msPerUpdate, 6, 3);
+        World.Step(msPerUpdate, 6, 3);
         
-        foreach (var body in _bodiesToDestroy) {
+        foreach (var body in bodiesToDestroy) {
             World.DestroyBody(body);
         }
-        _bodiesToDestroy.Clear();
+        bodiesToDestroy.Clear();
     }
 
     public void DrawLate() {
-        if (_debug)
+        if (debug)
             DrawDebug();
     }
 
@@ -50,28 +50,28 @@ public class PhysicsManager : IContactListener {
             return;
 
         if (evt.KeyDown == KeyboardKey.F3) {
-            _debug = !_debug;
+            debug = !debug;
             evt.Consume();
         }
     }
 
     public Body RegisterBody(BodyDef def, Entity entity) {
         var body = World.CreateBody(def);
-        _bodyToEntity[body] = entity;
+        bodyToEntity[body] = entity;
 
         return body;
     }
     
     public void DestroyBody(Body body) {
-        _bodiesToDestroy.Add(body);
-        _bodyToEntity.Remove(body);
+        bodiesToDestroy.Add(body);
+        bodyToEntity.Remove(body);
     }
 
     public Entity? GetEntityFromBody(Body body) {
-        if (!_bodyToEntity.ContainsKey(body))
+        if (!bodyToEntity.ContainsKey(body))
             return null;
 
-        return _bodyToEntity[body];
+        return bodyToEntity[body];
     }
 
     private void DrawDebug() {
@@ -106,13 +106,13 @@ public class PhysicsManager : IContactListener {
     }
 
     public void RegisterContactListener(IContactable listener) {
-        _contactListeners.Add(listener);
+        contactListeners.Add(listener);
     }
     public void UnregisterContactListener(IContactable listener) {
-        _contactListeners.Remove(listener);
+        contactListeners.Remove(listener);
     }
     public void BeginContact(Contact contact) {
-        foreach (var listener in _contactListeners) {
+        foreach (var listener in contactListeners) {
             if (contact.FixtureA.Body == listener.Body)
                 listener.OnContact(contact.FixtureB.Body);
             if (contact.FixtureB.Body == listener.Body)

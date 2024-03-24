@@ -9,7 +9,7 @@ public class AutoDestroyComponent(Entity entity, ComponentData? data = null) : C
     
     public int Timer;
     
-    public AutoDestroyComponentData Data => (AutoDestroyComponentData)_data;
+    public AutoDestroyComponentData Data => (AutoDestroyComponentData)data;
 
     public override void Setup(bool fromSave) {
         base.Setup(fromSave);
