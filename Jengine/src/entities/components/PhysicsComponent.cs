@@ -16,6 +16,7 @@ public struct Collider {
 
 public class PhysicsComponentData : ComponentData {
     public Collider Collider;
+    public bool     Static;
 }
 
 
@@ -33,7 +34,7 @@ public class PhysicsComponent(Entity entity, ComponentData? data = null) : Compo
             return;
 
         var def = new BodyDef {
-            BodyType      = BodyType.DynamicBody,
+            BodyType      = Data.Static ? BodyType.StaticBody : BodyType.DynamicBody,
             Position      = Entity.Transform.LocalPosition,
             LinearDamping = 0.05f,
             FixedRotation = true

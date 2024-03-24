@@ -37,7 +37,7 @@ public class Game {
     public SaveManager    SaveManager;
     public SceneManager   SceneManager;
     public PhysicsManager Physics;
-    public UiManager      Ui;
+    public UIManager      UI;
 
     // Collections
     private Dictionary<int, Entity?>          entities;
@@ -84,7 +84,7 @@ public class Game {
         SaveManager = new();
         SceneManager = new();
         Physics = new();
-        Ui = new();
+        UI = new();
 
         entities = new();
         entitiesToAdd = new();
@@ -94,6 +94,7 @@ public class Game {
     protected virtual void Init() {
         Renderer.Init();
         Physics.Init();
+        UI.Init();
 
         LoadConfig();
 
@@ -141,7 +142,9 @@ public class Game {
             // This needs to be out here otherwise we can get duplicate input events
             Input.ProcessInput();
             
+            UI.PreDraw();
             Renderer.Draw();
+            UI.PostDraw();
         }
     }
     
@@ -217,11 +220,13 @@ public class Game {
         framesSinceGameStart++;
     }
 
-    public virtual void DrawUi() {
-        Ui.DrawUi();
+    public virtual void DrawUI() {
+        UI.DrawUI();
     }
 
     public virtual void OnInput(InputEvent evt) {
+        UI.OnInput(evt);
+        
         foreach (var entity in entities.Values) {
             if (!evt.Consumed)
                 entity.OnInput(evt);
@@ -230,6 +235,8 @@ public class Game {
         SceneManager.GetCurrentScene()?.OnInput(evt);
         Physics.OnInput(evt);
         Renderer.Camera.OnInput(evt);
+        
+        UI.PostInput(evt);
     }
 
     public virtual void OnGUI() {
@@ -242,6 +249,7 @@ public class Game {
 
     protected virtual void OnScreenResized() {
         Renderer.OnScreenResized();
+        UI.OnScreenResized();
 
         PlayerConfig.ScreenWidth = ScreenWidth;
         PlayerConfig.ScreenHeight = ScreenHeight;

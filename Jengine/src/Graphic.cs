@@ -125,11 +125,15 @@ public class Graphic {
         return cellIndex + (curTick % animationDurationTicks) / (animationDurationTicks / animationFrames);
     }
     
-    public Rectangle GetCellBounds(int cellIndex) {
+    public Rectangle GetCellBounds() {
+        return GetCellBounds(cellIndex);
+    }
+    
+    public Rectangle GetCellBounds(int index) {
         if (Texture.Empty()) return new Rectangle(0, 0, 1, 1);
 
         var cols = Texture.Width / CellWidth;
-        return GetCellBounds(cellIndex % cols, cellIndex / cols);
+        return GetCellBounds(index % cols, index / cols);
     }
 
     public Rectangle GetCellBounds(int col, int row) {

@@ -1,21 +1,23 @@
-﻿using Raylib_cs;
+﻿using JEngine.defs;
+using Raylib_cs;
 using JEngine.util;
 
 namespace JEngine.ui;
 
-public enum UiEvent {
+public enum UIEvent {
     None,
     Draw,
     Input
 }
 
-public class UiManager {
+public class UIManager {
     // Constants
-    private const string DefaultFontPath = "assets/fonts/Pixeltype.ttf";
-    public const  int    DefaultFontSize = 10;
+    private const string DefaultFontPath = "assets/textures/fonts/Joepx.png";
+    private const string VisibilityFontPath = "assets/textures/fonts/Joepx_vis.png";
     
     // Resources
-    public readonly Font DefaultFont = Raylib.LoadFontEx(DefaultFontPath, DefaultFontSize, null, 0);
+    public Font DefaultFont;
+    public Font VisibilityFont;
     
     // State
     private List<Window>               windowStack       = new();
@@ -23,7 +25,7 @@ public class UiManager {
     private List<Window>               windowsToOpen     = new();
     private HashSet<string>            windowsToClose    = new();
     private HashSet<string>            immediateWindows  = new();
-    public  UiEvent                    CurrentEvent      = UiEvent.Draw;
+    public  UIEvent                    CurrentEvent      = UIEvent.Draw;
     public  Rectangle                  CurrentDrawBounds = new(0, 0, Find.Game.ScreenWidth, Find.Game.ScreenHeight); // TODO: Dynamic
 
     private MouseCursor cursor;
@@ -38,10 +40,14 @@ public class UiManager {
         Debug.Log("Initializing UI");
 
         Raylib.SetTextureFilter(DefaultFont.Texture, TextureFilter.Point);
+        
+        DefaultFont    = Raylib.LoadFont(DefaultFontPath);
+        VisibilityFont = Raylib.LoadFont(VisibilityFontPath);
+        GUI.Font       = DefaultFont;
     }
 
     public void OnInput(InputEvent evt) {
-        CurrentEvent = UiEvent.Input;
+        CurrentEvent = UIEvent.Input;
         
         // Lose focus
         if (evt.KeyDown is KeyboardKey.Escape || evt.MouseDown is MouseButton.Left)
@@ -77,7 +83,7 @@ public class UiManager {
             }
         }
         CurrentDrawBounds = new Rectangle(0, 0, Find.Game.ScreenWidth, Find.Game.ScreenHeight);
-        CurrentEvent      = UiEvent.None;
+        CurrentEvent      = UIEvent.None;
     }
 
     public void PostInput(InputEvent evt) {
@@ -92,13 +98,13 @@ public class UiManager {
         }
     }
 
-    public void PreRender() {
+    public void PreDraw() {
         Raylib.SetMouseCursor(cursor);
         SetCursor(MouseCursor.Default);
     }
 
-    public void DrawUi() {
-        CurrentEvent = UiEvent.Draw;
+    public void DrawUI() {
+        CurrentEvent = UIEvent.Draw;
         Find.Game.OnGUI();
 
         // Clear closed immediate windows
@@ -127,10 +133,10 @@ public class UiManager {
         }
         
         CurrentDrawBounds = new Rectangle(0, 0, Find.Game.ScreenWidth, Find.Game.ScreenHeight);
-        CurrentEvent      = UiEvent.None;
+        CurrentEvent      = UIEvent.None;
     }
 
-    public void PostRender() {
+    public void PostDraw() {
         windowStack.RemoveAll(window => windowsToClose.Contains(window.Id));
         windowStack.AddRange(windowsToOpen);
         
@@ -186,7 +192,7 @@ public class UiManager {
     }
 
     public void DoImmediateWindow(string id, Rectangle rect, Action<Rectangle> onUi, bool draggable = false, bool dialog = true, bool consumesHover = true) {
-        if (CurrentEvent == UiEvent.None) {
+        if (CurrentEvent == UIEvent.None) {
             Debug.Warn("Immediate windows must be called in OnGUI");
             return;
         }
@@ -196,7 +202,7 @@ public class UiManager {
         if (!found) {
             Window window;
             if (dialog)
-                window = new Dialog(id, rect, onUi);
+                window = new Panel(id, rect, onUi);
             else
                 window = new Window(id, rect, onUi);
             window.Immediate     = true;

@@ -114,7 +114,7 @@ public class Renderer {
             );
         }
 
-        Find.Game.DrawUi();
+        Find.Game.DrawUI();
         
         // RenderPickBuffer();
 

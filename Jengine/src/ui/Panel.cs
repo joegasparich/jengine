@@ -4,7 +4,7 @@ using JEngine.util;
 
 namespace JEngine.ui; 
 
-public class Dialog : Window {
+public class Panel : Window {
     // Constants
     public const  int    DefaultWindowHeaderHeight = 18;
     private const string WindowNPatchPath          = "assets/textures/ui/window.png";
@@ -24,8 +24,8 @@ public class Dialog : Window {
     protected bool    isDragging;
     private   Vector2 dragPos = Vector2.Zero;
 
-    public Dialog(Rectangle rect) : base(rect) {}
-    public Dialog(string id, Rectangle rect, Action<Rectangle> onUi, bool doBackground = true) : base(id, rect, onUi) {
+    public Panel(Rectangle rect) : base(rect) {}
+    public Panel(string id, Rectangle rect, Action<Rectangle> onUi, bool doBackground = true) : base(id, rect, onUi) {
         this.doBackground = doBackground;
     }
 
@@ -36,25 +36,25 @@ public class Dialog : Window {
         }
         
         if (doBackground)
-            Gui.DrawTextureNPatch(GetRect(), Find.AssetManager.GetTexture(WindowNPatchPath), 20, backgroundColour);
+            GUI.DrawTextureNPatch(GetRect(), Find.AssetManager.GetTexture(WindowNPatchPath), 20, backgroundColour);
         
         var headerRect = new Rectangle(0, 0, GetWidth(), HeaderHeight);
         if (!Title.NullOrEmpty()) {
-            using (new TextBlock(AlignMode.MiddleCenter))
-                Gui.Label(headerRect, Title);
+            using (new TextBlock(alignMode: AlignMode.MiddleCenter))
+                GUI.Label(headerRect, Title);
         }
         
         headerHovered = false;
-        if (Gui.HoverableArea(headerRect)) {
+        if (GUI.HoverableArea(headerRect)) {
             headerHovered = true;
         
             if (Draggable)
-                Find.Ui.SetCursor(MouseCursor.PointingHand);
+                Find.UI.SetCursor(MouseCursor.PointingHand);
         }
 
         if (ShowCloseX) {
-            if (Gui.ButtonIcon(new Rectangle(GetWidth() - CloseIconSize - Gui.GapTiny, Gui.GapTiny, CloseIconSize, CloseIconSize), Find.AssetManager.GetTexture(CloseIcon), Color.Gray))
-                Find.Ui.CloseWindow(Id);
+            if (GUI.ButtonIcon(new Rectangle(GetWidth() - CloseIconSize - GUI.GapTiny, GUI.GapTiny, CloseIconSize, CloseIconSize), Find.AssetManager.GetTexture(CloseIcon), Color.Gray))
+                Find.UI.CloseWindow(Id);
         }
         
         base.DoWindowContents();
@@ -71,7 +71,7 @@ public class Dialog : Window {
             if (headerHovered && evt.MouseDown == MouseButton.Left) {
                 dragPos    = evt.MousePos - new Vector2(AbsRect.X, AbsRect.Y);
                 isDragging = true;
-                Find.Ui.BringWindowToFront(Id);
+                Find.UI.BringWindowToFront(Id);
                 evt.Consume();
             }
             if (isDragging && evt.MouseUp == MouseButton.Left) {

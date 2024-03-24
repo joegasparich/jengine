@@ -24,7 +24,7 @@ public class AutoGrid {
     public float     CurY => curY;
     public Rectangle Rect => rect;
 
-    public AutoGrid(Rectangle rect, GridDirection direction, float colWidth, float rowHeight, float gap = Gui.GapTiny) {
+    public AutoGrid(Rectangle rect, GridDirection direction, float colWidth, float rowHeight, float gap = GUI.GapTiny) {
         this.direction = direction;
         this.rect      = rect;
         this.colWidth  = colWidth;

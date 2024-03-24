@@ -20,7 +20,7 @@ public class AutoLayout {
     public float     RemainingHeight => rect.Height - CurY;
     public Rectangle Rect            => rect;
 
-    public AutoLayout(Rectangle rect, AlignMode alignMode = AlignMode.Left, float gap = Gui.GapTiny) {
+    public AutoLayout(Rectangle rect, AlignMode alignMode = AlignMode.Left, float gap = GUI.GapTiny) {
         this.rect      = rect;
         CurY           = rect.Y;
         this.alignMode = alignMode;
@@ -28,38 +28,38 @@ public class AutoLayout {
     }
 
     public void Header(FormattedString text) {
-        using (new TextBlock(Gui.HeaderFontSize))
-            Gui.Label(GetAlignedRect(rect.Width, Gui.HeaderFontSize), text);
-        CurY += Gui.HeaderFontSize + gap;
+        using (new TextBlock(fontSize: GUI.HeaderFontSize))
+            GUI.Label(GetAlignedRect(rect.Width, GUI.HeaderFontSize), text);
+        CurY += GUI.HeaderFontSize + gap;
     }
 
     public void Label(FormattedString text, float? height = null) {
-        height ??= Gui.FontSize;
+        height ??= GUI.FontSize;
 
-        Gui.Label(GetAlignedRect(rect.Width, height.Value), text);
+        GUI.Label(GetAlignedRect(rect.Width, height.Value), text);
         CurY += height.Value + gap;
     }
 
     public bool ButtonText(FormattedString text, Color? col = null, bool selected = false, float? width = null, float? height = null) {
-        height ??= Gui.ButtonHeight;
+        height ??= GUI.ButtonHeight;
 
-        var res = Gui.ButtonText(GetAlignedRect(width ?? rect.Width, height.Value), text, col, selected);
+        var res = GUI.ButtonText(GetAlignedRect(width ?? rect.Width, height.Value), text, col, selected);
         CurY += height.Value + gap;
         
         return res;
     }
 
     public void TextInput(ref string text, string focusId, float? width = null, float? height = null) {
-        height ??= Gui.ButtonHeight;
+        height ??= GUI.ButtonHeight;
 
-        Gui.TextInput(GetAlignedRect(width ?? rect.Width, height.Value), ref text, focusId);
+        GUI.TextInput(GetAlignedRect(width ?? rect.Width, height.Value), ref text, focusId);
         CurY += height.Value + gap;
     }
 
     public void ProgressBar(float pct, Color? colour = null, Color? backgroundColour = null, float? width = null, float? height = null) {
         height ??= 10;
 
-        Gui.ProgressBar(GetAlignedRect(width ?? rect.Width, height.Value), pct, colour, backgroundColour);
+        GUI.ProgressBar(GetAlignedRect(width ?? rect.Width, height.Value), pct, colour, backgroundColour);
         CurY += height.Value + gap;
     }
 

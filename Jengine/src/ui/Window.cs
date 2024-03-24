@@ -13,7 +13,7 @@ public class Window {
     private Action<Rectangle> onUi;
     
     // Properties
-    public bool IsHovered => Find.Ui.IsMouseOverRect(GetRect());
+    public bool IsHovered => Find.UI.IsMouseOverRect(GetRect());
 
     public Window(Rectangle rect) {
         Id = Guid.NewGuid().ToString();
@@ -40,7 +40,7 @@ public class Window {
     public virtual void OnClose() {}
 
     public virtual void Close() {
-        Find.Ui.CloseWindow(Id);
+        Find.UI.CloseWindow(Id);
     }
     
     public float GetWidth() {
