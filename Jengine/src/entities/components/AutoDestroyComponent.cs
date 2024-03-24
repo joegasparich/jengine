@@ -4,25 +4,23 @@ public class AutoDestroyComponentData : ComponentData {
     public int Timer;
 }
 
-public class AutoDestroyComponent : Component {
+public class AutoDestroyComponent(Entity entity, ComponentData? data = null) : Component(entity, data) {
     public static Type DataType => typeof(AutoDestroyComponentData);
     
-    public int timer;
+    public int Timer;
     
-    public AutoDestroyComponentData Data => (AutoDestroyComponentData)data;
-    
-    public AutoDestroyComponent(Entity entity, ComponentData? data = null) : base(entity, data) {}
+    public AutoDestroyComponentData Data => (AutoDestroyComponentData)_data;
 
     public override void Setup(bool fromSave) {
         base.Setup(fromSave);
         
-        timer = Data.Timer;
+        Timer = Data.Timer;
     }
 
     public override void PreUpdate() {
-        if (timer > 0)
-            timer--;
+        if (Timer > 0)
+            Timer--;
         else
-            entity.Destroy();
+            Entity.Destroy();
     }
 }

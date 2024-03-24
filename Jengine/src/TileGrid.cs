@@ -9,7 +9,7 @@ public class TileGrid
 {
     public Graphic TileSet;
 
-    private int[] tiles;
+    private int[] _tiles;
     public  int   Width      { get; }
     public  int   Height     { get; }
     public  int   TileWidth  { get; }
@@ -19,18 +19,18 @@ public class TileGrid
         TileSet = tileSet;
         Width = width;
         Height = height;
-        tiles = new int[width * height];
+        _tiles = new int[width * height];
         
         TileWidth = tileWidth == -1 ? tileSet.CellWidth : tileWidth;
         TileHeight = tileHeight == -1 ? tileSet.CellHeight : tileHeight;
     }
 
     public int GetTileAt(int x, int y) {
-        return tiles[y * Width + x];
+        return _tiles[y * Width + x];
     }
     
     public void SetTileAt(IntVec2 pos, int index) {
-        tiles[pos.Y * Width + pos.X] = index;
+        _tiles[pos.Y * Width + pos.X] = index;
     }
 
     public Texture2D CreateTexture(int slice = -1, bool randomiseRotation = false) {
@@ -68,7 +68,7 @@ public class TileGrid
         return texture.Texture;
     }
     
-    public static List<TileGrid> LoadLDTKLevel(string path, int levelIndex) {
+    public static List<TileGrid> LoadLdtkLevel(string path, int levelIndex) {
         var json = Find.AssetManager.GetJson(path);
 
         if (json == null)
@@ -88,7 +88,7 @@ public class TileGrid
             foreach (var tile in layer["autoLayerTiles"]) {
                 var pos   = new IntVec2(x: tile["px"][0].Value<int>() / 16, y: tile["px"][1].Value<int>() / 16);
                 var index = pos.Y * grid.Width + pos.X;
-                grid.tiles[index] = tile["t"].Value<int>();
+                grid._tiles[index] = tile["t"].Value<int>();
             }
 
             layers.Add(grid);

@@ -2,15 +2,15 @@
 
 public class Dir4 : IEquatable<Dir4>
 {
-    public static readonly Dir4 North = new Dir4(0);
-    public static readonly Dir4 East  = new Dir4(1);
-    public static readonly Dir4 South = new Dir4(2);
-    public static readonly Dir4 West  = new Dir4(3);
+    public static readonly Dir4 North = new(0);
+    public static readonly Dir4 East  = new(1);
+    public static readonly Dir4 South = new(2);
+    public static readonly Dir4 West  = new(3);
 
-    private byte dirInt;
+    private byte _dirInt;
 
     public Dir4(byte dir) {
-        dirInt = dir;
+        _dirInt = dir;
     }
 
     public override bool Equals(object obj) {
@@ -21,7 +21,7 @@ public class Dir4 : IEquatable<Dir4>
     }
 
     public bool Equals(Dir4 other) {
-        return dirInt == other.dirInt;
+        return _dirInt == other._dirInt;
     }
 
     public static bool operator ==(Dir4 a, Dir4 b) {

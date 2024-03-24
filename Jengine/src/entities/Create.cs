@@ -3,7 +3,7 @@
 namespace JEngine.entities;
 
 public static class Create {
-    public static Entity CreateEntity(int? id = null) {
+    public static Entity? CreateEntity(int? id = null) {
         try {
             var entity = Activator.CreateInstance<Entity>();
 
@@ -11,16 +11,16 @@ public static class Create {
 
             return entity;
         } catch (Exception e) {
-            Debug.Error($"Failed to create entity: ", e);
+            Debug.Error("Failed to create entity: ", e);
             return null;
         }
     }
 
-    public static Entity CreateEntity(EntityDef def, int? id = null) {
+    public static Entity? CreateEntity(EntityDef def, int? id = null) {
         try {
             var entity = Activator.CreateInstance(typeof(Entity), def) as Entity;
 
-            foreach (var compData in def.components) {
+            foreach (var compData in def.Components) {
                 entity.AddComponent(compData.CompClass, compData);
             }
 
@@ -28,7 +28,7 @@ public static class Create {
 
             return entity;
         } catch (Exception e) {
-            Debug.Error($"Failed to create with def {def.id}: ", e);
+            Debug.Error($"Failed to create with def {def.Id}: ", e);
             return null;
         }
     }
@@ -37,7 +37,7 @@ public static class Create {
         try {
             var entity = Activator.CreateInstance(typeof(T), def) as T;
 
-            foreach (var compData in def.components) {
+            foreach (var compData in def.Components) {
                 entity.AddComponent(compData.CompClass, compData);
             }
 
@@ -45,7 +45,7 @@ public static class Create {
 
             return entity;
         } catch (Exception e) {
-            Debug.Error($"Failed to create entity of type {typeof(T).Name} with def {def.id}: ", e);
+            Debug.Error($"Failed to create entity of type {typeof(T).Name} with def {def.Id}: ", e);
             return null;
         }
     }
@@ -54,7 +54,7 @@ public static class Create {
         try {
             var entity = Activator.CreateInstance(type, def) as Entity;
 
-            foreach (var compData in def.components) {
+            foreach (var compData in def.Components) {
                 entity.AddComponent(compData.CompClass, compData);
             }
 
@@ -62,7 +62,7 @@ public static class Create {
 
             return entity;
         } catch (Exception e) {
-            Debug.Error($"Failed to create entity of type {type.Name} with def {def.id}: ", e);
+            Debug.Error($"Failed to create entity of type {type.Name} with def {def.Id}: ", e);
             return null;
         }
     }
@@ -84,7 +84,7 @@ public static class Create {
         try {
             var entity = Activator.CreateInstance(type, def) as Entity;
 
-            foreach (var compData in def.components) {
+            foreach (var compData in def.Components) {
                 entity.AddComponent(compData.CompClass, compData);
             }
 
@@ -92,7 +92,7 @@ public static class Create {
 
             return entity;
         } catch (Exception e) {
-            Debug.Error($"Failed to create entity of type {type.Name} with def {def.id}: ", e);
+            Debug.Error($"Failed to create entity of type {type.Name} with def {def.Id}: ", e);
             return null;
         }
     }

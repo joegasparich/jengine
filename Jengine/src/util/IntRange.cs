@@ -1,20 +1,20 @@
 namespace JEngine.util; 
 
 public class IntRange {
-    public int min;
-    public int max;
+    public int Min;
+    public int Max;
 
     public IntRange(int min, int max) {
-        this.min = min;
-        this.max = max;
+        Min = min;
+        Max = max;
     }
 
     public bool Includes(int value) {
-        return value >= min && value <= max;
+        return value >= Min && value <= Max;
     }
 
     public int Random() {
-        return Rand.Int(min, max);
+        return Rand.Int(Min, Max);
     }
     
 }

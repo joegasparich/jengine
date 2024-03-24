@@ -3,20 +3,20 @@ using Raylib_cs;
 namespace JEngine.util;
 
 public class Gradient {
-    public (float, Color)[] colours;
+    public (float, Color)[] Colours;
     
     public Gradient(params (float, Color)[] colours) {
-        this.colours = colours;
+        Colours = colours;
     }
     
     public Color Calculate(float value) {
-        for (var i = 0; i < colours.Length - 1; i++) {
-            if (value >= colours[i].Item1 && value <= colours[i + 1].Item1) {
-                var t = (value - colours[i].Item1) / (colours[i + 1].Item1 - colours[i].Item1);
-                return Colour.Lerp(colours[i].Item2, colours[i + 1].Item2, t);
+        for (var i = 0; i < Colours.Length - 1; i++) {
+            if (value >= Colours[i].Item1 && value <= Colours[i + 1].Item1) {
+                var t = (value - Colours[i].Item1) / (Colours[i + 1].Item1 - Colours[i].Item1);
+                return Colour.Lerp(Colours[i].Item2, Colours[i + 1].Item2, t);
             }
         }
         
-        return colours[^1].Item2;
+        return Colours[^1].Item2;
     }
 }

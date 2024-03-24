@@ -5,28 +5,28 @@ using Raylib_cs;
 namespace JEngine.entities;
 
 public class RenderComponentData : ComponentData {
-    public Graphic Graphic;
+    public Graphic? Graphic;
 }
 
 public class RenderComponent : Component {
     public static Type DataType => typeof(RenderComponentData);
 
     // State
-    public  Vector2       Offset = Vector2.Zero;
-    public  Color?        OverrideColour;
-    public  Graphic       BaseGraphic;
-    private Graphic       bakedGraphic;
-    private List<Graphic> attachments = new();
+    public  Vector2        Offset = Vector2.Zero;
+    public  Color?         OverrideColour;
+    public  Graphic        BaseGraphic;
+    private Graphic        _bakedGraphic;
+    private List<Graphic>  _attachments = new();
 
     // Properties
-    public RenderComponentData Data => (RenderComponentData)data;
-    public ref Graphic Graphics => ref bakedGraphic;
+    public     RenderComponentData Data     => (RenderComponentData)_data;
+    public ref Graphic?            Graphics => ref _bakedGraphic;
 
     private bool ShouldRender => true;
 
     public RenderComponent(Entity entity, RenderComponentData? data) : base(entity, data) {
         BaseGraphic  = data.Graphic;
-        bakedGraphic = BaseGraphic;
+        _bakedGraphic = BaseGraphic;
     }
 
     public override void Setup(bool fromSave) {
@@ -41,13 +41,13 @@ public class RenderComponent : Component {
         if (!ShouldRender)
             return;
 
-        bakedGraphic.Draw(
-            pos: entity.Transform.GlobalPosition + Offset,
-            rotation: -entity.Transform.GlobalRotation, // TODO: Figure out its negative
-            scale: entity.Transform.GlobalScale,
-            depth: Find.Renderer.GetDepth(entity.Transform.GlobalPosition.Y),
+        _bakedGraphic.Draw(
+            pos: Entity.Transform.GlobalPosition + Offset,
+            rotation: -Entity.Transform.GlobalRotation, // TODO: Figure out why its negative
+            scale: Entity.Transform.GlobalScale,
+            depth: Find.Renderer.GetDepth(Entity.Transform.GlobalPosition.Y),
             overrideColour: OverrideColour,
-            pickId: entity.Selectable ? entity.id : null
+            pickId: Entity.Selectable ? Entity.Id : null
         );
 
         OverrideColour = null;
@@ -56,14 +56,14 @@ public class RenderComponent : Component {
     public void AddAttachment(string spritePath) {
         var attachment = BaseGraphic;
         attachment.SetSprite(spritePath);
-        attachments.Add(attachment);
+        _attachments.Add(attachment);
 
         BakeAttachments();
     }
 
     private void BakeAttachments()
     {
-        if (attachments.NullOrEmpty()) 
+        if (_attachments.NullOrEmpty()) 
             return;
 
         // Bake the attachments into the texture
@@ -80,7 +80,7 @@ public class RenderComponent : Component {
             0,
             Color.White
         );
-        foreach (var att in attachments) {
+        foreach (var att in _attachments) {
             Raylib.DrawTexturePro(
                 att.Texture,
                 new Rectangle(0, 0, BaseGraphic.Texture.Width, -BaseGraphic.Texture.Height),
@@ -92,6 +92,6 @@ public class RenderComponent : Component {
         }
         Raylib.EndTextureMode();
 
-        bakedGraphic.Texture = renderTexture.Texture;
+        _bakedGraphic.Texture = renderTexture.Texture;
     }
 }

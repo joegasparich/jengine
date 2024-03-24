@@ -18,22 +18,22 @@ public class Transform : ISerialisable {
 
     public Matrix3x2 GlobalMatrix {
         get {
-            if (Entity.parent == null)
+            if (Entity.Parent == null)
                 return LocalMatrix;
 
             return
                 Matrix3x2.CreateScale(LocalScale) *
-                Matrix3x2.CreateScale(Entity.parent.Transform.LocalScale) *
+                Matrix3x2.CreateScale(Entity.Parent.Transform.LocalScale) *
                 Matrix3x2.CreateRotation(LocalRotation * JMath.DegToRad) *
                 Matrix3x2.CreateTranslation(LocalPosition) *
-                Matrix3x2.CreateRotation(Entity.parent.Transform.LocalRotation * JMath.DegToRad) *
-                Matrix3x2.CreateTranslation(Entity.parent.Transform.LocalPosition);
+                Matrix3x2.CreateRotation(Entity.Parent.Transform.LocalRotation * JMath.DegToRad) *
+                Matrix3x2.CreateTranslation(Entity.Parent.Transform.LocalPosition);
         }
     }
 
-    public Vector2 GlobalPosition => Entity.parent == null ? LocalPosition : GlobalMatrix.Translation;
-    public float   GlobalRotation => Entity.parent == null ? LocalRotation : (float)Math.Atan2(GlobalMatrix.M21, GlobalMatrix.M11) * JMath.RadToDeg;
-    public Vector2 GlobalScale    => Entity.parent == null ? LocalScale : new(MathF.Sqrt(GlobalMatrix.M11 * GlobalMatrix.M11 + GlobalMatrix.M12 * GlobalMatrix.M12),
+    public Vector2 GlobalPosition => Entity.Parent == null ? LocalPosition : GlobalMatrix.Translation;
+    public float   GlobalRotation => Entity.Parent == null ? LocalRotation : (float)Math.Atan2(GlobalMatrix.M21, GlobalMatrix.M11) * JMath.RadToDeg;
+    public Vector2 GlobalScale    => Entity.Parent == null ? LocalScale : new(MathF.Sqrt(GlobalMatrix.M11 * GlobalMatrix.M11 + GlobalMatrix.M12 * GlobalMatrix.M12),
                                          MathF.Sqrt(GlobalMatrix.M21 * GlobalMatrix.M21 + GlobalMatrix.M22 * GlobalMatrix.M22));
 
     public Transform(Entity entity) {

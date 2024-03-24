@@ -9,8 +9,8 @@ public interface ISerialisable {
     public void Serialise();
 }
 public interface IReferencable {
-    string                        UniqueId { get; }
-    static abstract IReferencable GetByUniqueId(string id);
+    string                         UniqueId { get; }
+    static abstract IReferencable? GetByUniqueId(string id);
 }
 
 public enum SerialiseMode {
@@ -36,7 +36,7 @@ public class SaveManager {
     // Constants
     private const string SaveDir         = "saves/";
     private const string DefaultSaveName = "save";
-    public readonly JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings() {
+    public readonly JsonSerializer Serializer = JsonSerializer.Create(new JsonSerializerSettings() {
         Converters = new List<JsonConverter> {
             new DefConverter(),
             new CompJsonConverter(),
@@ -46,20 +46,20 @@ public class SaveManager {
     });
     
     // State
-    public JObject       currentSaveNode;
-    public SerialiseMode mode;
+    public JObject       CurrentSaveNode;
+    public SerialiseMode Mode;
 
-    private Dictionary<ISerialisable, string> DeepSavedObjects = new();
+    private Dictionary<ISerialisable, string> _deepSavedObjects = new();
 
     public void SaveCurrentScene(string name = DefaultSaveName, bool overwrite = false) {
         Debug.Log("Saving game");
 
-        DeepSavedObjects.Clear();
+        _deepSavedObjects.Clear();
 
         var saveData = new JObject();
         saveData.Add("saveName", name);
-        mode            = SerialiseMode.Saving;
-        currentSaveNode = saveData;
+        Mode            = SerialiseMode.Saving;
+        CurrentSaveNode = saveData;
 
         try {
             Find.Game.Serialise();
@@ -69,7 +69,7 @@ public class SaveManager {
             return;
         }
 
-        mode = SerialiseMode.None;
+        Mode = SerialiseMode.None;
 
         // Create save folder if it doesn't exist
         if (!Directory.Exists(SaveDir))
@@ -98,17 +98,17 @@ public class SaveManager {
 
         Find.Game.ClearEntities();
 
-        currentSaveNode = saveData;
+        CurrentSaveNode = saveData;
         try {
-            mode = SerialiseMode.Loading;
+            Mode = SerialiseMode.Loading;
             Find.Game.Serialise();
-            mode = SerialiseMode.ResolvingRefs;
+            Mode = SerialiseMode.ResolvingRefs;
             Find.Game.Serialise();
         } catch (Exception e) {
             Debug.Error("Error loading game: ", e);
         }
 
-        mode = SerialiseMode.None;
+        Mode = SerialiseMode.None;
     }
 
     public IEnumerable<SaveFile> GetSaveFiles() {
@@ -128,8 +128,8 @@ public class SaveManager {
     public JObject Serialise(ISerialisable value) {
         var node = new JObject();
         
-        mode            = SerialiseMode.Saving;
-        currentSaveNode = node;
+        Mode            = SerialiseMode.Saving;
+        CurrentSaveNode = node;
         
         value.Serialise();
         return node;
@@ -143,18 +143,18 @@ public class SaveManager {
         else if (value is IReferencable)
             Debug.Warn(label + " is IReferencable, use ArchiveRef instead");
 
-        switch (mode) {
+        switch (Mode) {
             case SerialiseMode.Saving:
                 if (value == null) 
                     break;
                 
-                currentSaveNode.Add(label, JToken.FromObject(value, serializer));
+                CurrentSaveNode.Add(label, JToken.FromObject(value, Serializer));
                 break;
             case SerialiseMode.Loading:
-                if (currentSaveNode[label] == null)
+                if (CurrentSaveNode[label] == null)
                     break;
                 
-                value = currentSaveNode[label]!.ToObject<T>(serializer);
+                value = CurrentSaveNode[label]!.ToObject<T>(Serializer);
                 break;
         }
     }
@@ -164,7 +164,7 @@ public class SaveManager {
     // Currently used for classNames on entities/components
     // And anything too complicated for the other archivers
     public void ArchiveValue<T>(string label, Func<T> get, Action<T?>? set) {
-        switch (mode) {
+        switch (Mode) {
             case SerialiseMode.Saving: {
                 var value = get();
                 ArchiveValue(label, ref value);
@@ -182,20 +182,20 @@ public class SaveManager {
     }
 
     // Serialise def reference using id
-    public void ArchiveDef<T>(string label, ref T def) where T : Def {
-        switch (mode) {
+    public void ArchiveDef<T>(string label, ref T def) where T : Def? {
+        switch (Mode) {
             case SerialiseMode.Saving: {
                 if (def == null) 
                     break;
                 
-                currentSaveNode.Add(label, JToken.FromObject(def.id, serializer));
+                CurrentSaveNode.Add(label, JToken.FromObject(def.Id, Serializer));
                 break;
             }
             case SerialiseMode.Loading: {
-                if (currentSaveNode[label] == null)
+                if (CurrentSaveNode[label] == null)
                     break;
                 
-                var id = currentSaveNode[label]!.Value<string>();
+                var id = CurrentSaveNode[label]!.Value<string>();
                 def = Find.AssetManager.GetDef<T>(id);
                 break;
             }
@@ -206,18 +206,18 @@ public class SaveManager {
     // Implementers must provide a unique ID and a way to get a reference to the same
     // object from that ID
     public void ArchiveRef<T>(string label, ref T value) where T : class, IReferencable {
-        switch (mode) {
+        switch (Mode) {
             case SerialiseMode.Saving:
                 if (value == null)
                     break;
                 
-                currentSaveNode[label] = value.UniqueId;
+                CurrentSaveNode[label] = value.UniqueId;
                 break;
             case SerialiseMode.ResolvingRefs:
-                if (currentSaveNode[label] == null)
+                if (CurrentSaveNode[label] == null)
                     break;
                 
-                var id = currentSaveNode[label]!.Value<string>();
+                var id = CurrentSaveNode[label]!.Value<string>();
                 value = T.GetByUniqueId(id) as T;
                 break;
         }
@@ -228,33 +228,33 @@ public class SaveManager {
     public void ArchiveDeep<T>(string label, ref T? value, params object[] ctorArgs) where T : class, ISerialisable {
         // We need to store the parent because we are going to recurse
         // and need to restore back to the parent node once we're done
-        var parent = currentSaveNode;
-        switch (mode) {
+        var parent = CurrentSaveNode;
+        switch (Mode) {
             case SerialiseMode.Saving:
                 if (value == null)
                     break;
-                if (DeepSavedObjects.TryGetValue(value, out var existingPath)) {
-                    Debug.Warn($"{currentSaveNode.Path}{label} was already deep saved at {existingPath}");
+                if (_deepSavedObjects.TryGetValue(value, out var existingPath)) {
+                    Debug.Warn($"{CurrentSaveNode.Path}{label} was already deep saved at {existingPath}");
                     break;
                 }
                 
                 // Create a new node and serialise the value into it
-                currentSaveNode              = new JObject();
-                currentSaveNode["className"] = value.GetType().ToString(); 
+                CurrentSaveNode              = new JObject();
+                CurrentSaveNode["className"] = value.GetType().ToString(); 
                 value.Serialise();
-                DeepSavedObjects.Add(value, currentSaveNode.Path);
-                parent[label] = currentSaveNode;
+                _deepSavedObjects.Add(value, CurrentSaveNode.Path);
+                parent[label] = CurrentSaveNode;
                 break;
             case SerialiseMode.Loading:
-                if (currentSaveNode[label] == null)
+                if (CurrentSaveNode[label] == null)
                     break;
                 
-                currentSaveNode = parent[label] as JObject;
+                CurrentSaveNode = parent[label] as JObject;
                 // Instantiate object and serialise into it
                 if (value == null) {
                     // Need to use reflection to instantiate because T could be abstract
                     // We need to get the type from the className property
-                    var type = Type.GetType(currentSaveNode["className"].Value<string>());
+                    var type = Type.GetType(CurrentSaveNode["className"].Value<string>());
                     if (type == null || type.GetConstructor(Type.EmptyTypes) == null) {
                         Debug.Warn($"Failed to load {label}, type {type} not found or has no default constructor");
                         break;
@@ -264,7 +264,7 @@ public class SaveManager {
                 value.Serialise();
                 break;
             case SerialiseMode.ResolvingRefs:
-                currentSaveNode = parent[label] as JObject;
+                CurrentSaveNode = parent[label] as JObject;
                 if (value == null) {
                     Debug.Warn($"Could not find node {parent.Path}.{label} in save file");
                     break;
@@ -274,81 +274,81 @@ public class SaveManager {
                 break;
         }
         // Restore parent node
-        currentSaveNode = parent;
+        CurrentSaveNode = parent;
     }
     
     // Serialise ISerialisable - used rarely if the value is a property
     // Value must be already instantiated when loading
     // Above overload is preferred
     public void ArchiveDeep(string label, ISerialisable value) {
-        var parent = currentSaveNode;
-        switch (mode) {
+        var parent = CurrentSaveNode;
+        switch (Mode) {
             case SerialiseMode.Saving:
                 if (value == null)
                     break;
-                if (DeepSavedObjects.TryGetValue(value, out var existingPath)) {
-                    Debug.Warn($"{currentSaveNode.Path}{label} was already deep saved at {existingPath}");
+                if (_deepSavedObjects.TryGetValue(value, out var existingPath)) {
+                    Debug.Warn($"{CurrentSaveNode.Path}{label} was already deep saved at {existingPath}");
                     break;
                 }
 
-                currentSaveNode = new JObject();
-                currentSaveNode["className"] = value.GetType().ToString(); 
+                CurrentSaveNode = new JObject();
+                CurrentSaveNode["className"] = value.GetType().ToString(); 
                 value.Serialise();
-                DeepSavedObjects.Add(value, currentSaveNode.Path);
-                parent[label] = currentSaveNode;
+                _deepSavedObjects.Add(value, CurrentSaveNode.Path);
+                parent[label] = CurrentSaveNode;
                 break;
             case SerialiseMode.Loading:
-                if (currentSaveNode[label] == null)
+                if (CurrentSaveNode[label] == null)
                     break;
                 
                 if (value == null) {
                     Debug.Warn($"Failed to load {label}, value because it is null");
                     break;
                 }
-                currentSaveNode = parent[label] as JObject;
+                CurrentSaveNode = parent[label] as JObject;
                 value.Serialise();
                 break;
             case SerialiseMode.ResolvingRefs:
-                currentSaveNode = parent[label] as JObject;
+                CurrentSaveNode = parent[label] as JObject;
                 value.Serialise();
                 break;
         }
-        currentSaveNode = parent;
+        CurrentSaveNode = parent;
     }
 
     // Stores a collection of values using any of the four save modes implemented above
     public void ArchiveCollection<T>(string label, ref List<T> collection, SaveMode saveMode) where T : class, new() {
-        var parent = currentSaveNode;
-        switch (mode) {
+        var parent = CurrentSaveNode;
+        switch (Mode) {
             case SerialiseMode.Saving: {
                 // Create a json array and generate JTokens to store in it
                 var array = new JArray();
                 foreach (var value in collection) {
                     switch (saveMode) {
                         case SaveMode.Value:
-                            array.Add(JToken.FromObject(value, serializer));
+                            array.Add(JToken.FromObject(value, Serializer));
                             break;
                         case SaveMode.Def:
                             var def = value as Def;
-                            array.Add(JToken.FromObject(def.id, serializer));
+                            array.Add(JToken.FromObject(def.Id, Serializer));
                             break;
                         case SaveMode.Ref:
                             var reference = value as IReferencable;
-                            array.Add(JToken.FromObject(reference.UniqueId, serializer));
+                            array.Add(JToken.FromObject(reference.UniqueId, Serializer));
                             break;
                         case SaveMode.Deep:
-                            currentSaveNode = new JObject();
-                            array.Add(currentSaveNode);
+                            CurrentSaveNode = new JObject();
+                            array.Add(CurrentSaveNode);
                             
                             var serialisable = value as ISerialisable;
                             
-                            if (DeepSavedObjects.TryGetValue(serialisable, out var existingPath)) {
-                                Debug.Warn($"{currentSaveNode.Path}{label} was already deep saved at {existingPath}");
+                            if (_deepSavedObjects.TryGetValue(serialisable, out var existingPath)) {
+                                Debug.Warn($"{CurrentSaveNode.Path}{label} was already deep saved at {existingPath}");
                                 break;
                             }
                             
                             serialisable.Serialise();
-                            DeepSavedObjects.Add(serialisable, currentSaveNode.Path);
+                            _deepSavedObjects.Add(serialisable, CurrentSaveNode.Path);
                             break;
                     }
                 }
@@ -367,13 +367,13 @@ public class SaveManager {
                 foreach (var value in array) {
                     switch (saveMode) {
                         case SaveMode.Value:
-                            collection.Add(value.ToObject<T>(serializer));
+                            collection.Add(value.ToObject<T>(Serializer));
                             break;
                         case SaveMode.Def:
                             collection.Add(Find.AssetManager.GetDef(type, value.Value<string>()) as T);
                             break;
                         case SaveMode.Deep:
-                            currentSaveNode = value as JObject; 
+                            CurrentSaveNode = value as JObject; 
                             var item = new T() as ISerialisable;
                             item.Serialise();
                             collection.Add(item as T);
@@ -406,7 +406,7 @@ public class SaveManager {
                 break;
             }
         }
-        currentSaveNode = parent;
+        CurrentSaveNode = parent;
     }
 
     // Serialise IEnumerable of ISerialisable with getter/selector
@@ -414,21 +414,21 @@ public class SaveManager {
     // Takes an IEnumerable and a selector function that returns an IEnumerable of ISerialisable
     // Implementers must deserialise the JArray themselves
    public void ArchiveCollection(string label, IEnumerable<ISerialisable> collection, Func<JArray, IEnumerable<ISerialisable>> select) {
-        var parent = currentSaveNode;
-        switch (mode) {
+        var parent = CurrentSaveNode;
+        switch (Mode) {
             case SerialiseMode.Saving: {
                 var array = new JArray();
                 foreach (var value in collection) {
-                    currentSaveNode = new JObject();
-                    array.Add(currentSaveNode);
+                    CurrentSaveNode = new JObject();
+                    array.Add(CurrentSaveNode);
                     
-                    if (DeepSavedObjects.TryGetValue(value, out var existingPath)) {
-                        Debug.Warn($"{currentSaveNode.Path}{label} was already deep saved at {existingPath}");
+                    if (_deepSavedObjects.TryGetValue(value, out var existingPath)) {
+                        Debug.Warn($"{CurrentSaveNode.Path}{label} was already deep saved at {existingPath}");
                         break;
                     }
                     
                     value.Serialise();
-                    DeepSavedObjects.Add(value, currentSaveNode.Path);
+                    _deepSavedObjects.Add(value, CurrentSaveNode.Path);
                 }
                 parent[label] = array;
                 break;
@@ -437,7 +437,7 @@ public class SaveManager {
                 var array = parent[label] as JArray;
                 var i = 0;
                 foreach (var value in select(array)) {
-                    currentSaveNode = array[i++] as JObject;
+                    CurrentSaveNode = array[i++] as JObject;
                     value.Serialise();
                 }
                 break;
@@ -449,25 +449,25 @@ public class SaveManager {
                 break;
             }
         }
-        currentSaveNode = parent;
+        CurrentSaveNode = parent;
     }
    
    public void ArchiveCollection<T>(string label, IEnumerable<T> collection, Action<T> select) where T : class, ISerialisable, new() {
-       var parent = currentSaveNode;
-       switch (mode) {
+       var parent = CurrentSaveNode;
+       switch (Mode) {
            case SerialiseMode.Saving: {
                var array = new JArray();
                foreach (var value in collection) {
-                   currentSaveNode = new JObject();
-                   array.Add(currentSaveNode);
+                   CurrentSaveNode = new JObject();
+                   array.Add(CurrentSaveNode);
                    
-                   if (DeepSavedObjects.TryGetValue(value, out var existingPath)) {
-                       Debug.Warn($"{currentSaveNode.Path}{label} was already deep saved at {existingPath}");
+                   if (_deepSavedObjects.TryGetValue(value, out var existingPath)) {
+                       Debug.Warn($"{CurrentSaveNode.Path}{label} was already deep saved at {existingPath}");
                        break;
                    }
                    
                    value.Serialise();
-                   DeepSavedObjects.Add(value, currentSaveNode.Path);
+                   _deepSavedObjects.Add(value, CurrentSaveNode.Path);
                }
                parent[label] = array;
                break;
@@ -475,7 +475,7 @@ public class SaveManager {
            case SerialiseMode.Loading: {
                var array = parent[label] as JArray;
                foreach (var value in array) {
-                   currentSaveNode = value as JObject; 
+                   CurrentSaveNode = value as JObject; 
                    var item = new T() as ISerialisable;
                    item.Serialise();
                    select(item as T);
@@ -489,27 +489,27 @@ public class SaveManager {
                break;
            }
        }
-       currentSaveNode = parent;
+       CurrentSaveNode = parent;
    }
     
     // Custom serialisation
     // User must handle raw JToken values themselves
     public void ArchiveCustom(string label, Func<JToken> save, Action<JToken> load, Action<JToken> resolveRefs) {
-        var parent = currentSaveNode;
-        switch (mode) {
+        var parent = CurrentSaveNode;
+        switch (Mode) {
             case SerialiseMode.Saving: {
-                currentSaveNode[label] = save();
+                CurrentSaveNode[label] = save();
                 break;
             }
             case SerialiseMode.Loading: {
-                load(currentSaveNode[label]);
+                load(CurrentSaveNode[label]);
                 break;
             }
             case SerialiseMode.ResolvingRefs: {
-                resolveRefs(currentSaveNode[label]);
+                resolveRefs(CurrentSaveNode[label]);
                 break;
             }
         }
-        currentSaveNode = parent;
+        CurrentSaveNode = parent;
     }
 }

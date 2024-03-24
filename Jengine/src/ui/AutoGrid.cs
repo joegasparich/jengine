@@ -10,45 +10,45 @@ public enum GridDirection {
 
 public class AutoGrid {
     // State
-    private Rectangle     rect;
-    private GridDirection direction;
-    private float         colWidth;
-    private float         rowHeight;
-    private float         gap;
+    private Rectangle     _rect;
+    private GridDirection _direction;
+    private float         _colWidth;
+    private float         _rowHeight;
+    private float         _gap;
     
-    private float         curX;
-    private float         curY;
+    private float         _curX;
+    private float         _curY;
     
     // Properties
-    public float     CurX => curX;
-    public float     CurY => curY;
-    public Rectangle Rect => rect;
+    public float     CurX => _curX;
+    public float     CurY => _curY;
+    public Rectangle Rect => _rect;
 
-    public AutoGrid(Rectangle rect, GridDirection direction, float colWidth, float rowHeight, float gap = GUI.GapTiny) {
-        this.direction     = direction;
-        this.rect          = rect;
-        this.colWidth      = colWidth;
-        this.rowHeight     = rowHeight;
-        this.gap           = gap;
+    public AutoGrid(Rectangle rect, GridDirection direction, float colWidth, float rowHeight, float gap = Gui.GapTiny) {
+        _direction     = direction;
+        _rect          = rect;
+        _colWidth      = colWidth;
+        _rowHeight     = rowHeight;
+        _gap           = gap;
         
-        curX               = rect.X;
-        curY               = rect.Y;
+        _curX               = rect.X;
+        _curY               = rect.Y;
     }
     
     public void GetNext(out Rectangle rect) {
-        rect = new Rectangle(curX, curY, colWidth, rowHeight);
+        rect = new Rectangle(_curX, _curY, _colWidth, _rowHeight);
         
-        if (direction == GridDirection.Vertical) {
-            curY += rowHeight + gap;
-            if (curY + rowHeight > this.rect.Y + this.rect.Height) {
-                curY = this.rect.Y;
-                curX += colWidth + gap;
+        if (_direction == GridDirection.Vertical) {
+            _curY += _rowHeight + _gap;
+            if (_curY + _rowHeight > _rect.Y + _rect.Height) {
+                _curY = _rect.Y;
+                _curX += _colWidth + _gap;
             }
         } else {
-            curX += colWidth + gap;
-            if (curX + colWidth > this.rect.X + this.rect.Width) {
-                curX = this.rect.X;
-                curY += rowHeight + gap;
+            _curX += _colWidth + _gap;
+            if (_curX + _colWidth > _rect.X + _rect.Width) {
+                _curX = _rect.X;
+                _curY += _rowHeight + _gap;
             }
         }
     }

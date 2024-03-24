@@ -5,30 +5,30 @@ namespace JEngine.ui;
 public class Window {
     
     // Config
-    public  string            id;
-    public  bool              immediate           = false;
-    public  bool              dismissOnRightClick = false;
-    public  Rectangle         absRect;
-    private Action<Rectangle> onUI;
-    public  bool              consumesHover = true;
+    public  string            Id;
+    public  bool              Immediate           = false;
+    public  bool              DismissOnRightClick = false;
+    public  Rectangle         AbsRect;
+    public  bool              ConsumesHover = true;
+    private Action<Rectangle> _onUi;
     
     // Properties
     public bool IsHovered => Find.UI.IsMouseOverRect(GetRect());
 
     public Window(Rectangle rect) {
-        id = Guid.NewGuid().ToString();
-        absRect = rect;
+        Id = Guid.NewGuid().ToString();
+        AbsRect = rect;
     }
 
     public Window(string id, Rectangle rect, Action<Rectangle> onUi) {
-        this.id = id;
-        absRect = rect;
-        onUI = onUi;
+        this.Id = id;
+        AbsRect = rect;
+        _onUi = onUi;
     }
 
     public virtual void DoWindowContents() {
-        if (onUI != null)
-            onUI(GetRect());
+        if (_onUi != null)
+            _onUi(GetRect());
     }
 
     public virtual void OnInput(InputEvent evt) {
@@ -40,15 +40,15 @@ public class Window {
     public virtual void OnClose() {}
 
     public virtual void Close() {
-        Find.UI.CloseWindow(id);
+        Find.UI.CloseWindow(Id);
     }
     
     public float GetWidth() {
-        return Math.Min(absRect.Width, Find.Game.ScreenWidth - absRect.X);
+        return Math.Min(AbsRect.Width, Find.Game.ScreenWidth - AbsRect.X);
     }
     
     public float GetHeight() {
-        return Math.Min(absRect.Height, Find.Game.ScreenHeight - absRect.Y);
+        return Math.Min(AbsRect.Height, Find.Game.ScreenHeight - AbsRect.Y);
     }
 
     public Rectangle GetRect() {

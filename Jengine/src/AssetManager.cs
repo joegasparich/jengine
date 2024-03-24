@@ -13,7 +13,7 @@ public class AssetManager {
     private const string DefPath = "assets/defs";
     private const string TexturePath = "assets/textures";
     private const string SoundPath = "assets/sounds";
-    private readonly JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings {
+    private readonly JsonSerializer _serializer = JsonSerializer.Create(new JsonSerializerSettings {
         Converters = new List<JsonConverter> {
             new DefConverter(),
             new TypeConverter(),
@@ -21,15 +21,15 @@ public class AssetManager {
             new LerpPointsConverter()
         },
     });
-    private Texture2D defaultTexture;
-    private Sound defaultSound;
+    private Texture2D _defaultTexture;
+    private Sound _defaultSound;
     
     // State
-    private readonly Dictionary<string, Texture2D>             textureMap     = new();
-    private readonly Dictionary<string, Sound>                 soundMap       = new();
-    private readonly Dictionary<Type, Dictionary<string, Def>> defMap         = new();
-    private readonly Dictionary<string, Def>                   defMapFlat     = new();
-    public readonly  List<(object, ExpressionValueProvider)>   unresolvedDefs = new();
+    private readonly Dictionary<string, Texture2D>             _textureMap    = new();
+    private readonly Dictionary<string, Sound>                 _soundMap      = new();
+    private readonly Dictionary<Type, Dictionary<string, Def>> _defMap        = new();
+    private readonly Dictionary<string, Def>                   _defMapFlat    = new();
+    public readonly  List<(object, ExpressionValueProvider)>   UnresolvedDefs = new();
 
     public void LoadAssets() {
         LoadTextures();
@@ -54,11 +54,11 @@ public class AssetManager {
                 GetTexture(path);
             } catch (Exception e) {
                 Debug.Error($"Failed to load texture with path: {path}", e);
-                textureMap.Remove(path);
+                _textureMap.Remove(path);
             }
         }
         
-        defaultTexture = GetTexture(TexturePath + "/placeholder.png");
+        _defaultTexture = GetTexture(TexturePath + "/placeholder.png");
     }
 
     private void LoadSounds() {
@@ -70,11 +70,11 @@ public class AssetManager {
                 GetSound(path);
             } catch (Exception e) {
                 Debug.Error($"Failed to load sound with path: {path}", e);
-                soundMap.Remove(path);
+                _soundMap.Remove(path);
             }
         }
         
-        defaultSound = GetSound(SoundPath + "/placeholder.wav");
+        _defaultSound = GetSound(SoundPath + "/placeholder.wav");
     }
 
     private static Queue<JObject> GetDataQueue() {
@@ -168,7 +168,7 @@ public class AssetManager {
                 continue;
 
             // Check if already loaded
-            if (defMapFlat.ContainsKey(id)) {
+            if (_defMapFlat.ContainsKey(id)) {
                 Debug.Error($"Failed to load def {id}, id already exists");
                 continue;
             }
@@ -191,33 +191,33 @@ public class AssetManager {
             // Instantiate
             Def instance;
             try {
-                instance = (Def)data.ToObject(type, serializer)!;
+                instance = (Def)data.ToObject(type, _serializer)!;
             } catch (Exception e) {
                 Debug.Error($"Failed to load def {id}, could not deserialize json", e);
                 continue;
             }
 
             // Register
-            if (!defMap.ContainsKey(type))
-                defMap.Add(type, new Dictionary<string, Def>());
+            if (!_defMap.ContainsKey(type))
+                _defMap.Add(type, new Dictionary<string, Def>());
 
-            defMap[type].Add(id, instance);
-            defMapFlat[id] = instance;
+            _defMap[type].Add(id, instance);
+            _defMapFlat[id] = instance;
         }
     }
 
     private void ResolveDefReferences() {
-        foreach (var unresolvedDef in unresolvedDefs) {
+        foreach (var unresolvedDef in UnresolvedDefs) {
             var (obj, provider) = unresolvedDef;
             var val = provider.GetValue(obj);
 
             if (val is Def def)
-                provider.SetValue(obj, GetDef(def.id));
+                provider.SetValue(obj, GetDef(def.Id));
             else if (val.GetType().IsGenericType && val.GetType().GetGenericTypeDefinition() == typeof(List<>)) {
                 var list        = (IList)val;
                 var genericList = Activator.CreateInstance(val.GetType()) as IList;
                 foreach (Def d in list) {
-                    genericList.Add(GetDef(d.id));
+                    genericList.Add(GetDef(d.Id));
                 }
 
                 provider.SetValue(obj, genericList);
@@ -230,9 +230,9 @@ public class AssetManager {
                     var value = entry.Value;
                     
                     if (key is Def kd)
-                        key = GetDef(kd.id);
+                        key = GetDef(kd.Id);
                     if (value is Def vd)
-                        value = GetDef(vd.id);
+                        value = GetDef(vd.Id);
                     
                     genericDict.Add(key, value);
                 }
@@ -248,22 +248,22 @@ public class AssetManager {
     public Texture2D GetTexture(string path) {
         var shortPath = path.Replace(TexturePath + "/", "");
 
-        if (!textureMap.ContainsKey(shortPath)) {
+        if (!_textureMap.ContainsKey(shortPath)) {
             Texture2D texture;
 
             path = ValidatePath(path);
             
             if (!File.Exists(path)) {
                 Debug.Warn("Could not find path to texture " + path);
-                texture = defaultTexture;
+                texture = _defaultTexture;
             } else {
                 texture = Raylib.LoadTexture(path);
             }
             
-            textureMap.Add(shortPath, texture);
+            _textureMap.Add(shortPath, texture);
         }
 
-        return textureMap[shortPath];
+        return _textureMap[shortPath];
     }
 
     public Image LoadImage(string path) {
@@ -275,22 +275,22 @@ public class AssetManager {
     public Sound GetSound(string path) {
         var shortPath = path.Replace(SoundPath + "/", "");
 
-        if (!soundMap.ContainsKey(shortPath)) {
+        if (!_soundMap.ContainsKey(shortPath)) {
             Sound sound;
 
             path = ValidatePath(path);
             
             if (!File.Exists(path)) {
                 Debug.Warn("Could not find path to sound " + path);
-                sound = defaultSound;
+                sound = _defaultSound;
             } else {
                 sound = Raylib.LoadSound(path);
             }
             
-            soundMap.Add(shortPath, sound);
+            _soundMap.Add(shortPath, sound);
         }
 
-        return soundMap[shortPath];
+        return _soundMap[shortPath];
     }
 
     public JObject? GetJson(string path) {
@@ -313,20 +313,20 @@ public class AssetManager {
     }
 
     public Def? GetDef(string id, bool suppressError = false) {
-        if (!defMapFlat.ContainsKey(id)) {
+        if (!_defMapFlat.ContainsKey(id)) {
             if (!suppressError)
                 Debug.Error($"Failed to get def with id {id}, no defs of that type have been loaded");
             return null;
         }
         
-        return defMapFlat[id];
+        return _defMapFlat[id];
     }
 
     public Def? GetDef(Type type, string id) {
-        if (!defMap.ContainsKey(type)) {
+        if (!_defMap.ContainsKey(type)) {
             // Try get it from the flat map if it's a subclass
-            if (defMapFlat.ContainsKey(id)) {
-                var def = defMapFlat[id];
+            if (_defMapFlat.ContainsKey(id)) {
+                var def = _defMapFlat[id];
                 if (def.DefType.IsSubclassOf(type))
                     return def;
             }
@@ -335,19 +335,19 @@ public class AssetManager {
             return null;
         }
 
-        if (!defMap[type].ContainsKey(id)) {
+        if (!_defMap[type].ContainsKey(id)) {
             Debug.Error($"Failed to get def of type {type} with id {id}, no def with that id has been loaded");
             return null;
         }
 
-        return defMap[type][id];
+        return _defMap[type][id];
     }
 
     public T? GetDef<T>(string id) where T : Def {
-        if (!defMap.ContainsKey(typeof(T))) {
+        if (!_defMap.ContainsKey(typeof(T))) {
             // Try get it from the flat map if it's a subclass
-            if (defMapFlat.ContainsKey(id)) {
-                var def = defMapFlat[id];
+            if (_defMapFlat.ContainsKey(id)) {
+                var def = _defMapFlat[id];
                 if (def.DefType.IsSubclassOf(typeof(T)))
                     return def as T;
             }
@@ -356,23 +356,23 @@ public class AssetManager {
             return null;
         }
 
-        if (!defMap[typeof(T)].ContainsKey(id)) {
+        if (!_defMap[typeof(T)].ContainsKey(id)) {
             Debug.Error($"Failed to get def of type {typeof(T)} with id {id}, no def with that id has been loaded");
             return null;
         }
 
-        return (T)defMap[typeof(T)][id];
+        return (T)_defMap[typeof(T)][id];
     }
     
     public List<T>? GetAllDefs<T>() where T : Def {
-        if (!defMap.ContainsKey(typeof(T))) {
+        if (!_defMap.ContainsKey(typeof(T))) {
             Debug.Error($"Failed to get defs of type {typeof(T)}, no defs of that type have been loaded");
             return null;
         }
         
         // TODO: Cache this
 
-        return defMap[typeof(T)].Values.Cast<T>().ToList();
+        return _defMap[typeof(T)].Values.Cast<T>().ToList();
     }
 
     private string ValidatePath(string path) {

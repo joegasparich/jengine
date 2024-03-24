@@ -10,20 +10,20 @@ public static class FormattedStringExtension {
 }
 
 public partial class FormattedString {
-    internal string taggedString;
+    internal string _taggedString;
 
     // TODO: Check regex perf and cache stripped tag result
     [GeneratedRegex("<[^>]+>")]
     private static partial Regex StripTagRegex();
-    public string StripTags => StripTagRegex().Replace(taggedString, "");
+    public string StripTags => StripTagRegex().Replace(_taggedString, "");
     
     public int Length => StripTags.Length;
     
     public FormattedString() {
-        taggedString = "";
+        _taggedString = "";
     }
     public FormattedString(string rawString, string tag = "s", string val = "") {
-        this.taggedString = Tag(rawString, tag, val);
+        _taggedString = Tag(rawString, tag, val);
     }
 
     private static string Tag(string str, string tag, string val = "") {
@@ -34,24 +34,24 @@ public partial class FormattedString {
     }
 
     public IEnumerable<FormattedString> Split(char separator) {
-        var split = taggedString.Split(separator);
+        var split = _taggedString.Split(separator);
         foreach (var str in split) {
             var formatted = new FormattedString();
-            formatted.taggedString = str;
+            formatted._taggedString = str;
             yield return formatted;
         }
     }
 
     public FormattedString Trim() {
         var formatted = new FormattedString();
-        formatted.taggedString = taggedString.Trim();
+        formatted._taggedString = _taggedString.Trim();
         return formatted;
     }
 
     [GeneratedRegex("<(.*?)(?:=(.*?))?>([\\s\\S]*?)<\\/.*?>")]
     private static partial Regex ResolveTagsRegex();
     public IEnumerable<(string tagName, string attribute, string contents)> Resolve() {
-        var matches = ResolveTagsRegex().Matches(taggedString);
+        var matches = ResolveTagsRegex().Matches(_taggedString);
 
         foreach (Match match in matches) {
             yield return (match.Groups[1].Value, match.Groups[2].Value, match.Groups[3].Value);
@@ -60,22 +60,22 @@ public partial class FormattedString {
 
     public static FormattedString operator +(FormattedString a, FormattedString b) {
         return new FormattedString {
-            taggedString = a.taggedString + b.taggedString
+            _taggedString = a._taggedString + b._taggedString
         };
     }
     public static FormattedString operator +(FormattedString a, string b) {
         return new FormattedString {
-            taggedString = a.taggedString + new FormattedString(b).taggedString
+            _taggedString = a._taggedString + new FormattedString(b)._taggedString
         };
     }
     public static FormattedString operator +(string a, FormattedString b) {
         return new FormattedString {
-            taggedString = new FormattedString(a).taggedString + b.taggedString
+            _taggedString = new FormattedString(a)._taggedString + b._taggedString
         };
     }
 
     public override string ToString() {
-        return taggedString;
+        return _taggedString;
     }
 
     public static implicit operator FormattedString(string str) => new(str);

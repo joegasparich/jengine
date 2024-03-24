@@ -6,28 +6,28 @@ using JEngine.util;
 namespace JEngine.entities;
 
 public static class EntitySerialiseUtility {
-    public static JToken SaveEntities(IEnumerable<Entity> entities) {
-        var parent = Find.SaveManager.currentSaveNode;
+    public static JToken SaveEntities(IEnumerable<Entity?> entities) {
+        var parent = Find.SaveManager.CurrentSaveNode;
 
         var saveData = new JArray();
 
         foreach (var entity in entities) {
             var entityData = new JObject();
-            Find.SaveManager.currentSaveNode = entityData;
+            Find.SaveManager.CurrentSaveNode = entityData;
             entity.Serialise();
             saveData.Add(entityData);
         }
 
-        Find.SaveManager.currentSaveNode = parent;
+        Find.SaveManager.CurrentSaveNode = parent;
         return saveData;
     }
 
     public static void LoadEntities(JArray data) {
-        var parent = Find.SaveManager.currentSaveNode;
-        Find.SaveManager.mode = SerialiseMode.Loading;
+        var parent = Find.SaveManager.CurrentSaveNode;
+        Find.SaveManager.Mode = SerialiseMode.Loading;
         
         foreach (JObject entityData in data) {
-            Find.SaveManager.currentSaveNode = entityData;
+            Find.SaveManager.CurrentSaveNode = entityData;
             var type = Type.GetType(entityData["type"].Value<string>());
 
             Entity entity;
@@ -44,7 +44,7 @@ public static class EntitySerialiseUtility {
                     var compType = TypeUtility.GetTypeByName(comp["type"].Value<string>());
                     if (comp.ContainsKey("data")) {
                         var compDataType = TypeUtility.GetTypeByName(comp["data"]["type"].Value<string>());
-                        var compData = (ComponentData) comp["data"]["val"].ToObject(compDataType, Find.SaveManager.serializer);
+                        var compData = (ComponentData) comp["data"]["val"].ToObject(compDataType, Find.SaveManager.Serializer);
                         entity.AddComponent(Activator.CreateInstance(compType, entity, compData) as Component);
                     } else {
                         entity.AddComponent(Activator.CreateInstance(compType, entity, null) as Component);
@@ -57,42 +57,42 @@ public static class EntitySerialiseUtility {
             entity.Setup(true);
         }
         
-        Find.SaveManager.currentSaveNode = parent;
+        Find.SaveManager.CurrentSaveNode = parent;
     }
 
-    public static void ResolveRefsEntities(JArray data, List<Entity> entities) {
-        var parent = Find.SaveManager.currentSaveNode;
+    public static void ResolveRefsEntities(JArray data, List<Entity?> entities) {
+        var parent = Find.SaveManager.CurrentSaveNode;
         
         for (var i = 0; i < entities.Count; i++) {
             var entity = entities[i];
-            Find.SaveManager.currentSaveNode = data[i] as JObject;
+            Find.SaveManager.CurrentSaveNode = data[i] as JObject;
             entity.Serialise();
         }
 
-        Find.SaveManager.currentSaveNode = parent;
+        Find.SaveManager.CurrentSaveNode = parent;
     }
 
     public static JToken SaveComponents(IEnumerable<Component> components) {
-        var parent = Find.SaveManager.currentSaveNode;
+        var parent = Find.SaveManager.CurrentSaveNode;
 
         var saveData = new JArray();
 
         foreach (var component in components) {
             var componentData = new JObject();
-            Find.SaveManager.currentSaveNode = componentData;
+            Find.SaveManager.CurrentSaveNode = componentData;
             component.Serialise();
             saveData.Add(componentData);
         }
 
-        Find.SaveManager.currentSaveNode = parent;
+        Find.SaveManager.CurrentSaveNode = parent;
         return saveData;
     }
     
     public static void LoadComponents(Entity entity, JArray data) {
-        var parent = Find.SaveManager.currentSaveNode;
+        var parent = Find.SaveManager.CurrentSaveNode;
 
         foreach (var entityData in data) {
-            Find.SaveManager.currentSaveNode = entityData as JObject;
+            Find.SaveManager.CurrentSaveNode = entityData as JObject;
             Type componentType = TypeUtility.GetTypeByName(entityData["type"].Value<string>());
             if (entity.HasComponent(componentType)) {
                 var component = entity.GetComponent(componentType);
@@ -104,17 +104,17 @@ public static class EntitySerialiseUtility {
             }
         }
         
-        Find.SaveManager.currentSaveNode = parent;
+        Find.SaveManager.CurrentSaveNode = parent;
     }
     
     public static void ResolveRefsComponents(JArray data, List<Component> components) {
-        var parent = Find.SaveManager.currentSaveNode;
+        var parent = Find.SaveManager.CurrentSaveNode;
         for (var i = 0; i < components.Count; i++) {
             var component = components[i];
-            Find.SaveManager.currentSaveNode = data[i] as JObject;
+            Find.SaveManager.CurrentSaveNode = data[i] as JObject;
             component.Serialise();
         }
 
-        Find.SaveManager.currentSaveNode = parent;
+        Find.SaveManager.CurrentSaveNode = parent;
     }
 }

@@ -6,38 +6,38 @@ using JEngine.util;
 namespace JEngine;
 
 public class Graphic {
-    [JsonProperty] private string spritePath = "";
+    [JsonProperty] private string _spritePath = "";
     
-    public Vector2 origin = Vector2.Zero;
-    public Color   colour = Color.White;
-    public bool    flipX;
+    public Vector2 Origin = Vector2.Zero;
+    public Color   Colour = Color.White;
+    public bool    FlipX;
 
     // Spritesheet
-    [JsonProperty] private int cellWidth;
-    [JsonProperty] private int cellHeight;
-    private                int cellIndex;
+    [JsonProperty] private int _cellWidth;
+    [JsonProperty] private int _cellHeight;
+    private                int _cellIndex;
 
     // Animation
-    private int  animationFrames;
-    private int  animationDurationTicks;
-    private int  animationStartTick;
-    private bool loopAnimation = true;
+    private int  _animationFrames;
+    private int  _animationDurationTicks;
+    private int  _animationStartTick;
+    private bool _loopAnimation = true;
 
     // Properties
-    private Texture2D texture;
+    private Texture2D _texture;
     public Texture2D Texture
     {
         get {
-            if (texture.Empty())
-                texture = Find.AssetManager.GetTexture(spritePath);
+            if (_texture.Empty())
+                _texture = Find.AssetManager.GetTexture(_spritePath);
 
-            return texture;
+            return _texture;
         }
-        set => texture = value;
+        set => _texture = value;
     }
 
-    public int CellWidth  => cellWidth  == 0 ? Texture.Width : cellWidth;
-    public int CellHeight => cellHeight == 0 ? Texture.Height : cellHeight;
+    public int CellWidth  => _cellWidth  == 0 ? Texture.Width : _cellWidth;
+    public int CellHeight => _cellHeight == 0 ? Texture.Height : _cellHeight;
 
     [JsonConstructor]
     public Graphic() {}
@@ -50,8 +50,8 @@ public class Graphic {
     }
 
     public void SetSprite(string path) {
-        spritePath = path;
-        Texture = Find.AssetManager.GetTexture(spritePath);
+        _spritePath = path;
+        Texture = Find.AssetManager.GetTexture(_spritePath);
     }
 
     public void SetSpritesheet(string path, int cellWidth, int cellHeight) {
@@ -60,20 +60,20 @@ public class Graphic {
         if (cellWidth > Texture.Width || cellHeight > Texture.Height)
             Debug.Warn($"Spritesheet cell size is larger than texture size ({cellWidth}, {cellHeight})");
 
-        this.cellWidth  = cellWidth;
-        this.cellHeight = cellHeight;
+        this._cellWidth  = cellWidth;
+        this._cellHeight = cellHeight;
     }
 
     public void SetIndex(int index) {
-        cellIndex = index;
+        _cellIndex = index;
     }
 
     public void SetAnimation(int startIndex, int frames, int speed, bool loop = true) {
-        cellIndex       = startIndex;
-        animationFrames = frames;
-        animationDurationTicks  = speed;
-        loopAnimation   = loop;
-        animationStartTick = Find.Game.Ticks;
+        _cellIndex       = startIndex;
+        _animationFrames = frames;
+        _animationDurationTicks  = speed;
+        _loopAnimation   = loop;
+        _animationStartTick = Find.Game.Ticks;
     }
 
     public void Draw(
@@ -101,12 +101,12 @@ public class Graphic {
             pos: pos,
             scale: new Vector2(Texture.Width * source.Width, Texture.Height * source.Height) * scale,
             rotation: rotation,
-            flipX: this.flipX || flipX,
+            flipX: this.FlipX || flipX,
             flipY: flipY,
             depth: depth,
-            origin: origin,
+            origin: Origin,
             source: source,
-            color: overrideColour ?? colour,
+            color: overrideColour ?? Colour,
             fragShader: fragShader,
             pickId: pickId,
             now: now
@@ -114,15 +114,15 @@ public class Graphic {
     }
 
     private int GetAnimationFrame() {
-        if (animationDurationTicks == 0 || animationFrames == 0)
-            return cellIndex;
+        if (_animationDurationTicks == 0 || _animationFrames == 0)
+            return _cellIndex;
 
-        var curTick = Find.Game.Ticks - animationStartTick;
+        var curTick = Find.Game.Ticks - _animationStartTick;
 
-        if (!loopAnimation && curTick >= animationDurationTicks)
-            return cellIndex + animationFrames - 1;
+        if (!_loopAnimation && curTick >= _animationDurationTicks)
+            return _cellIndex + _animationFrames - 1;
 
-        return cellIndex + (curTick % animationDurationTicks) / (animationDurationTicks / animationFrames);
+        return _cellIndex + (curTick % _animationDurationTicks) / (_animationDurationTicks / _animationFrames);
     }
     
     public Rectangle GetCellBounds(int cellIndex) {

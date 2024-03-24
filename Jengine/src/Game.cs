@@ -10,14 +10,14 @@ using JEngine.ui;
 namespace JEngine;
 
 public class PlayerConfig {
-    public int   screenWidth  = 1280;
-    public int   screenHeight = 720;
-    public float uiScale = 1f;
+    public int   ScreenWidth  = 1280;
+    public int   ScreenHeight = 720;
+    public float UiScale = 1f;
 }
 
 public class GameConfig {
-    public double msPerUpdate  = 1000 / 60f;
-    public int    worldScalePx = 1; // This is the scale of entity positions to screen pixels
+    public double MsPerUpdate  = 1000 / 60f;
+    public int    WorldScalePx = 1; // This is the scale of entity positions to screen pixels
 }
 
 public class Game {
@@ -27,36 +27,36 @@ public class Game {
     public const  int    DefaultScreenHeight = 720;
     private const string ConfigFilePath      = "config.json";
 
-    public GameConfig   gameConfig;
-    public PlayerConfig playerConfig;
+    public GameConfig   GameConfig;
+    public PlayerConfig PlayerConfig;
 
     // Managers
-    public InputManager   input;
-    public Renderer       renderer;
-    public AssetManager   assets;
-    public SaveManager    saveManager;
-    public SceneManager   sceneManager;
-    public PhysicsManager physics;
-    public UIManager      ui;
+    public InputManager   Input;
+    public Renderer       Renderer;
+    public AssetManager   Assets;
+    public SaveManager    SaveManager;
+    public SceneManager   SceneManager;
+    public PhysicsManager Physics;
+    public UiManager      Ui;
 
     // Collections
-    private Dictionary<int, Entity>          entities;
-    private List<Entity>                     entitiesToAdd;
-    private List<Entity>                     entitiesToRemove;
-    private Dictionary<string, List<Entity>> entitiesByTag = new();
+    private Dictionary<int, Entity?>          _entities;
+    private List<Entity?>                     _entitiesToAdd;
+    private List<Entity?>                     _entitiesToRemove;
+    private Dictionary<string, List<Entity?>> _entitiesByTag = new();
 
     // State
-    private int      ticksSinceGameStart;
-    private int      framesSinceGameStart;
-    private int      nextEntityId = 1;
-    private bool     paused;
+    private int      _ticksSinceGameStart;
+    private int      _framesSinceGameStart;
+    private int      _nextEntityId = 1;
+    private bool     _paused;
 
     // Properties
-    public int      Ticks           => ticksSinceGameStart;
-    public int      Frames          => framesSinceGameStart;
+    public int      Ticks           => _ticksSinceGameStart;
+    public int      Frames          => _framesSinceGameStart;
     public int      ScreenWidth     => Raylib.GetScreenWidth();
     public int      ScreenHeight    => Raylib.GetScreenHeight();
-    public bool     IsPaused        => paused;
+    public bool     IsPaused        => _paused;
 
     public void Run() {
         Debug.Log("Application Started");
@@ -75,32 +75,32 @@ public class Game {
         Raylib.InitWindow(DefaultScreenWidth, DefaultScreenHeight, "JEngine");
         Raylib.SetExitKey(KeyboardKey.Null);
 
-        gameConfig = new();
-        playerConfig = new();
+        GameConfig = new();
+        PlayerConfig = new();
 
-        input = new();
-        renderer = new();
-        assets = new();
-        saveManager = new();
-        sceneManager = new();
-        physics = new();
-        ui = new();
+        Input = new();
+        Renderer = new();
+        Assets = new();
+        SaveManager = new();
+        SceneManager = new();
+        Physics = new();
+        Ui = new();
 
-        entities = new();
-        entitiesToAdd = new();
-        entitiesToRemove = new();
+        _entities = new();
+        _entitiesToAdd = new();
+        _entitiesToRemove = new();
     }
 
     protected virtual void Init() {
-        renderer.Init();
-        physics.Init();
+        Renderer.Init();
+        Physics.Init();
 
         LoadConfig();
 
-        Raylib.SetWindowSize(playerConfig.screenWidth, playerConfig.screenHeight);
+        Raylib.SetWindowSize(PlayerConfig.ScreenWidth, PlayerConfig.ScreenHeight);
         Raylib.InitAudioDevice();
 
-        assets.LoadAssets();
+        Assets.LoadAssets();
         StaticConstructorUtility.CallConstructors();
     }
 
@@ -118,19 +118,19 @@ public class Game {
             var elapsed = currentTime - lastTime;
             lag += elapsed;
 
-            while (lag >= gameConfig.msPerUpdate) {
-                if (!paused) {
+            while (lag >= GameConfig.MsPerUpdate) {
+                if (!_paused) {
                     // Do Update
                     PreUpdate();
                     Update();
                     PostUpdate();
 
-                    ticksSinceGameStart++;
+                    _ticksSinceGameStart++;
                 }
 
                 ConstantUpdate();
 
-                lag -= gameConfig.msPerUpdate;
+                lag -= GameConfig.MsPerUpdate;
             }
             
             lastTime = currentTime;
@@ -139,50 +139,50 @@ public class Game {
                 OnScreenResized();
             
             // This needs to be out here otherwise we can get duplicate input events
-            input.ProcessInput();
+            Input.ProcessInput();
             
-            renderer.Draw();
+            Renderer.Draw();
         }
     }
     
     protected virtual void PreUpdate() {
-        sceneManager.GetCurrentScene()?.PreUpdate();
+        SceneManager.GetCurrentScene()?.PreUpdate();
 
-        foreach (var entity in entities.Values) {
+        foreach (var entity in _entities.Values) {
             try {
                 entity.PreUpdate();
             } catch (Exception e) {
-                Debug.Error($"Error in entity PreUpdate {entity.id}", e);
+                Debug.Error($"Error in entity PreUpdate {entity.Id}", e);
             }
         }
     }
     
     protected virtual void Update() {
-        physics.Update();
-        sceneManager.GetCurrentScene()?.Update();
-        renderer.Update();
+        Physics.Update();
+        SceneManager.GetCurrentScene()?.Update();
+        Renderer.Update();
 
-        foreach (var entity in entities.Values) {
+        foreach (var entity in _entities.Values) {
             try {
                 entity.Update();
 
-                if (TickUtility.IsHashTick(entity.id, TickUtility.TickRareInterval))
+                if (TickUtility.IsHashTick(entity.Id, TickUtility.TickRareInterval))
                     entity.UpdateRare();
 
             } catch (Exception e) {
-                Debug.Error($"Error in entity Update {entity.id}", e);
+                Debug.Error($"Error in entity Update {entity.Id}", e);
             }
         }
     }
     
     protected virtual void PostUpdate() {
-        sceneManager.GetCurrentScene()?.PostUpdate();
+        SceneManager.GetCurrentScene()?.PostUpdate();
 
-        foreach (var entity in entities.Values) {
+        foreach (var entity in _entities.Values) {
             try {
                 entity.PostUpdate();
             } catch (Exception e) {
-                Debug.Error($"Error in entity PostUpdate {entity.id}", e);
+                Debug.Error($"Error in entity PostUpdate {entity.Id}", e);
             }
         }
     }
@@ -192,74 +192,74 @@ public class Game {
     /// Occurs after PostUpdate
     /// </summary>
     protected virtual void ConstantUpdate() {
-        sceneManager.GetCurrentScene()?.ConstantUpdate();
+        SceneManager.GetCurrentScene()?.ConstantUpdate();
 
         DoEntityReg();
     }
 
     public virtual void Draw() {
-        sceneManager.GetCurrentScene()?.Draw();
+        SceneManager.GetCurrentScene()?.Draw();
 
-        foreach (var entity in entities.Values) {
+        foreach (var entity in _entities.Values) {
             entity.Draw();
         }
     }
 
     public virtual void DrawLate() {
-        sceneManager.GetCurrentScene()?.DrawLate();
+        SceneManager.GetCurrentScene()?.DrawLate();
 
-        foreach (var entity in entities.Values) {
+        foreach (var entity in _entities.Values) {
             entity.DrawLate();
         }
 
-        physics.DrawLate();
+        Physics.DrawLate();
 
-        framesSinceGameStart++;
+        _framesSinceGameStart++;
     }
 
-    public virtual void DrawUI() {
-        ui.DrawUI();
+    public virtual void DrawUi() {
+        Ui.DrawUi();
     }
 
     public virtual void OnInput(InputEvent evt) {
-        foreach (var entity in entities.Values) {
-            if (!evt.consumed)
+        foreach (var entity in _entities.Values) {
+            if (!evt.Consumed)
                 entity.OnInput(evt);
         }
 
-        sceneManager.GetCurrentScene()?.OnInput(evt);
-        physics.OnInput(evt);
-        renderer.camera.OnInput(evt);
+        SceneManager.GetCurrentScene()?.OnInput(evt);
+        Physics.OnInput(evt);
+        Renderer.Camera.OnInput(evt);
     }
 
     public virtual void OnGUI() {
         Find.SceneManager.GetCurrentScene()?.OnGUI();
 
-        foreach (var entity in entities.Values) {
+        foreach (var entity in _entities.Values) {
             entity.OnGUI();
         }
     }
 
     protected virtual void OnScreenResized() {
-        renderer.OnScreenResized();
+        Renderer.OnScreenResized();
 
-        playerConfig.screenWidth = ScreenWidth;
-        playerConfig.screenHeight = ScreenHeight;
+        PlayerConfig.ScreenWidth = ScreenWidth;
+        PlayerConfig.ScreenHeight = ScreenHeight;
         SaveConfig();
     }
 
-        public int RegisterEntity(Entity entity, int? id = null) {
-        entity.id = id ?? nextEntityId++;
+        public int RegisterEntity(Entity? entity, int? id = null) {
+        entity.Id = id ?? _nextEntityId++;
 
-        entitiesToAdd.Add(entity);
+        _entitiesToAdd.Add(entity);
 
-        return entity.id;
+        return entity.Id;
     }
 
-    public int RegisterEntityNow(Entity entity, int id) {
-        entity.id = id;
+    public int RegisterEntityNow(Entity? entity, int id) {
+        entity.Id = id;
 
-        entities.Add(entity.id, entity);
+        _entities.Add(entity.Id, entity);
         entity.AddTag(EntityTags.All);
                 
         foreach (var tag in entity.Tags) {
@@ -269,107 +269,107 @@ public class Game {
         return id;
     }
     
-    public void Notify_EntityTagged(Entity entity, string tag) {
-        if (!entitiesByTag.ContainsKey(tag))
-            entitiesByTag.Add(tag, new List<Entity>());
+    public void Notify_EntityTagged(Entity? entity, string tag) {
+        if (!_entitiesByTag.ContainsKey(tag))
+            _entitiesByTag.Add(tag, new List<Entity?>());
 
-        entitiesByTag[tag].Add(entity);
+        _entitiesByTag[tag].Add(entity);
     }
     
-    public void Notify_EntityUntagged(Entity entity, string tag) {
-        if (!entitiesByTag.ContainsKey(tag))
+    public void Notify_EntityUntagged(Entity? entity, string tag) {
+        if (!_entitiesByTag.ContainsKey(tag))
             return;
 
-        entitiesByTag[tag].Remove(entity);
+        _entitiesByTag[tag].Remove(entity);
     }
 
-    public void UnregisterEntity(Entity entity) {
-        entitiesToRemove.Add(entity);
+    public void UnregisterEntity(Entity? entity) {
+        _entitiesToRemove.Add(entity);
     }
 
     private void DoEntityReg() {
-        foreach (var entity in entitiesToAdd) {
+        foreach (var entity in _entitiesToAdd) {
             try {
-                RegisterEntityNow(entity, entity.id);
+                RegisterEntityNow(entity, entity.Id);
                 entity.Setup(false);
             } catch (Exception e) {
-                Debug.Error($"Failed to set up entity {entity.id}:", e);
+                Debug.Error($"Failed to set up entity {entity.Id}:", e);
                 entity.Destroy();
             }
         }
-        entitiesToAdd.Clear();
+        _entitiesToAdd.Clear();
 
-        foreach (var entity in entitiesToRemove) {
-            if (!entities.ContainsKey(entity.id))
+        foreach (var entity in _entitiesToRemove) {
+            if (!_entities.ContainsKey(entity.Id))
                 continue;
 
-            entities.Remove(entity.id);
+            _entities.Remove(entity.Id);
             
             foreach (var tag in entity.Tags) {
-                entitiesByTag[tag].Remove(entity);
+                _entitiesByTag[tag].Remove(entity);
             }
         }
-        entitiesToRemove.Clear();
+        _entitiesToRemove.Clear();
     }
 
     public Entity? GetEntityById(int id) {
-        if (!entities.ContainsKey(id))
+        if (!_entities.ContainsKey(id))
             return null;
 
-        return entities[id];
+        return _entities[id];
     }
     
-    public IEnumerable<Entity> GetEntitiesByTag(string tag) {
-        if (!entitiesByTag.ContainsKey(tag)) yield break;
+    public IEnumerable<Entity?> GetEntitiesByTag(string tag) {
+        if (!_entitiesByTag.ContainsKey(tag)) yield break;
 
-        foreach (var entity in entitiesByTag[tag]) {
+        foreach (var entity in _entitiesByTag[tag]) {
             yield return entity;
         }
     }
 
     public void ClearEntities() {
-        foreach (var entity in entities) {
+        foreach (var entity in _entities) {
             entity.Value.Destroy();
         }
-        foreach (var entity in entitiesToAdd) {
+        foreach (var entity in _entitiesToAdd) {
             entity.Destroy();
         }
 
-        entities.Clear();
-        entitiesToAdd.Clear();
-        entitiesToRemove.Clear();
-        entitiesByTag.Clear();
+        _entities.Clear();
+        _entitiesToAdd.Clear();
+        _entitiesToRemove.Clear();
+        _entitiesByTag.Clear();
     }
 
     public void Pause(bool pause) {
-        paused = pause;
+        _paused = pause;
     }
     public void TogglePause() {
-        paused = !paused;
+        _paused = !_paused;
     }
 
     public virtual void Serialise() {
-        saveManager.ArchiveValue("ticksSinceGameStart",  ref ticksSinceGameStart);
-        saveManager.ArchiveValue("framesSinceGameStart", ref framesSinceGameStart);
-        saveManager.ArchiveValue("nextEntityId",         ref nextEntityId);
+        SaveManager.ArchiveValue("ticksSinceGameStart",  ref _ticksSinceGameStart);
+        SaveManager.ArchiveValue("framesSinceGameStart", ref _framesSinceGameStart);
+        SaveManager.ArchiveValue("nextEntityId",         ref _nextEntityId);
 
         DoEntityReg();
-        if (saveManager.mode == SerialiseMode.Loading)
-            entities.Clear();
+        if (SaveManager.Mode == SerialiseMode.Loading)
+            _entities.Clear();
 
-        saveManager.ArchiveDeep("scene", sceneManager.GetCurrentScene());
-        saveManager.ArchiveCustom("entities",
-            () => EntitySerialiseUtility.SaveEntities(entities.Values),
+        SaveManager.ArchiveDeep("scene", SceneManager.GetCurrentScene());
+        SaveManager.ArchiveCustom("entities",
+            () => EntitySerialiseUtility.SaveEntities(_entities.Values),
             data => EntitySerialiseUtility.LoadEntities(data as JArray),
-            data => EntitySerialiseUtility.ResolveRefsEntities(data as JArray, entities.Values.ToList())
+            data => EntitySerialiseUtility.ResolveRefsEntities(data as JArray, _entities.Values.ToList())
         );
 
-        if (saveManager.mode == SerialiseMode.Loading)
-            sceneManager.GetCurrentScene().PostLoad();
+        if (SaveManager.Mode == SerialiseMode.Loading)
+            SceneManager.GetCurrentScene().PostLoad();
     }
 
     public void SaveConfig() {
-        File.WriteAllText(ConfigFilePath, JsonConvert.SerializeObject(playerConfig, Formatting.Indented));
+        File.WriteAllText(ConfigFilePath, JsonConvert.SerializeObject(PlayerConfig, Formatting.Indented));
     }
 
     public void LoadConfig() {
@@ -378,6 +378,6 @@ public class Game {
             return;
         }
         
-        playerConfig = JsonConvert.DeserializeObject<PlayerConfig>(File.ReadAllText(ConfigFilePath));
+        PlayerConfig = JsonConvert.DeserializeObject<PlayerConfig>(File.ReadAllText(ConfigFilePath));
     }
 }

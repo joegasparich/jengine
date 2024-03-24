@@ -11,7 +11,7 @@ namespace JEngine;
 //-- Converters --//
 
 public class DefConverter : JsonConverter {
-    private bool skipOverMe;
+    private bool _skipOverMe;
 
     public override bool CanConvert(Type objectType) {
         return objectType.IsAssignableTo(typeof(Def));
@@ -19,10 +19,10 @@ public class DefConverter : JsonConverter {
 
     public override bool CanRead {
         get {
-            if (!skipOverMe) 
+            if (!_skipOverMe) 
                 return true;
 
-            skipOverMe = false;
+            _skipOverMe = false;
             return false;
 
         }
@@ -34,7 +34,7 @@ public class DefConverter : JsonConverter {
     public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer, JsonProperty prop, object target) {
         // Skip over root level Defs so they can be deserialized normally
         if (reader.Depth == 0) {
-            skipOverMe = true;
+            _skipOverMe = true;
             return serializer.Deserialize(reader, objectType);
         }
 
@@ -44,7 +44,7 @@ public class DefConverter : JsonConverter {
 
         // Otherwise we need to create some unresolved defs
         var def = Activator.CreateInstance(objectType) as Def;
-        def.id = reader.Value as string;
+        def.Id = reader.Value as string;
 
         // TODO: Feels hacky, make it better if I support more collections than just lists
         // What does this even do?
@@ -52,7 +52,7 @@ public class DefConverter : JsonConverter {
             return def;
 
         if (target != null)
-            Find.AssetManager.unresolvedDefs.Add((target, prop.ValueProvider as ExpressionValueProvider)!);
+            Find.AssetManager.UnresolvedDefs.Add((target, prop.ValueProvider as ExpressionValueProvider)!);
 
         return def;
     }
@@ -60,7 +60,7 @@ public class DefConverter : JsonConverter {
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer) {
         var def = value as Def;
         
-        writer.WriteValue(def?.id);
+        writer.WriteValue(def?.Id);
     }
 }
 
@@ -126,7 +126,7 @@ public class CompJsonConverter : JsonConverter {
             else
                 componentData = child.Value.ToObject(typeof(ComponentData), internalSerializer) as ComponentData;
             
-            var compClassProp = typeof(ComponentData).GetField("compClass", BindingFlags.NonPublic | BindingFlags.Instance);
+            var compClassProp = typeof(ComponentData).GetField("_compClass", BindingFlags.NonPublic | BindingFlags.Instance);
             compClassProp.SetValue(componentData, child.Name);
             components.Add(componentData);
         }

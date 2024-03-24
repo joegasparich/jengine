@@ -7,22 +7,22 @@ using Raylib_cs;
 namespace JEngine;
 
 public class Audio {
-    [JsonProperty] private string soundPath = "";
+    [JsonProperty] private string _soundPath = "";
 
-    public float volume    = 1;
-    public float falloffPx = 2000;
+    public float Volume    = 1;
+    public float FalloffPx = 2000;
     
     // Properties
-    private Sound sound;
+    private Sound _sound;
     public Sound Sound
     {
         get {
-            if (!Raylib.IsSoundReady(sound))
-                sound = Find.AssetManager.GetSound(soundPath);
+            if (!Raylib.IsSoundReady(_sound))
+                _sound = Find.AssetManager.GetSound(_soundPath);
 
-            return sound;
+            return _sound;
         }
-        set => sound = value;
+        set => _sound = value;
     }
     
     [JsonConstructor]
@@ -33,19 +33,19 @@ public class Audio {
     }
 
     public void SetSound(string path) {
-        soundPath = path;
-        Sound     = Find.AssetManager.GetSound(soundPath);
+        _soundPath = path;
+        Sound     = Find.AssetManager.GetSound(_soundPath);
     }
 
     public void PlayOnCamera() {
-        Raylib.SetSoundVolume(Sound, volume);
+        Raylib.SetSoundVolume(Sound, Volume);
         Raylib.PlaySound(Sound);
     }
 
     public void PlayAtPos(Vector2 worldPos) {
         var screenPos     = Find.Renderer.WorldToScreenPos(worldPos);
         var screenPosNorm = new Vector2(screenPos.X / Find.Game.ScreenWidth, screenPos.Y / Find.Game.ScreenHeight);
-        Raylib.SetSoundVolume(Sound, JMath.Clamp01(volume * (1 - JMath.Clamp01(screenPosNorm.Distance(new Vector2(0.5f))))));
+        Raylib.SetSoundVolume(Sound, JMath.Clamp01(Volume * (1 - JMath.Clamp01(screenPosNorm.Distance(new Vector2(0.5f))))));
         Raylib.SetSoundPan(Sound, 1 - JMath.Clamp01(screenPosNorm.X));
         Raylib.PlaySound(Sound);
     }

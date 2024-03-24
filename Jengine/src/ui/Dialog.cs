@@ -12,49 +12,49 @@ public class Dialog : Window {
     private const int    CloseIconSize             = 16;
     
     // Config
-    public           string title;
-    public           bool   showCloseX = false;
-    public           bool   draggable;
-    public           int    headerHeight     = DefaultWindowHeaderHeight;
-    private readonly bool   doBackground     = true;
-    protected        Color  backgroundColour = Color.White;
+    public           string Title;
+    public           bool   ShowCloseX = false;
+    public           bool   Draggable;
+    public           int    HeaderHeight     = DefaultWindowHeaderHeight;
+    private readonly bool   _doBackground     = true;
+    protected        Color  _backgroundColour = Color.White;
     
     // State
-    protected bool    headerHovered;
-    protected bool    isDragging;
-    private   Vector2 dragPos = Vector2.Zero;
+    protected bool    _headerHovered;
+    protected bool    _isDragging;
+    private   Vector2 _dragPos = Vector2.Zero;
 
     public Dialog(Rectangle rect) : base(rect) {}
     public Dialog(string id, Rectangle rect, Action<Rectangle> onUi, bool doBackground = true) : base(id, rect, onUi) {
-        this.doBackground = doBackground;
+        _doBackground = doBackground;
     }
 
     public override void DoWindowContents() {
-        if (isDragging) {
-            var newPos = Find.Input.GetMousePos() - dragPos;
-            absRect = absRect with { X = newPos.X, Y = newPos.Y };
+        if (_isDragging) {
+            var newPos = Find.Input.GetMousePos() - _dragPos;
+            AbsRect = AbsRect with { X = newPos.X, Y = newPos.Y };
         }
         
-        if (doBackground)
-            GUI.DrawTextureNPatch(GetRect(), Find.AssetManager.GetTexture(WindowNPatchPath), 20, backgroundColour);
+        if (_doBackground)
+            Gui.DrawTextureNPatch(GetRect(), Find.AssetManager.GetTexture(WindowNPatchPath), 20, _backgroundColour);
         
-        var headerRect = new Rectangle(0, 0, GetWidth(), headerHeight);
-        if (!title.NullOrEmpty()) {
+        var headerRect = new Rectangle(0, 0, GetWidth(), HeaderHeight);
+        if (!Title.NullOrEmpty()) {
             using (new TextBlock(AlignMode.MiddleCenter))
-                GUI.Label(headerRect, title);
+                Gui.Label(headerRect, Title);
         }
         
-        headerHovered = false;
-        if (GUI.HoverableArea(headerRect)) {
-            headerHovered = true;
+        _headerHovered = false;
+        if (Gui.HoverableArea(headerRect)) {
+            _headerHovered = true;
         
-            if (draggable)
+            if (Draggable)
                 Find.UI.SetCursor(MouseCursor.PointingHand);
         }
 
-        if (showCloseX) {
-            if (GUI.ButtonIcon(new Rectangle(GetWidth() - CloseIconSize - GUI.GapTiny, GUI.GapTiny, CloseIconSize, CloseIconSize), Find.AssetManager.GetTexture(CloseIcon), Color.Gray))
-                Find.UI.CloseWindow(id);
+        if (ShowCloseX) {
+            if (Gui.ButtonIcon(new Rectangle(GetWidth() - CloseIconSize - Gui.GapTiny, Gui.GapTiny, CloseIconSize, CloseIconSize), Find.AssetManager.GetTexture(CloseIcon), Color.Gray))
+                Find.UI.CloseWindow(Id);
         }
         
         base.DoWindowContents();
@@ -63,19 +63,19 @@ public class Dialog : Window {
     public override void OnInput(InputEvent evt) {
         base.OnInput(evt);
 
-        if (evt.consumed) 
+        if (evt.Consumed) 
             return;
         
         // Dragging
-        if (draggable) {
-            if (headerHovered && evt.mouseDown == MouseButton.Left) {
-                dragPos    = evt.mousePos - new Vector2(absRect.X, absRect.Y);
-                isDragging = true;
-                Find.UI.BringWindowToFront(id);
+        if (Draggable) {
+            if (_headerHovered && evt.MouseDown == MouseButton.Left) {
+                _dragPos    = evt.MousePos - new Vector2(AbsRect.X, AbsRect.Y);
+                _isDragging = true;
+                Find.UI.BringWindowToFront(Id);
                 evt.Consume();
             }
-            if (isDragging && evt.mouseUp == MouseButton.Left) {
-                isDragging = false;
+            if (_isDragging && evt.MouseUp == MouseButton.Left) {
+                _isDragging = false;
                 evt.Consume();
             }
         }

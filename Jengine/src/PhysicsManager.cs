@@ -16,77 +16,77 @@ public interface IContactable {
 }
 
 public class PhysicsManager : IContactListener {
-    public  World                    world;
-    private HashSet<IContactable>    contactListeners = new();
-    private Dictionary<Body, Entity> bodyToEntity     = new();
-    private List<Body>               bodiesToDestroy  = new();
+    public  World                    World;
+    private HashSet<IContactable>    _contactListeners = new();
+    private Dictionary<Body, Entity> _bodyToEntity     = new();
+    private List<Body>               _bodiesToDestroy  = new();
 
-    private float msPerUpdate;
-    private bool debug;
+    private float _msPerUpdate;
+    private bool _debug;
 
     public void Init() {
-        msPerUpdate = (float)Find.Game.gameConfig.msPerUpdate;
+        _msPerUpdate = (float)Find.Game.GameConfig.MsPerUpdate;
 
-        world = new World(Vector2.Zero);
-        world.SetContactListener(this);
+        World = new World(Vector2.Zero);
+        World.SetContactListener(this);
     }
 
     public void Update() {
-        world.Step(msPerUpdate, 6, 3);
+        World.Step(_msPerUpdate, 6, 3);
         
-        foreach (var body in bodiesToDestroy) {
-            world.DestroyBody(body);
+        foreach (var body in _bodiesToDestroy) {
+            World.DestroyBody(body);
         }
-        bodiesToDestroy.Clear();
+        _bodiesToDestroy.Clear();
     }
 
     public void DrawLate() {
-        if (debug)
+        if (_debug)
             DrawDebug();
     }
 
     public void OnInput(InputEvent evt) {
-        if (evt.consumed)
+        if (evt.Consumed)
             return;
 
-        if (evt.keyDown == KeyboardKey.F3) {
-            debug = !debug;
+        if (evt.KeyDown == KeyboardKey.F3) {
+            _debug = !_debug;
             evt.Consume();
         }
     }
 
     public Body RegisterBody(BodyDef def, Entity entity) {
-        var body = world.CreateBody(def);
-        bodyToEntity[body] = entity;
+        var body = World.CreateBody(def);
+        _bodyToEntity[body] = entity;
 
         return body;
     }
     
     public void DestroyBody(Body body) {
-        bodiesToDestroy.Add(body);
-        bodyToEntity.Remove(body);
+        _bodiesToDestroy.Add(body);
+        _bodyToEntity.Remove(body);
     }
 
     public Entity? GetEntityFromBody(Body body) {
-        if (!bodyToEntity.ContainsKey(body))
+        if (!_bodyToEntity.ContainsKey(body))
             return null;
 
-        return bodyToEntity[body];
+        return _bodyToEntity[body];
     }
 
     private void DrawDebug() {
-        foreach (var body in world.BodyList) {
+        foreach (var body in World.BodyList) {
             foreach (var fixture in body.FixtureList) {
                 if (fixture.Shape is CircleShape circle) {
-                    Drawing.DrawCircleLines(body.GetPosition() * Find.Game.gameConfig.worldScalePx, circle.Radius * Find.Game.gameConfig.worldScalePx, Color.Red, (int)Depth.Debug);
+                    Drawing.DrawCircleLines(body.GetPosition() * Find.Game.GameConfig.WorldScalePx, circle.Radius * Find.Game.GameConfig.WorldScalePx, Color.Red, (int)Depth.Debug);
                 } else if (fixture.Shape is PolygonShape poly) {
                     var vertices = poly.Vertices;
                     for (var i = 0; i < poly.Count; i++) {
                         var vertex     = vertices[i];
                         var nextVertex = vertices[(i + 1) % poly.Count];
                         Drawing.DrawLine(
-                            (body.GetPosition() + vertex) * Find.Game.gameConfig.worldScalePx,
-                            (body.GetPosition() + nextVertex) * Find.Game.gameConfig.worldScalePx,
+                            (body.GetPosition() + vertex) * Find.Game.GameConfig.WorldScalePx,
+                            (body.GetPosition() + nextVertex) * Find.Game.GameConfig.WorldScalePx,
                             Color.Red,
                             (int)Depth.Debug
                         );
@@ -100,19 +100,19 @@ public class PhysicsManager : IContactListener {
         var def   = new BodyDef();
         var shape = new PolygonShape();
         shape.Set(rect.Vertices());
-        var body = world.CreateBody(def);
+        var body = World.CreateBody(def);
         body.CreateFixture(new FixtureDef { Shape = shape, Friction = 0 });
         return body;
     }
 
     public void RegisterContactListener(IContactable listener) {
-        contactListeners.Add(listener);
+        _contactListeners.Add(listener);
     }
     public void UnregisterContactListener(IContactable listener) {
-        contactListeners.Remove(listener);
+        _contactListeners.Remove(listener);
     }
     public void BeginContact(Contact contact) {
-        foreach (var listener in contactListeners) {
+        foreach (var listener in _contactListeners) {
             if (contact.FixtureA.Body == listener.Body)
                 listener.OnContact(contact.FixtureB.Body);
             if (contact.FixtureB.Body == listener.Body)

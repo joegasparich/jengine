@@ -1,23 +1,23 @@
 namespace JEngine.util; 
 
 public struct FloatRange {
-    public float min;
-    public float max;
+    public float Min;
+    public float Max;
 
     public FloatRange(float min, float max) {
-        this.min = min;
-        this.max = max;
+        this.Min = min;
+        this.Max = max;
     }
 
     public bool Includes(float value) {
-        return value >= min && value <= max;
+        return value >= Min && value <= Max;
     }
 
     public float Random() {
-        return Rand.Float() * (max - min) + min;
+        return Rand.Float() * (Max - Min) + Min;
     }
 
     public float Lerp(float t) {
-        return min + (max - min) * t;
+        return Min + (Max - Min) * t;
     }
 }

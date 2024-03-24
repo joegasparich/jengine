@@ -9,31 +9,30 @@ namespace JEngine.entities;
 /// </summary>
 public class ComponentData {
     [JsonProperty]
-    private string compClass;
+    private string _compClass;
 
-    public virtual Type CompClass => TypeUtility.GetTypeByName(compClass);
+    public virtual Type CompClass => TypeUtility.GetTypeByName(_compClass);
 }
 
 public abstract class Component : ISerialisable {
     // References
-    protected Entity        entity;
-    public    ComponentData data;
+    public readonly    Entity         Entity;
+    protected readonly ComponentData? _data;
     
     // Properties
-    public            Entity Entity       => entity;
     protected virtual Type[] Dependencies => Array.Empty<Type>();
     
     public Component(Entity entity, ComponentData? data = null) {
-        this.entity = entity;
-        this.data   = data;
+        Entity = entity;
+        _data   = data;
         
-        if (this.data == null && GetType().GetProperty("DataType")?.GetValue(null) is Type type)
-            this.data = Activator.CreateInstance(type) as ComponentData;
+        if (_data == null && GetType().GetProperty("DataType")?.GetValue(null) is Type type)
+            _data = Activator.CreateInstance(type) as ComponentData;
     }
 
     public virtual void Setup(bool fromSave) {
         foreach (var dependency in Dependencies) {
-            Debug.Assert(entity.HasComponent(dependency), $"Entity {entity} does not have dependency {dependency}");
+            Debug.Assert(Entity.HasComponent(dependency), $"Entity {Entity} does not have dependency {dependency}");
         }
     }
     public virtual void PreUpdate()             {}
@@ -49,12 +48,12 @@ public abstract class Component : ISerialisable {
     public virtual void Serialise() {
         Find.SaveManager.ArchiveValue("type", () => GetType().ToString(), null);
 
-        if (entity.Def == null && data != null) {
+        if (Entity.Def == null && _data != null) {
             Find.SaveManager.ArchiveCustom("data",
                 () => {
                     var saveData = new JObject();
-                    saveData.Add("type", data.GetType().ToString());
-                    saveData.Add("val", JToken.FromObject(data, Find.SaveManager.serializer));
+                    saveData.Add("type", _data.GetType().ToString());
+                    saveData.Add("val", JToken.FromObject(_data, Find.SaveManager.Serializer));
                     return saveData;
                 },
                 _ => {},

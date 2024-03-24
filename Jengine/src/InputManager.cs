@@ -11,32 +11,32 @@ public enum InputEventType {
 }
 
 public class InputEvent {
-    public InputEventType type;
-    public KeyboardKey?   keyDown;
-    public KeyboardKey?   keyUp;
-    public MouseButton?   mouseDown;
-    public MouseButton?   mouseUp;
+    public InputEventType Type;
+    public KeyboardKey?   KeyDown;
+    public KeyboardKey?   KeyUp;
+    public MouseButton?   MouseDown;
+    public MouseButton?   MouseUp;
     // public InputType?     inputDown;
     // public InputType?     inputUp;
-    public Vector2        mousePos;
-    public Vector2        mouseWorldPos;
-    public float          mouseScroll;
-    public bool           consumed;
+    public Vector2        MousePos;
+    public Vector2        MouseWorldPos;
+    public float          MouseScroll;
+    public bool           Consumed;
     
     public InputEvent(InputEventType type) {
-        this.type = type;
+        Type = type;
     }
 
     public void Consume() {
-        consumed = true;
+        Consumed = true;
     }
 }
 
 public class InputManager {
     // Constants
-    private static readonly int MouseButtonNull = -1;
-    private static readonly int MouseButtonMax  = (int)MouseButton.Back;
-    private static readonly int KeyMax          = (int)KeyboardKey.KeyboardMenu;
+    private const int _mouseButtonNull = -1;
+    private static readonly int _mouseButtonMax  = (int)MouseButton.Back;
+    private static readonly int _keyMax          = (int)KeyboardKey.KeyboardMenu;
     
     // Collections
     // private Dictionary<KeyboardKey, InputType[]> inputs = new() {
@@ -52,21 +52,21 @@ public class InputManager {
     // };
 
     // State
-    private InputEvent currentEvent;
+    private InputEvent _currentEvent;
 
     public void ProcessInput() {
         // Key events
-        for (int k = 0; k < KeyMax; k++) {
+        for (int k = 0; k < _keyMax; k++) {
             var key = (KeyboardKey)k;
             if (!Raylib.IsKeyPressed(key) && !Raylib.IsKeyReleased(key) && !Raylib.IsKeyDown(key))
                 continue;
 
             // Raw Keys
             var evt = new InputEvent(InputEventType.Key);
-            evt.keyDown       = Raylib.IsKeyPressed(key) ? key : null;
-            evt.keyUp         = Raylib.IsKeyReleased(key) ? key : null;
-            evt.mousePos      = Raylib.GetMousePosition();
-            evt.mouseWorldPos = Find.Renderer.ScreenToWorldPos(evt.mousePos);
+            evt.KeyDown       = Raylib.IsKeyPressed(key) ? key : null;
+            evt.KeyUp         = Raylib.IsKeyReleased(key) ? key : null;
+            evt.MousePos      = Raylib.GetMousePosition();
+            evt.MouseWorldPos = Find.Renderer.ScreenToWorldPos(evt.MousePos);
 
             FireInputEvent(evt);
             
@@ -84,32 +84,32 @@ public class InputManager {
         }
         
         // Mouse events
-        for (int mb = 0; mb < MouseButtonMax; mb++) {
+        for (int mb = 0; mb < _mouseButtonMax; mb++) {
             var mouseButton = (MouseButton)mb;
             if (!Raylib.IsMouseButtonPressed(mouseButton) && !Raylib.IsMouseButtonReleased(mouseButton) && !Raylib.IsMouseButtonDown(mouseButton))
                 continue;
 
             var evt = new InputEvent(InputEventType.MouseButton);
-            evt.mouseDown     = Raylib.IsMouseButtonPressed(mouseButton) ? mouseButton : null;
-            evt.mouseUp       = Raylib.IsMouseButtonReleased(mouseButton) ? mouseButton : null;
-            evt.mousePos      = Raylib.GetMousePosition();
-            evt.mouseWorldPos = Find.Renderer.ScreenToWorldPos(evt.mousePos);
+            evt.MouseDown     = Raylib.IsMouseButtonPressed(mouseButton) ? mouseButton : null;
+            evt.MouseUp       = Raylib.IsMouseButtonReleased(mouseButton) ? mouseButton : null;
+            evt.MousePos      = Raylib.GetMousePosition();
+            evt.MouseWorldPos = Find.Renderer.ScreenToWorldPos(evt.MousePos);
 
             FireInputEvent(evt);
         }
 
         if (Raylib.GetMouseWheelMove() != 0) {
             var evt = new InputEvent(InputEventType.MouseScroll);
-            evt.mouseScroll   = Raylib.GetMouseWheelMove();
-            evt.mousePos      = Raylib.GetMousePosition();
-            evt.mouseWorldPos = Find.Renderer.ScreenToWorldPos(evt.mousePos);
+            evt.MouseScroll   = Raylib.GetMouseWheelMove();
+            evt.MousePos      = Raylib.GetMousePosition();
+            evt.MouseWorldPos = Find.Renderer.ScreenToWorldPos(evt.MousePos);
 
             FireInputEvent(evt);
         }
     }
 
     public void FireInputEvent(InputEvent evt) {
-        currentEvent = evt;
+        _currentEvent = evt;
         
         Find.Game.OnInput(evt);
         // Messenger::fire(EventType::InputEvent);
@@ -150,6 +150,6 @@ public class InputManager {
     }
     
     public InputEvent GetCurrentEvent() {
-        return currentEvent;
+        return _currentEvent;
     }
 }

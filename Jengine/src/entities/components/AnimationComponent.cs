@@ -23,17 +23,15 @@ public class AnimationComponentData : ComponentData {
     public string                        DefaultAnimation;
 }
 
-public class AnimationComponent : Component {
+public class AnimationComponent(Entity entity, ComponentData? data = null) : Component(entity, data) {
     public static Type DataType => typeof(AnimationComponentData);
-    
-    private       Dictionary<string, Animation> animations = new();
-    protected     string                        CurrentAnimation { get; private set; }
 
-    protected override Type[]                 Dependencies => [typeof(RenderComponent)];
-    public             AnimationComponentData Data         => (AnimationComponentData)data;
-    protected          RenderComponent        Render       => entity.GetComponent<RenderComponent>();
-    
-    public AnimationComponent(Entity entity, ComponentData? data = null) : base(entity, data) { }
+    private   Dictionary<string, Animation> _animations = new();
+    protected string?                       CurrentAnimation { get; private set; }
+
+    protected override Type[]                  Dependencies => [typeof(RenderComponent)];
+    public             AnimationComponentData? Data         => _data as AnimationComponentData;
+    protected          RenderComponent         Render       => Entity.GetComponent<RenderComponent>()!;
 
     public override void Setup(bool fromSave) {
         base.Setup(fromSave);
@@ -45,15 +43,15 @@ public class AnimationComponent : Component {
     }
 
     public void AddAnimation(string name, Animation animation) {
-        animations.Add(name, animation);
+        _animations.Add(name, animation);
     }
     
     public void PlayAnimation(string name) {
         if (CurrentAnimation == name)
             return;
         
-        if (animations.TryGetValue(name, out var animation)) {
-            Render.Graphics.SetAnimation(animation.StartIndex, animation.NumFrames, animation.Duration, animation.Loop);
+        if (_animations.TryGetValue(name, out var animation)) {
+            Render.Graphics?.SetAnimation(animation.StartIndex, animation.NumFrames, animation.Duration, animation.Loop);
             
             CurrentAnimation = name;
         }

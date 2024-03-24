@@ -2,22 +2,22 @@ namespace JEngine.scenes;
 
 public class SceneManager {
     // State
-    private Scene currentScene;
+    private Scene? _currentScene;
     
     // TODO: Add progress callback
     public void LoadScene(Scene scene) {
-        if (currentScene != null) {
-            Debug.Log($"Stopping scene: {currentScene.Name}");
-            currentScene.Stop();
+        if (_currentScene != null) {
+            Debug.Log($"Stopping scene: {_currentScene.Name}");
+            _currentScene.Stop();
         }
         
         Debug.Log($"Starting scene: {scene.Name}");
 
-        currentScene = scene;
-        currentScene.Start();
+        _currentScene = scene;
+        _currentScene.Start();
     }
     
-    public Scene GetCurrentScene() {
-        return currentScene;
+    public Scene? GetCurrentScene() {
+        return _currentScene;
     }
 }

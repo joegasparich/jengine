@@ -1,18 +1,16 @@
-﻿namespace JEngine.defs;
+﻿using JEngine.util;
+
+namespace JEngine.defs;
 
 public class Def {
     // Config
-    public string  @class;
-    public bool    @abstract = false;
-    public string? inherits;
+    public required string  Class;
+    public          bool    Abstract = false;
+    public          string? Inherits;
     
-    public string  id;
-    public string? name;
+    public required string  Id;
+    public          string? Name;
 
     // Properties
-    public Type DefType => Type.GetType("JEngine.defs." + @class);
-
-    public DefRef GetRef() {
-        return new DefRef(id);
-    }
+    public Type DefType => TypeUtility.GetTypeByName(Class);
 }

@@ -7,13 +7,13 @@ public static class Find
 {
     public static Game Game;
 
-    public static GameConfig     Config       => Game.gameConfig;
-    public static InputManager   Input        => Game.input;
-    public static Renderer       Renderer     => Game.renderer;
-    public static AssetManager   AssetManager => Game.assets;
-    public static SceneManager   SceneManager => Game.sceneManager;
-    public static SaveManager    SaveManager  => Game.saveManager;
-    public static Camera         Camera       => Renderer.camera;
-    public static UIManager      UI           => Game.ui;
-    public static PhysicsManager Physics      => Game.physics;
+    public static GameConfig     Config       => Game.GameConfig;
+    public static InputManager   Input        => Game.Input;
+    public static Renderer       Renderer     => Game.Renderer;
+    public static AssetManager   AssetManager => Game.Assets;
+    public static SceneManager   SceneManager => Game.SceneManager;
+    public static SaveManager    SaveManager  => Game.SaveManager;
+    public static Camera         Camera       => Renderer.Camera;
+    public static UiManager      UI           => Game.Ui;
+    public static PhysicsManager Physics      => Game.Physics;
 }

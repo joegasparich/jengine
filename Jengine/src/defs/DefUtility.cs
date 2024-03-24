@@ -2,16 +2,6 @@ using JEngine.util;
 
 namespace JEngine.defs;
 
-public struct DefRef {
-    private string id;
-    
-    public Def? Def => Find.AssetManager.GetDef(id);
-
-    public DefRef(string id) {
-        this.id = id;
-    }
-}
-
 [AttributeUsage(AttributeTargets.Class)]
 public class DefOf : Attribute {}
 

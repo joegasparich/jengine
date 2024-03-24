@@ -1,7 +1,7 @@
 namespace JEngine.util; 
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class StaticConstructorOnLaunch : Attribute {}
+public class StaticConstructorOnLaunch : Attribute;
 
 public static class StaticConstructorUtility
 {
