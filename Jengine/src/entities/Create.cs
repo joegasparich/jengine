@@ -26,6 +26,8 @@ public static class Create {
 
             Find.Game.RegisterEntity(entity, id);
 
+            entity.SetName($"{def.Name}-{id}");
+
             return entity;
         } catch (Exception e) {
             Debug.Error($"Failed to create with def {def.Id}: ", e);
@@ -42,6 +44,8 @@ public static class Create {
             }
 
             Find.Game.RegisterEntity(entity, id);
+            
+            entity.SetName($"{def.Name}-{id}");
 
             return entity;
         } catch (Exception e) {
@@ -59,6 +63,8 @@ public static class Create {
             }
 
             Find.Game.RegisterEntity(entity, id);
+            
+            entity.SetName($"{def.Name}-{id}");
 
             return entity;
         } catch (Exception e) {

@@ -256,7 +256,7 @@ public class Game {
         SaveConfig();
     }
 
-        public int RegisterEntity(Entity? entity, int? id = null) {
+    public int RegisterEntity(Entity? entity, int? id = null) {
         entity.Id = id ?? nextEntityId++;
 
         entitiesToAdd.Add(entity);
@@ -272,6 +272,11 @@ public class Game {
                 
         foreach (var tag in entity.Tags) {
             Notify_EntityTagged(entity, tag);
+        }
+
+        if (!entity.IsSetup) {
+            Debug.Error($"Entity {entity.Name} is being registered without being set up");
+            entity.Setup(false);
         }
 
         return id;
@@ -299,7 +304,6 @@ public class Game {
         foreach (var entity in entitiesToAdd) {
             try {
                 RegisterEntityNow(entity, entity.Id);
-                entity.Setup(false);
             } catch (Exception e) {
                 Debug.Error($"Failed to set up entity {entity.Id}:", e);
                 entity.Destroy();

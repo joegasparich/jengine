@@ -51,9 +51,9 @@ public static class VectorExtension {
         z = v.Z;
     }
     
-    public static Vector2 Rotate(this Vector2 v, float angleRad) {
-        var s = MathF.Sin(angleRad);
-        var c = MathF.Cos(angleRad);
+    public static Vector2 Rotate(this Vector2 v, float angleDeg) {
+        var s = MathF.Sin(angleDeg * JMath.DegToRad);
+        var c = MathF.Cos(angleDeg * JMath.DegToRad);
         return new Vector2(v.X * c - v.Y * s, v.X * s + v.Y * c);
     }
 

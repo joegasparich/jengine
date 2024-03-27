@@ -19,6 +19,8 @@ public class Effect {
         if (parent != null)
             effect.Parent = parent;
         
+        effect.Setup(false);
+        
         return effect;
     }
 }

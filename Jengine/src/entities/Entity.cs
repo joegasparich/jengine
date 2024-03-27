@@ -23,6 +23,7 @@ public class Entity : ISerialisable, IReferencable {
 
     // Unsaved
     public bool Destroyed;
+    public bool IsSetup;
     
     // Properties
     public         IEnumerable<Component> Components => components.Values;
@@ -67,6 +68,13 @@ public class Entity : ISerialisable, IReferencable {
     }
 
     public virtual void Setup(bool fromSave) {
+        if (IsSetup) {
+            Debug.Error("Entity already setup");
+            return;
+        }
+        
+        IsSetup = true;
+        
         foreach (var component in components.Values) {
             component.Setup(fromSave);
         }

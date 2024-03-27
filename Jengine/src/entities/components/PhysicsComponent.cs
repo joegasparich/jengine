@@ -17,6 +17,9 @@ public struct Collider {
 public class PhysicsComponentData : ComponentData {
     public Collider Collider;
     public bool     Static;
+    public string   CollisionLayer;
+    public float    Friction = 1f;
+    public float    Density = 1f;
 }
 
 
@@ -36,7 +39,7 @@ public class PhysicsComponent(Entity entity, ComponentData? data = null) : Compo
         var def = new BodyDef {
             BodyType      = Data.Static ? BodyType.StaticBody : BodyType.DynamicBody,
             Position      = Entity.Transform.LocalPosition,
-            LinearDamping = 0.05f,
+            LinearDamping = 10f * Data.Friction,
             FixedRotation = true
         };
 
@@ -49,8 +52,13 @@ public class PhysicsComponent(Entity entity, ComponentData? data = null) : Compo
         
         var fixtureDef = new FixtureDef {
             Shape = shape,
-            Density = 10f,
-            Friction = 0f,
+            Density = Data.Density,
+            Friction = 0.5f,
+            Restitution = 0.3f,
+            Filter = {
+                CategoryBits = Find.Physics.GetCollisionLayer(Data.CollisionLayer),
+                MaskBits     = Find.Physics.GetCollisionMask(Data.CollisionLayer)
+            }
         };
 
         body.CreateFixture(fixtureDef);
@@ -69,5 +77,9 @@ public class PhysicsComponent(Entity entity, ComponentData? data = null) : Compo
 
     public void AddForce(Vector2 force) {
         body.ApplyForce(force, body.GetLocalCenter(), true);
+    }
+    
+    public void AddImpulse(Vector2 impulse) {
+        body.ApplyLinearImpulse(impulse, body.GetLocalCenter(), true);
     }
 }

@@ -78,7 +78,7 @@ public class ParticleSystem : Entity {
         return new Particle {
             Active   = true,
             Position = Vector2.Zero,
-            Velocity = new Vector2(0, -speed).Rotate(settings.Direction.Random() * JMath.DegToRad),
+            Velocity = new Vector2(0, -speed).Rotate(settings.Direction.Random()),
             Scale    = scale,
             Lifetime = settings.Lifetime,
             Colour   = col
