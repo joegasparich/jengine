@@ -5,13 +5,22 @@ namespace JEngine.util;
 
 public static class JMath {
     // Modify values
-    public static float Lerp(float from, float to,  float pct) =>  from + (to - from) * pct;
-    public static float Normalise(float val,  float min, float max) =>  (val - min) / (max - min);
-    public static float Clamp(float val,  float min, float max) =>  Math.Max(min, Math.Min(max, val));
-    public static float Clamp01(float val) =>  Math.Max(0, Math.Min(1, val));
-    public static float Min(params float[] vals) => vals.Min();
-    public static float Max(params float[] vals) => vals.Max();
-    public static int PositiveMod(int x, int m) => (x % m + m) % m;
+    public static float Lerp(float         from, float to,  float pct) =>  from + (to - from) * pct;
+    public static float Normalise(float    val,  float min, float max) =>  (val - min) / (max - min);
+    public static float Clamp(float        val,  float min, float max) =>  Math.Max(min, Math.Min(max, val));
+    public static float Clamp01(float      val)      =>  Math.Max(0, Math.Min(1, val));
+    public static float Min(params float[] vals)     => vals.Min();
+    public static float Max(params float[] vals)     => vals.Max();
+    public static int   PositiveMod(int    x, int m) => (x % m + m) % m;
+    public static float PositiveMod(float  x, float m) => (x % m + m) % m;
+    
+    // Easing
+    public static float EaseIn(float  t) => t * t;
+    public static float EaseOut(float t) => t * (2 - t);
+    public static float EaseInOut(float t) => t < 0.5f ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    public static float EaseInCubic(float  t) => t * t * t;
+    public static float EaseOutCubic(float t) => 1 - (1 - t) * (1 - t) * (1 - t);
+    public static float EaseInOutCubic(float t) => t < 0.5f ? 4 * t * t * t : 1 - (4 * (1 - t) * (1 - t) * (1 - t));
     
     // Trig
     public const float DegToRad = MathF.PI / 180.0f;
