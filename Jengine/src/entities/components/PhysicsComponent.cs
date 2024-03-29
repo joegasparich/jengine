@@ -82,4 +82,11 @@ public class PhysicsComponent(Entity entity, ComponentData? data = null) : Compo
     public void AddImpulse(Vector2 impulse) {
         body.ApplyLinearImpulse(impulse, body.GetLocalCenter(), true);
     }
+
+    public void SetCollisionLayer(string collisionLayer) {
+        body.FixtureList.First().Filter = new Filter {
+            CategoryBits = Find.Physics.GetCollisionLayer(collisionLayer),
+            MaskBits = Find.Physics.GetCollisionMask(collisionLayer),
+        };
+    }
 }
