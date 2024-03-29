@@ -20,6 +20,7 @@ public class Entity : ISerialisable, IReferencable {
     // State
     private Transform transform;
     public  Entity?   Parent;
+    public  int       TickSetup = -1;
 
     // Unsaved
     public bool Destroyed;
@@ -73,7 +74,8 @@ public class Entity : ISerialisable, IReferencable {
             return;
         }
         
-        IsSetup = true;
+        IsSetup     = true;
+        TickSetup = Find.Game.Ticks;
         
         foreach (var component in components.Values) {
             component.Setup(fromSave);

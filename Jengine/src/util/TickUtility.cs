@@ -1,7 +1,8 @@
 ﻿namespace JEngine.util; 
 
 public static class TickUtility {
-    public static int TickRareInterval => 300; // 5 seconds
+    public const int TicksPerSecond = 60;
+    public const int TickRareInterval = 300; // 5 seconds
     
     public static bool IsHashTick(int id, int interval) {
         return (Find.Game.Ticks + id) % interval == 0;
