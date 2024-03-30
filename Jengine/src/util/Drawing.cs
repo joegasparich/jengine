@@ -1,4 +1,5 @@
 using System.Numerics;
+using Jengine.util;
 using Raylib_cs;
 
 namespace JEngine.util; 
@@ -233,13 +234,13 @@ public static class Drawing {
     }
 
     public static void DrawTexture(
-        Texture2D texture,
-        Vector2 position,
-        float? rotation = null,
-        Vector2? scale = null,
-        Vector2? origin = null,
-        float? posZ = null,
-        Color? tint = null
+        Tex      tex,
+        Vector2  position,
+        float?   rotation = null,
+        Vector2? scale    = null,
+        Vector2? origin   = null,
+        float?   posZ     = null,
+        Color?   tint     = null
     ) {
         rotation ??= 0;
         scale ??= new Vector2(1, 1);
@@ -248,9 +249,9 @@ public static class Drawing {
         tint ??= Color.White;
 
         DrawTexture(
-            texture,
-            new Rectangle(0, 0, texture.Width, texture.Height),
-            new Rectangle(position.X, position.Y, texture.Width * scale.Value.X, texture.Height * scale.Value.Y),
+            tex,
+            new Rectangle(0, 0, tex.Width, tex.Height),
+            new Rectangle(position.X, position.Y, tex.Width * scale.Value.X, tex.Height * scale.Value.Y),
             origin.Value,
             rotation.Value,
             posZ.Value,
@@ -259,14 +260,16 @@ public static class Drawing {
     }
     
     public static void DrawTexture(
-        Texture2D texture,
+        Tex       tex,
         Rectangle sourceRect,
         Rectangle destRect,
-        Vector2 origin,
-        float rotation,
-        float posZ,
-        Color tint
+        Vector2   origin,
+        float     rotation,
+        float     posZ,
+        Color     tint
     ) {
+        Texture2D texture = tex;
+        
         // Check if texture if valid
         if (texture.Id <= 0) 
             return;

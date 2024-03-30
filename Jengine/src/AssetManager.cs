@@ -1,9 +1,11 @@
 using System.Collections;
+using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Raylib_cs;
 using JEngine.defs;
+using Jengine.util;
 using JEngine.util;
 
 namespace JEngine;
@@ -21,14 +23,14 @@ public class AssetManager {
             new LerpPointsConverter()
         },
     });
-    private Texture2D defaultTexture;
+    private Tex defaultTexture;
     private Sound defaultSound;
     
     // State
-    private readonly Dictionary<string, Texture2D>             textureMap    = new();
-    private readonly Dictionary<string, Sound>                 soundMap      = new();
-    private readonly Dictionary<Type, Dictionary<string, Def>> defMap        = new();
-    private readonly Dictionary<string, Def>                   defMapFlat    = new();
+    private readonly Dictionary<string, Tex>                   textureMap     = new();
+    private readonly Dictionary<string, Sound>                 soundMap       = new();
+    private readonly Dictionary<Type, Dictionary<string, Def>> defMap         = new();
+    private readonly Dictionary<string, Def>                   defMapFlat     = new();
     public readonly  List<(object, ExpressionValueProvider)>   UnresolvedDefs = new();
 
     public void LoadAssets() {
@@ -245,11 +247,11 @@ public class AssetManager {
         }
     }
 
-    public Texture2D GetTexture(string path) {
+    public Tex GetTexture(string path) {
         var shortPath = path.Replace(TexturePath + "/", "");
 
         if (!textureMap.ContainsKey(shortPath)) {
-            Texture2D texture;
+            Tex texture;
 
             path = ValidatePath(path);
             
@@ -257,7 +259,8 @@ public class AssetManager {
                 Debug.Warn("Could not find path to texture " + path);
                 texture = defaultTexture;
             } else {
-                texture = Raylib.LoadTexture(path);
+                Debug.Log("Loading texture " + path);
+                texture = new Tex(path);
             }
             
             textureMap.Add(shortPath, texture);
@@ -380,5 +383,26 @@ public class AssetManager {
             path = path.Insert(0, "assets/");
 
         return path;
+    }
+    
+    private readonly ConcurrentQueue<Texture2D>       texturesToUnload       = new();
+    private readonly ConcurrentQueue<RenderTexture2D> renderTexturesToUnload = new();
+
+    public void Unload(Texture2D texture) {
+        texturesToUnload.Enqueue(texture);
+    }
+    public void Unload(RenderTexture2D texture) {
+        renderTexturesToUnload.Enqueue(texture);
+    }
+
+    public void DoUnload() {
+        foreach (var texture in texturesToUnload) {
+            Raylib.UnloadTexture(texture);
+        }
+        texturesToUnload.Clear();
+        foreach (var texture in renderTexturesToUnload) {
+            Raylib.UnloadRenderTexture(texture);
+        }
+        renderTexturesToUnload.Clear();
     }
 }

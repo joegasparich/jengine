@@ -1,4 +1,5 @@
-﻿using Raylib_cs;
+﻿using Jengine.util;
+using Raylib_cs;
 
 namespace JEngine.util;
 
@@ -14,7 +15,7 @@ public static class TextureUtility {
         return new IntVec2(width, height);
     }
 
-    public static Rectangle MaintainAspectRatio(Rectangle rect, Texture2D texture, Rectangle? source = null) {
+    public static Rectangle MaintainAspectRatio(Rectangle rect, Tex texture, Rectangle? source = null) {
         source ??= new Rectangle(0, 0, 1, 1);
 
         var texWidth  = texture.Width * source.Value.Width;

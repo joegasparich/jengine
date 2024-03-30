@@ -1,4 +1,5 @@
 using System.Numerics;
+using Jengine.util;
 using JEngine.util;
 using Raylib_cs;
 
@@ -20,7 +21,7 @@ public class RendererConfig {
 }
 
 internal class DrawCall {
-    public Texture2D Texture;
+    public Tex Texture;
     public Rectangle SourceRect; 
     public Rectangle DestRect; 
     public Vector2   Origin;
@@ -45,11 +46,11 @@ public class Renderer {
     private SortedList<float, DrawCall> drawCalls = new(new DuplicateKeyComparer<float>());
     
     // State
-    public  Camera          Camera;
-    private RenderTexture2D screenBuffer;
-    private RenderTexture2D pickBuffer;
-    private Image           pickImage;
-    private bool            drawingWorld;
+    public  Camera    Camera;
+    private RenderTex screenBuffer;
+    private RenderTex pickBuffer;
+    private Image     pickImage;
+    private bool      drawingWorld;
 
     public void Init() {
         Debug.Log("Initialising Renderer");
@@ -58,8 +59,8 @@ public class Renderer {
 
         Camera = new();
 
-        screenBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
-        pickBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
+        screenBuffer = new RenderTex(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
+        pickBuffer = new RenderTex(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
 
         // Set outline colour
         var outlineColLoc = Raylib.GetShaderLocation(outlineShader, "outlineCol");
@@ -99,13 +100,13 @@ public class Renderer {
 
                 RenderPickIdsToBuffer();
                 Raylib.UnloadImage(pickImage);
-                pickImage = Raylib.LoadImageFromTexture(pickBuffer.Texture);
+                pickImage = Raylib.LoadImageFromTexture(pickBuffer);
 
             }
             Raylib.EndTextureMode();
 
             Raylib.DrawTexturePro(
-                screenBuffer.Texture,
+                screenBuffer,
                 new Rectangle(0, 0, Find.Game.ScreenWidth, -Find.Game.ScreenHeight),
                 new Rectangle(0, 0, Find.Game.ScreenWidth, Find.Game.ScreenHeight),
                 new Vector2(0, 0),
@@ -124,10 +125,8 @@ public class Renderer {
     }
 
     public void OnScreenResized() {
-        Raylib.UnloadRenderTexture(pickBuffer);
-        Raylib.UnloadRenderTexture(screenBuffer);
-        pickBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
-        screenBuffer = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
+        pickBuffer = new RenderTex(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
+        screenBuffer = new RenderTex(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
 
         Camera.OnScreenResized();
     }
@@ -138,7 +137,7 @@ public class Renderer {
     }
 
     public void Draw(
-        Texture2D  texture,
+        Tex        texture,
         Vector2    pos,
         float      depth  = 0,
         Vector2?   scale  = null,
@@ -238,8 +237,8 @@ public class Renderer {
 
     private void RenderPickBuffer() {
         Raylib.DrawTexturePro(
-            pickBuffer.Texture,
-            new Rectangle(0, 0, pickBuffer.Texture.Width, -pickBuffer.Texture.Height),
+            pickBuffer,
+            new Rectangle(0, 0, pickBuffer.Width, -pickBuffer.Height),
             new Rectangle(0, Find.Game.ScreenHeight - 112, 173, 112),
             new Vector2(0, 0),
             0,

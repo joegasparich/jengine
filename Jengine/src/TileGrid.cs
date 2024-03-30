@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Jengine.util;
 using JEngine.util;
 using Newtonsoft.Json.Linq;
 using Raylib_cs;
@@ -33,11 +34,11 @@ public class TileGrid
         tiles[pos.Y * Width + pos.X] = index;
     }
 
-    public Texture2D CreateTexture(int slice = -1, bool randomiseRotation = false) {
+    public RenderTex CreateTexture(int slice = -1, bool randomiseRotation = false) {
         var isSlice = slice != -1;
         
         var textureHeight = isSlice ? TileSet.CellHeight : Height * TileHeight;
-        var texture       = Raylib.LoadRenderTexture(Width * TileWidth, textureHeight);
+        var texture       = new RenderTex(Width * TileWidth, textureHeight);
         Raylib.BeginTextureMode(texture);
         Raylib.ClearBackground(Colour.Transparent);
 
@@ -61,11 +62,11 @@ public class TileGrid
         }
 
         Raylib.EndTextureMode();
-
+        
         // var img = Raylib.LoadImageFromTexture(texture.Texture);
         // Raylib.ExportImage(img, $"test{slice}.png");
 
-        return texture.Texture;
+        return texture;
     }
     
     public static List<TileGrid> LoadLdtkLevel(string path, int levelIndex) {

@@ -1,4 +1,5 @@
 using System.Numerics;
+using Jengine.util;
 using JEngine.util;
 using Raylib_cs;
 
@@ -14,7 +15,7 @@ struct Particle {
 }
 
 public class ParticleSettings {
-    public Texture2D   Texture;
+    public Tex         Texture;
     public int         Count;
     public int         Lifetime = 60;
     public Color       Colour   = Color.White;

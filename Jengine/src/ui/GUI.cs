@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Text;
+using Jengine.util;
 using Raylib_cs;
 using JEngine.util;
 
@@ -18,17 +19,13 @@ public enum AlignMode {
 }
 
 internal class ClipPlane {
-    public RenderTexture2D RenderTexture = Raylib.LoadRenderTexture(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
-    public Rectangle       Rect;
-    public Rectangle       Source;
+    public RenderTex tex = new(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
+    public Rectangle Rect;
+    public Rectangle Source;
 
     public void SetRect(Rectangle rect) {
         Rect = rect;
         Source    = new Rectangle(rect.X, -(rect.Height + rect.Y), rect.Width, -rect.Height);
-    }
-
-    public void CleanUp() {
-        Raylib.UnloadRenderTexture(RenderTexture);
     }
 }
 
@@ -101,7 +98,7 @@ public static class GUI {
         
         var plane = clipPlanePool.Pop();
         plane.SetRect(rect);
-        Raylib.BeginTextureMode(plane.RenderTexture);
+        Raylib.BeginTextureMode(plane.tex);
         activeClipPlanes.Push(plane);
     }
 
@@ -110,7 +107,7 @@ public static class GUI {
         var plane = activeClipPlanes.Pop();
         
         Raylib.DrawTexturePro(
-            plane.RenderTexture.Texture,
+            plane.tex,
             plane.Source,
             plane.Rect,
             new Vector2(0, 0),
@@ -138,7 +135,7 @@ public static class GUI {
         Raylib.DrawRectangleLinesEx(absRect, thickness, col);
     }
 
-    public static void DrawTexture(Rectangle rect, Texture2D texture, Color? col = null) {
+    public static void DrawTexture(Rectangle rect, Tex texture, Color? col = null) {
         if (Find.UI.CurrentEvent != UIEvent.Draw) 
             return;
 
@@ -153,7 +150,7 @@ public static class GUI {
         );
     }
     
-    public static void DrawSubTexture(Rectangle rect, Texture2D texture, Rectangle source, Color? col = null) {
+    public static void DrawSubTexture(Rectangle rect, Tex texture, Rectangle source, Color? col = null) {
         if (Find.UI.CurrentEvent != UIEvent.Draw) 
             return;
 
@@ -173,7 +170,7 @@ public static class GUI {
         );
     }
 
-    public static void DrawTextureNPatch(Rectangle rect, Texture2D texture, int cornerSize, Color? col = null) {
+    public static void DrawTextureNPatch(Rectangle rect, Tex texture, int cornerSize, Color? col = null) {
         if (Find.UI.CurrentEvent != UIEvent.Draw) 
             return;
 
@@ -290,7 +287,7 @@ public static class GUI {
         return ClickableArea(rect);
     }
 
-    public static bool ButtonIcon(Rectangle rect, Texture2D icon, Color? colour = null) {
+    public static bool ButtonIcon(Rectangle rect, Tex icon, Color? colour = null) {
         DrawTexture(rect, icon, colour);
 
         if (HoverableArea(rect))

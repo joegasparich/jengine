@@ -6,6 +6,8 @@ public class Dir4 : IEquatable<Dir4>
     public static readonly Dir4 East  = new(1);
     public static readonly Dir4 South = new(2);
     public static readonly Dir4 West  = new(3);
+    
+    public static readonly Dir4[] All = { North, East, South, West };
 
     private byte dirInt;
 

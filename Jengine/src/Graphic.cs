@@ -1,7 +1,7 @@
 using System.Numerics;
+using Jengine.util;
 using Newtonsoft.Json;
 using Raylib_cs;
-using JEngine.util;
 
 namespace JEngine;
 
@@ -24,11 +24,11 @@ public class Graphic {
     private bool loopAnimation = true;
 
     // Properties
-    private Texture2D texture;
-    public Texture2D Texture
+    private Tex texture;
+    public Tex Texture
     {
         get {
-            if (texture.Empty())
+            if (texture == null || texture.Empty())
                 texture = Find.AssetManager.GetTexture(spritePath);
 
             return texture;

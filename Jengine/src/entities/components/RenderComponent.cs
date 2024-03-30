@@ -1,4 +1,5 @@
 using System.Numerics;
+using Jengine.util;
 using JEngine.util;
 using Raylib_cs;
 
@@ -69,9 +70,9 @@ public class RenderComponent : Component {
 
         // Bake the attachments into the texture
         // Currently assumes that the attachment will have the exact same dimensions as the main sprite
-        var renderTexture = Raylib.LoadRenderTexture(BaseGraphic.Texture.Width, BaseGraphic.Texture.Height);
+        var tex = new RenderTex(BaseGraphic.Texture.Width, BaseGraphic.Texture.Height);
 
-        Raylib.BeginTextureMode(renderTexture);
+        Raylib.BeginTextureMode(tex);
         Raylib.ClearBackground(Colour.Transparent);
         Raylib.DrawTexturePro(
             BaseGraphic.Texture,
@@ -93,6 +94,6 @@ public class RenderComponent : Component {
         }
         Raylib.EndTextureMode();
 
-        bakedGraphic.Texture = renderTexture.Texture;
+        bakedGraphic.Texture = tex;
     }
 }

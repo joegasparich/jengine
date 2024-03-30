@@ -145,6 +145,9 @@ public class Game {
             UI.PreDraw();
             Renderer.Draw();
             UI.PostDraw();
+         
+            // Free any managed RL assets
+            Assets.DoUnload();
         }
     }
     
