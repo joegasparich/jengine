@@ -31,4 +31,8 @@
         </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Newtonsoft.Json\Src\Newtonsoft.Json\Newtonsoft.Json.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -16,7 +16,7 @@ public class CustomContractResolver : DefaultContractResolver {
         if (contract is JsonObjectContract objectContract) {
             objectContract.OnPropertySetter = (o, value, property, reader) => {
                 if (reader.Depth > 0 && value.GetType().IsAssignableTo(typeof(Def))) {
-                    Find.AssetManager.UnresolvedDefs.Add((o, property.ValueProvider as ExpressionValueProvider)!);
+                    Find.AssetManager.UnresolvedDefs.Add((o, property.ValueProvider as DynamicValueProvider)!);
                 }
             };
         }

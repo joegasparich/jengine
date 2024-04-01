@@ -32,7 +32,7 @@ public class AssetManager {
     private readonly Dictionary<string, Sound>                 soundMap       = new();
     private readonly Dictionary<Type, Dictionary<string, Def>> defMap         = new();
     private readonly Dictionary<string, Def>                   defMapFlat     = new();
-    public readonly  List<(object, ExpressionValueProvider)>   UnresolvedDefs = new();
+    public readonly  List<(object, DynamicValueProvider)>   UnresolvedDefs = new();
 
     public void LoadAssets() {
         LoadTextures();
