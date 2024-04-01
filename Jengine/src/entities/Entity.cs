@@ -68,7 +68,7 @@ public class Entity : ISerialisable, IReferencable {
         Find.SaveManager.ArchiveDef("def", ref def);
     }
 
-    public virtual void Setup(bool fromSave) {
+    public virtual void Setup(bool fromSave = false) {
         if (IsSetup) {
             Debug.Error("Entity already setup");
             return;
@@ -137,9 +137,6 @@ public class Entity : ISerialisable, IReferencable {
     public virtual void OnInput(InputEvent evt) {
         foreach (var component in components.Values) {
             component.OnInput(evt);
-
-            if (evt.Consumed) 
-                return;
         }
     }
     

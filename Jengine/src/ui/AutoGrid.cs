@@ -8,7 +8,7 @@ public enum GridDirection {
     Horizontal
 }
 
-public class AutoGrid {
+public struct AutoGrid {
     // State
     private Rectangle     rect;
     private GridDirection direction;

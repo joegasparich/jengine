@@ -231,8 +231,7 @@ public class Game {
         UI.OnInput(evt);
         
         foreach (var entity in entities.Values) {
-            if (!evt.Consumed)
-                entity.OnInput(evt);
+            entity.OnInput(evt);
         }
 
         SceneManager.GetCurrentScene()?.OnInput(evt);

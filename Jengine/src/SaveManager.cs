@@ -37,6 +37,7 @@ public class SaveManager {
     private const string SaveDir         = "saves/";
     private const string DefaultSaveName = "save";
     public readonly JsonSerializer Serializer = JsonSerializer.Create(new JsonSerializerSettings() {
+        ContractResolver = new CustomContractResolver(),
         Converters = new List<JsonConverter> {
             new DefConverter(),
             new CompJsonConverter(),

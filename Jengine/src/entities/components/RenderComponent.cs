@@ -14,11 +14,12 @@ public class RenderComponent : Component {
     public static Type DataType => typeof(RenderComponentData);
 
     // State
-    public  Vector2        Offset = Vector2.Zero;
-    public  Color?         OverrideColour;
-    public  Graphic        BaseGraphic;
-    private Graphic        bakedGraphic;
-    private List<Graphic>  attachments = new();
+    public  Vector2       Offset = Vector2.Zero;
+    public  Color?        OverrideColour;
+    public  Graphic       BaseGraphic;
+    private Graphic       bakedGraphic;
+    private List<Graphic> attachments = new();
+    public  Shader?       Shader;
 
     // Properties
     public     RenderComponentData Data     => (RenderComponentData)data;
@@ -26,8 +27,8 @@ public class RenderComponent : Component {
 
     private bool ShouldRender => true;
 
-    public RenderComponent(Entity entity, RenderComponentData? data) : base(entity, data) {
-        BaseGraphic  = data.Graphic;
+    public RenderComponent(Entity entity, ComponentData? data) : base(entity, data) {
+        BaseGraphic  = Data.Graphic;
         bakedGraphic = BaseGraphic;
     }
 
@@ -49,14 +50,15 @@ public class RenderComponent : Component {
             scale: Entity.Transform.GlobalScale,
             depth: Data.sortZ ? Find.Renderer.GetDepth(Entity.Transform.GlobalPosition.Y) : (int)Depth.Below,
             overrideColour: OverrideColour,
-            pickId: Entity.Selectable ? Entity.Id : null
+            pickId: Entity.Selectable ? Entity.Id : null,
+            fragShader: Shader
         );
 
         OverrideColour = null;
     }
 
     public void AddAttachment(string spritePath) {
-        var attachment = BaseGraphic;
+        var attachment = BaseGraphic.Clone();
         attachment.SetSprite(spritePath);
         attachments.Add(attachment);
 

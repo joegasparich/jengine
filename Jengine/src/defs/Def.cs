@@ -7,6 +7,7 @@ public class Def {
     public required string  Class;
     public          bool    Abstract = false;
     public          string? Inherits;
+    public          bool    Resolved = true;
     
     public required string  Id;
     public          string? Name;

@@ -16,6 +16,7 @@ public class AssetManager {
     private const string TexturePath = "assets/textures";
     private const string SoundPath = "assets/sounds";
     private readonly JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings {
+        ContractResolver = new CustomContractResolver(),
         Converters = new List<JsonConverter> {
             new DefConverter(),
             new TypeConverter(),
@@ -213,13 +214,18 @@ public class AssetManager {
             var (obj, provider) = unresolvedDef;
             var val = provider.GetValue(obj);
 
-            if (val is Def def)
-                provider.SetValue(obj, GetDef(def.Id));
+            if (val is Def def) {
+                var newDef = GetDef(def.Id);
+                newDef.Resolved = true;
+                provider.SetValue(obj, newDef);
+            }
             else if (val.GetType().IsGenericType && val.GetType().GetGenericTypeDefinition() == typeof(List<>)) {
                 var list        = (IList)val;
                 var genericList = Activator.CreateInstance(val.GetType()) as IList;
                 foreach (Def d in list) {
-                    genericList.Add(GetDef(d.Id));
+                    var newDef = GetDef(d.Id);
+                    newDef.Resolved = true;
+                    genericList.Add(newDef);
                 }
 
                 provider.SetValue(obj, genericList);
@@ -230,11 +236,16 @@ public class AssetManager {
                 foreach (DictionaryEntry entry in dict) {
                     var key = entry.Key;
                     var value = entry.Value;
-                    
-                    if (key is Def kd)
+
+                    if (key is Def kd) {
                         key = GetDef(kd.Id);
-                    if (value is Def vd)
+                        (key as Def).Resolved = true;
+                    }
+
+                    if (value is Def vd) {
                         value = GetDef(vd.Id);
+                        (value as Def).Resolved = true;
+                    }
                     
                     genericDict.Add(key, value);
                 }

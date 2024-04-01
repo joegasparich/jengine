@@ -34,7 +34,7 @@ internal class DrawCall {
 
 public class Renderer {
     // Resources
-    private static readonly Shader outlineShader      = Raylib.LoadShader(null, "assets/shaders/outline.fsh");
+    public static readonly  Shader OutlineShader      = Raylib.LoadShader(null, "assets/shaders/outline.fsh");
     private static readonly Shader basicShader        = Raylib.LoadShader(null, "assets/shaders/basic.fsh");
     private static readonly Shader discardAlphaShader = Raylib.LoadShader(null, "assets/shaders/discard_alpha.fsh");
     private static readonly Shader pickShader         = Raylib.LoadShader(null, "assets/shaders/pick.fsh");
@@ -63,8 +63,8 @@ public class Renderer {
         pickBuffer = new RenderTex(Find.Game.ScreenWidth, Find.Game.ScreenHeight);
 
         // Set outline colour
-        var outlineColLoc = Raylib.GetShaderLocation(outlineShader, "outlineCol");
-        Raylib.SetShaderValue(outlineShader, outlineColLoc, new Vector4(0.4f, 0.7f, 1f, 1f), ShaderUniformDataType.Vec4);
+        var outlineColLoc = Raylib.GetShaderLocation(OutlineShader, "outlineCol");
+        Raylib.SetShaderValue(OutlineShader, outlineColLoc, new Vector4(0.4f, 0.7f, 1f, 1f), ShaderUniformDataType.Vec4);
 
         // Rlgl.EnableDepthTest();
         Rlgl.EnableColorBlend();

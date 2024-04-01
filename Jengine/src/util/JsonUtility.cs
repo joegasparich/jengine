@@ -8,6 +8,23 @@ using JEngine.util;
 
 namespace JEngine;
 
+// -- Contract Resolver --//
+
+public class CustomContractResolver : DefaultContractResolver {
+    protected override JsonContract CreateContract(Type objectType) {
+        var contract = base.CreateContract(objectType);
+        if (contract is JsonObjectContract objectContract) {
+            objectContract.OnPropertySetter = (o, value, property, reader) => {
+                if (reader.Depth > 0 && value.GetType().IsAssignableTo(typeof(Def))) {
+                    Find.AssetManager.UnresolvedDefs.Add((o, property.ValueProvider as ExpressionValueProvider)!);
+                }
+            };
+        }
+        
+        return contract;
+    }
+}
+
 //-- Converters --//
 
 public class DefConverter : JsonConverter {
@@ -29,9 +46,6 @@ public class DefConverter : JsonConverter {
     }
 
     public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) {
-        throw new NotImplementedException();
-    }
-    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer, JsonProperty prop, object target) {
         // Skip over root level Defs so they can be deserialized normally
         if (reader.Depth == 0) {
             skipOverMe = true;
@@ -44,15 +58,11 @@ public class DefConverter : JsonConverter {
 
         // Otherwise we need to create some unresolved defs
         var def = Activator.CreateInstance(objectType) as Def;
-        def.Id = reader.Value as string;
+        def.Id       = reader.Value as string;
+        def.Resolved = false;
 
-        // TODO: Feels hacky, make it better if I support more collections than just lists
-        // What does this even do?
-        if (reader.Path.EndsWith("]") && !reader.Path.EndsWith("[0]"))
-            return def;
-
-        if (target != null)
-            Find.AssetManager.UnresolvedDefs.Add((target, prop.ValueProvider as ExpressionValueProvider)!);
+        // if (target != null)
+        //     Find.AssetManager.UnresolvedDefs.Add((target, prop.ValueProvider as ExpressionValueProvider)!);
 
         return def;
     }
@@ -88,6 +98,7 @@ public class TypeConverter : JsonConverter {
 public class CompJsonConverter : JsonConverter {
     // This needs to be kept in sync with the main serializer config but without itself
     private readonly JsonSerializer internalSerializer = JsonSerializer.Create(new JsonSerializerSettings() {
+        ContractResolver = new CustomContractResolver(),
         Converters = new List<JsonConverter> {
             new DefConverter(),
             new TypeConverter(),

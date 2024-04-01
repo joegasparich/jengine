@@ -3,7 +3,7 @@ using JEngine.util;
 
 namespace JEngine.ui; 
 
-public class AutoLayout {
+public struct AutoLayout {
     public enum AlignMode {
         Left,
         Center,

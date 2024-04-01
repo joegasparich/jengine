@@ -138,6 +138,11 @@ public static class GUI {
     public static void DrawTexture(Rectangle rect, Tex texture, Color? col = null) {
         if (Find.UI.CurrentEvent != UIEvent.Draw) 
             return;
+        
+        if (texture == null || texture.Empty()) {
+            Debug.Error("Attempted to draw a null or empty texture!");
+            return;
+        }
 
         var absRect = Find.UI.GetAbsRect(rect);
         Raylib.DrawTexturePro(
@@ -153,6 +158,11 @@ public static class GUI {
     public static void DrawSubTexture(Rectangle rect, Tex texture, Rectangle source, Color? col = null) {
         if (Find.UI.CurrentEvent != UIEvent.Draw) 
             return;
+
+        if (texture == null || texture.Empty()) {
+            Debug.Error("Attempted to draw a null or empty texture!");
+            return;
+        }
 
         var absRect = Find.UI.GetAbsRect(rect);
         Raylib.DrawTexturePro(

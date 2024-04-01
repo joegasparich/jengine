@@ -49,6 +49,22 @@ public class Graphic {
         SetSpritesheet(path, cellWidth, cellHeight);
     }
 
+    public Graphic Clone() {
+        return new Graphic {
+            spritePath = spritePath,
+            Origin     = Origin,
+            Colour     = Colour,
+            FlipX      = FlipX,
+            cellWidth  = cellWidth,
+            cellHeight = cellHeight,
+            cellIndex  = cellIndex,
+            animationFrames = animationFrames,
+            animationDurationTicks = animationDurationTicks,
+            animationStartTick = animationStartTick,
+            loopAnimation = loopAnimation
+        };
+    }
+
     public void SetSprite(string path) {
         spritePath = path;
         Texture = Find.AssetManager.GetTexture(spritePath);
