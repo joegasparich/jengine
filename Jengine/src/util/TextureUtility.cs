@@ -20,17 +20,21 @@ public static class TextureUtility {
 
         var texWidth  = texture.Width * source.Value.Width;
         var texHeight = texture.Height * source.Value.Height;
+        
+        var texAspectRatio  = texWidth / texHeight;
+        var rectAspectRatio = rect.Width / rect.Height;
 
-        if (texWidth < texHeight) {
-            var width = rect.Width * (texWidth / texHeight);
-            return new Rectangle(rect.X + (rect.Width - width) / 2, rect.Y, width, rect.Height);
+        if (texAspectRatio > rectAspectRatio) {
+            // Adjust height to maintain aspect ratio
+            var newHeight  = (int)Math.Round(rect.Width / texAspectRatio);
+            var heightDiff = rect.Height - newHeight;
+            return new Rectangle(rect.X, rect.Y + heightDiff / 2, rect.Width, newHeight);
+        } else {
+            // Adjust width to maintain aspect ratio
+            var newWidth  = (int)Math.Round(rect.Height * texAspectRatio);
+            var widthDiff = rect.Width - newWidth;
+            return new Rectangle(rect.X + widthDiff / 2, rect.Y, newWidth, rect.Height);
         }
-        if (texWidth > texHeight) {
-            var height = rect.Height * (texHeight / texWidth);
-            return new Rectangle(rect.X, rect.Y + (rect.Height - height) / 2, rect.Width, height);
-        }
-
-        return rect;
     }
 
     public static float ScaleToFit(int width, int height, int maxWidth, int maxHeight)
